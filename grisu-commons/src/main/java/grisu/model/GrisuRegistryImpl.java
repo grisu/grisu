@@ -10,7 +10,7 @@ import grisu.model.info.ResourceInformationImpl;
 import grisu.model.info.UserApplicationInformation;
 import grisu.model.info.UserApplicationInformationImpl;
 import grisu.settings.Environment;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.Cred;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,10 +69,10 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
 	private TemplateManager templateManager;
-	private final Credential credential;
+	private final Cred credential;
 
 	public GrisuRegistryImpl(final ServiceInterface serviceInterface,
-			final Credential credential) {
+			final Cred credential) {
 		this.serviceInterface = serviceInterface;
 		this.credential = credential;
 	}
@@ -105,7 +105,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 		return cachedApplicationInformationObjects.get(applicationName);
 	}
 
-	public Credential getCredential() {
+	public Cred getCredential() {
 		return this.credential;
 	}
 

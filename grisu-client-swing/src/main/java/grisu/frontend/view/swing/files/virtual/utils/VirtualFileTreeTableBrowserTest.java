@@ -2,11 +2,9 @@ package grisu.frontend.view.swing.files.virtual.utils;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
-import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
@@ -19,23 +17,26 @@ public class VirtualFileTreeTableBrowserTest {
 	 */
 	public static void main(String[] args) throws LoginException {
 
-		// final ServiceInterface si = LoginManager.loginCommandline("LOCAL");
-		final ServiceInterface si = LoginManager.loginCommandline("LOCAL_WS");
-
-		// final ServiceInterface si = LoginManager
-		// .loginCommandline("BeSTGRID-DEV");
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					final VirtualFileTreeTableBrowserTest window = new VirtualFileTreeTableBrowserTest(
-							si);
-					window.frame.setVisible(true);
-				} catch (final Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		// // final ServiceInterface si =
+		// LoginManager.loginCommandline("LOCAL");
+		// final ServiceInterface si =
+		// LoginManager.loginCommandline("LOCAL_WS");
+		//
+		// // final ServiceInterface si = LoginManager
+		// // .loginCommandline("BeSTGRID-DEV");
+		//
+		// EventQueue.invokeLater(new Runnable() {
+		// public void run() {
+		// try {
+		// final VirtualFileTreeTableBrowserTest window = new
+		// VirtualFileTreeTableBrowserTest(
+		// si);
+		// window.frame.setVisible(true);
+		// } catch (final Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// });
 
 		// EventQueue.invokeLater(new Runnable() {
 		// public void run() {

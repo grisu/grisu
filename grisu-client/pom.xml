@@ -114,6 +114,11 @@
 <!-- 			<artifactId>commons-cli</artifactId> -->
 <!-- 			<version>1.2</version> -->
 <!-- 		</dependency> -->
+		<dependency>
+			<groupId>grith</groupId>
+			<artifactId>grid-session</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>

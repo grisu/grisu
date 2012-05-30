@@ -2,10 +2,8 @@ package grisu.frontend.view.swing.files.virtual.utils;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
-import grisu.frontend.control.login.LoginManager;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
@@ -18,20 +16,21 @@ public class VirtualFileBrowserTest {
 	 */
 	public static void main(String[] args) throws LoginException {
 
-		final ServiceInterface si = LoginManager.loginCommandline("LOCAL");
-		// final ServiceInterface si = LoginManager.loginCommandline("Local");
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					final VirtualFileBrowserTest window = new VirtualFileBrowserTest(
-							si);
-					window.frame.setVisible(true);
-				} catch (final Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		// final ServiceInterface si = LoginManager.loginCommandline("LOCAL");
+		// // final ServiceInterface si =
+		// LoginManager.loginCommandline("Local");
+		//
+		// EventQueue.invokeLater(new Runnable() {
+		// public void run() {
+		// try {
+		// final VirtualFileBrowserTest window = new VirtualFileBrowserTest(
+		// si);
+		// window.frame.setVisible(true);
+		// } catch (final Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// });
 
 		// EventQueue.invokeLater(new Runnable() {
 		// public void run() {

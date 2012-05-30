@@ -1,10 +1,7 @@
 package grisu.frontend.view.swing.login;
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginException;
-import grisu.frontend.control.login.LoginManager;
 import grisu.settings.ClientPropertiesManager;
-import grith.jgrith.plainProxy.LocalProxy;
 
 import java.awt.CardLayout;
 import java.util.LinkedList;
@@ -16,17 +13,12 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.RowSpec;
-
-public class LoginPanel extends JPanel {
+public class LoginPanel extends JPanel implements ServiceInterfaceHolder {
 
 	static final Logger myLogger = LoggerFactory.getLogger(LoginPanel.class
 			.getName());
 
-	private JPanel loginPanel;
+	private GrisuLoginPanel loginPanel;
 
 	private final String SWING_CLIENT_PANEL = "ROOT";
 	private final String LOGIN_PANEL = "LOGIN";
@@ -35,7 +27,7 @@ public class LoginPanel extends JPanel {
 	private final boolean tryExistingGridProxy;
 
 	private final GrisuSwingClient client;
-	private MultiLoginPanel multiLoginPanel;
+
 
 	private LoginProgressPanel progressPanel = null;
 
@@ -66,47 +58,54 @@ public class LoginPanel extends JPanel {
 		add(client.getRootPanel(), SWING_CLIENT_PANEL);
 		add(getProgressPanel(), PROGRESS_PANEL);
 
-		if (tryExistingGridProxy) {
-			if (LocalProxy.validGridProxyExists()) {
-
-				new Thread() {
-					@Override
-					public void run() {
-
-						try {
-							getProgressPanel().setCreatingServiceInterface();
-							switchToProgressPanel();
-							final ServiceInterface si = LoginManager.login();
-							setServiceInterface(si);
-						} catch (final LoginException e) {
-							switchToLoginPanel();
-						}
-					}
-				}.start();
-
-			}
-		}
+		// if (tryExistingGridProxy) {
+		// if (LocalProxy.validGridProxyExists()) {
+		//
+		// new Thread() {
+		// @Override
+		// public void run() {
+		//
+		// try {
+		// getProgressPanel().setCreatingServiceInterface();
+		// switchToProgressPanel();
+		// final ServiceInterface si = LoginManager.login();
+		// setServiceInterface(si);
+		// } catch (final LoginException e) {
+		// switchToLoginPanel();
+		// }
+		// }
+		// }.start();
+		//
+		// }
+		// }
 	}
 
-	private JPanel getLoginPanel() {
+	private GrisuLoginPanel getLoginPanel() {
 		if (loginPanel == null) {
-			loginPanel = new JPanel();
-			loginPanel.setLayout(new FormLayout(new ColumnSpec[] {
-					FormFactory.RELATED_GAP_COLSPEC,
-					ColumnSpec.decode("default:grow"), }, new RowSpec[] {
-					FormFactory.RELATED_GAP_ROWSPEC,
-					RowSpec.decode("default:grow"), }));
-			loginPanel.add(getMultiLoginPanel(), "2, 2, fill, fill");
+			loginPanel = new GrisuLoginPanel(this);
 		}
 		return loginPanel;
 	}
 
-	private MultiLoginPanel getMultiLoginPanel() {
-		if (multiLoginPanel == null) {
-			multiLoginPanel = new MultiLoginPanel(this);
-		}
-		return multiLoginPanel;
-	}
+	// private JPanel getLoginPanel() {
+	// if (loginPanel == null) {
+	// loginPanel = new JPanel();
+	// loginPanel.setLayout(new FormLayout(new ColumnSpec[] {
+	// FormFactory.RELATED_GAP_COLSPEC,
+	// ColumnSpec.decode("default:grow"), }, new RowSpec[] {
+	// FormFactory.RELATED_GAP_ROWSPEC,
+	// RowSpec.decode("default:grow"), }));
+	// loginPanel.add(getMultiLoginPanel(), "2, 2, fill, fill");
+	// }
+	// return loginPanel;
+	// }
+	//
+	// private MultiLoginPanel getMultiLoginPanel() {
+	// if (multiLoginPanel == null) {
+	// multiLoginPanel = new MultiLoginPanel(this);
+	// }
+	// return multiLoginPanel;
+	// }
 
 	private LoginProgressPanel getProgressPanel() {
 
@@ -116,7 +115,8 @@ public class LoginPanel extends JPanel {
 		return progressPanel;
 	}
 
-	public void setServiceInterface(ServiceInterface si) {
+	public void setServiceInterface(final ServiceInterface si) {
+
 
 		try {
 			getProgressPanel().setLoginToBackend(si);

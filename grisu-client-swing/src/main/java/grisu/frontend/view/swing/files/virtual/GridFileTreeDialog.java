@@ -1,7 +1,6 @@
 package grisu.frontend.view.swing.files.virtual;
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.view.swing.files.GridFileListListener;
 import grisu.model.dto.GridFile;
 
@@ -18,12 +17,11 @@ import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 public class GridFileTreeDialog extends JDialog implements WindowListener,
-		GridFileListListener {
+GridFileListListener {
 
 	// private class SwingAction extends AbstractAction {
 	// public SwingAction() {
@@ -39,17 +37,17 @@ public class GridFileTreeDialog extends JDialog implements WindowListener,
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		try {
-			final ServiceInterface si = LoginManager.loginCommandline("Local");
-			final GridFileTreeDialog dialog = new GridFileTreeDialog(si, null,
-					false, new String[] { ".txt" }, true);
-			dialog.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			dialog.setVisible(true);
-
-			dialog.setVisible(true);
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
+		// try {
+		// final ServiceInterface si = LoginManager.loginCommandline("Local");
+		// final GridFileTreeDialog dialog = new GridFileTreeDialog(si, null,
+		// false, new String[] { ".txt" }, true);
+		// dialog.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		// dialog.setVisible(true);
+		//
+		// dialog.setVisible(true);
+		// } catch (final Exception e) {
+		// e.printStackTrace();
+		// }
 	}
 
 	private final JPanel contentPanel = new JPanel();

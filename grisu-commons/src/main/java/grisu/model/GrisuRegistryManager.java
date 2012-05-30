@@ -4,7 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.info.UserApplicationInformation;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.Cred;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class GrisuRegistryManager {
 		return getDefault(si).getApplicationInformation(app);
 	}
 
-	public static Credential getCredential(ServiceInterface si) {
+	public static Cred getCredential(ServiceInterface si) {
 		return getDefault(si).getCredential();
 	}
 
@@ -45,36 +45,6 @@ public class GrisuRegistryManager {
 			if (cachedRegistries.get(serviceInterface) == null) {
 
 				throw new RuntimeException("ServiceInterface not registered...");
-				// GrisuRegistry defaultRegistry;
-				// try {
-				//
-				// final String classname = serviceInterface.getClass()
-				// .getName();
-				//
-				// if (!classname.contains("Local")) {
-				// // trying to manage mds information locally, because
-				// // it's
-				// // much faster...
-				// final Class clientSideRegistryClass = Class
-				// .forName("grisu.frontend.info.clientsidemds.ClientSideGrisuRegistry");
-				// final Constructor clientSideRegistryConstructor =
-				// clientSideRegistryClass
-				// .getConstructor(ServiceInterface.class);
-				// defaultRegistry = (GrisuRegistry)
-				// (clientSideRegistryConstructor
-				// .newInstance(serviceInterface));
-				// myLogger.info("Using client side mds library.");
-				// } else {
-				// defaultRegistry = new GrisuRegistryImpl(
-				// serviceInterface);
-				// }
-				// } catch (final Exception e) {
-				// myLogger.info("Couldn't use client side mds library: "
-				// + e.getLocalizedMessage());
-				// myLogger.info("Using grisu service interface to calculate mds information...");
-				// defaultRegistry = new GrisuRegistryImpl(serviceInterface);
-				// // }
-				// cachedRegistries.put(serviceInterface, defaultRegistry);
 			}
 
 		}
@@ -100,15 +70,11 @@ public class GrisuRegistryManager {
 	}
 
 	public static void registerServiceInterface(ServiceInterface si,
-			Credential c) {
+			Cred c) {
 
 		cachedRegistries.put(si, new GrisuRegistryImpl(si, c));
 
 	}
 
-	// public synchronized static void setDefault(
-	// final ServiceInterface serviceInterface, GrisuRegistry registry) {
-	// cachedRegistries.put(serviceInterface, registry);
-	// }
 
 }

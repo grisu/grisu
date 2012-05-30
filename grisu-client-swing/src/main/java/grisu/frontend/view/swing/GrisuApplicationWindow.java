@@ -3,7 +3,7 @@ package grisu.frontend.view.swing;
 import grisu.GrisuVersion;
 import grisu.X;
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginManager;
+import grisu.frontend.control.login.LoginManagerNew;
 import grisu.frontend.model.events.ApplicationEventListener;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.login.LoginPanel;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
 
 public abstract class GrisuApplicationWindow implements WindowListener,
-		ServiceInterfaceHolder {
+ServiceInterfaceHolder {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuApplicationWindow.class.getName());
@@ -161,7 +161,7 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 	 */
 	private void initialize() {
 
-		LoginManager.initEnvironment();
+		LoginManagerNew.initEnvironment();
 
 		new ApplicationEventListener();
 

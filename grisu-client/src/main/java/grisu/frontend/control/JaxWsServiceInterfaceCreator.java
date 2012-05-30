@@ -4,7 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.jaxws.CommandLogHandler;
-import grisu.frontend.control.login.LoginManager;
+import grisu.frontend.control.login.LoginManagerNew;
 import grisu.jcommons.constants.GridEnvironment;
 import grisu.settings.Environment;
 
@@ -153,9 +153,9 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 			binding.setMTOMEnabled(true);
 
-			String clientstring = LoginManager.getClientName()
+			String clientstring = LoginManagerNew.getClientName()
 					+ " "
-					+ LoginManager.getClientVersion()
+					+ LoginManagerNew.getClientVersion()
 					+ " / "
 					+ "frontend "
 					+ grisu.jcommons.utils.Version
@@ -168,7 +168,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 			map.put("X-grisu-client", Collections.singletonList(clientstring));
 
-			String session_id = LoginManager.USER_SESSION;
+			String session_id = LoginManagerNew.USER_SESSION;
 			if (StringUtils.isNotBlank(session_id)) {
 				map.put("X-client-session-id",
 						Collections.singletonList(session_id));

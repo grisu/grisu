@@ -1,7 +1,6 @@
 package grisu.frontend.view.swing.utils;
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginManager;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -23,16 +22,16 @@ public class SettingsDialog extends JDialog {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		try {
-			final SettingsDialog dialog = new SettingsDialog(null);
-
-			final ServiceInterface si = LoginManager.loginCommandline();
-			dialog.setServiceInterface(si);
-
-			dialog.setVisible(true);
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
+		// try {
+		// final SettingsDialog dialog = new SettingsDialog(null);
+		//
+		// final ServiceInterface si = LoginManager.loginCommandline();
+		// dialog.setServiceInterface(si);
+		//
+		// dialog.setVisible(true);
+		// } catch (final Exception e) {
+		// e.printStackTrace();
+		// }
 	}
 
 	private ServiceInterface si;

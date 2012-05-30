@@ -1,7 +1,6 @@
 package grisu.frontend.view.swing.files;
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginManager;
 import grisu.model.files.GlazedFile;
 
 import java.awt.BorderLayout;
@@ -15,7 +14,6 @@ import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 public class GrisuFileDialog extends JDialog implements FileListListener {
@@ -24,27 +22,27 @@ public class GrisuFileDialog extends JDialog implements FileListListener {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		try {
-
-			ServiceInterface si = null;
-
-			si = LoginManager.login();
-
-			System.out.println("Creating dialog.");
-			final GrisuFileDialog dialog = new GrisuFileDialog(null, si, null);
-			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-			System.out.println("Created dialog. Setting visible.");
-			dialog.setVisible(true);
-
-			for (final GlazedFile file : dialog.getSelectedFiles()) {
-				System.out.println("File: " + file.getUrl());
-			}
-
-			dialog.dispose();
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
+		// try {
+		//
+		// ServiceInterface si = null;
+		//
+		// si = LoginManager.login();
+		//
+		// System.out.println("Creating dialog.");
+		// final GrisuFileDialog dialog = new GrisuFileDialog(null, si, null);
+		// dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		// System.out.println("Created dialog. Setting visible.");
+		// dialog.setVisible(true);
+		//
+		// for (final GlazedFile file : dialog.getSelectedFiles()) {
+		// System.out.println("File: " + file.getUrl());
+		// }
+		//
+		// dialog.dispose();
+		//
+		// } catch (final Exception e) {
+		// e.printStackTrace();
+		// }
 
 	}
 
