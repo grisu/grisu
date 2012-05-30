@@ -22,7 +22,7 @@ public class GrisuCliClient extends GridClient {
 		GrisuCliClient gcc = new GrisuCliClient(args);
 
 
-		execute(gcc);
+		execute(gcc, false);
 
 	}
 
