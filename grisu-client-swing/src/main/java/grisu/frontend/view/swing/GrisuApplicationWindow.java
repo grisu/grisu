@@ -11,6 +11,7 @@ import grisu.frontend.view.swing.login.ServiceInterfaceHolder;
 import grisu.frontend.view.swing.utils.AdvancedSettingsPanel;
 import grisu.jcommons.utils.HttpProxyPanel;
 import grisu.model.dto.GridFile;
+import grith.gridsession.GridClient;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -33,7 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 
-public abstract class GrisuApplicationWindow implements WindowListener,
+public abstract class GrisuApplicationWindow extends GridClient implements
+		WindowListener,
 ServiceInterfaceHolder {
 
 	static final Logger myLogger = LoggerFactory
