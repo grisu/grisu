@@ -15,6 +15,7 @@ import grith.gridsession.GridClient;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -33,10 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.jgoodies.common.base.SystemUtils;
+import com.jgoodies.looks.Options;
 
 public abstract class GrisuApplicationWindow extends GridClient implements
-		WindowListener,
-ServiceInterfaceHolder {
+WindowListener, ServiceInterfaceHolder {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuApplicationWindow.class.getName());
@@ -172,7 +174,26 @@ ServiceInterfaceHolder {
 				AWTEvent.WINDOW_EVENT_MASK);
 
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			myLogger.debug("Setting look and feel.");
+
+			UIManager.put(Options.USE_SYSTEM_FONTS_APP_KEY, Boolean.TRUE);
+			Options.setDefaultIconSize(new Dimension(18, 18));
+
+			String lafName = null;
+			if (SystemUtils.IS_OS_WINDOWS) {
+				lafName = Options.JGOODIES_WINDOWS_NAME;
+			} else {
+				lafName = UIManager.getSystemLookAndFeelClassName();
+			}
+
+			try {
+				myLogger.debug("Look and feel name:" + lafName);
+				UIManager.setLookAndFeel(lafName);
+			} catch (Exception e) {
+				System.err.println("Can't set look & feel:" + e);
+			}
+
+			// UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (final Exception e) {
 			myLogger.error(e.getLocalizedMessage(), e);
 		}
