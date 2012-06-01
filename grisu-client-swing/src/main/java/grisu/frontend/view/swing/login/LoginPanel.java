@@ -2,6 +2,7 @@ package grisu.frontend.view.swing.login;
 
 import grisu.control.ServiceInterface;
 import grisu.settings.ClientPropertiesManager;
+import grith.gridsession.SessionClient;
 
 import java.awt.CardLayout;
 import java.util.LinkedList;
@@ -26,19 +27,12 @@ public class LoginPanel extends JPanel implements ServiceInterfaceHolder {
 
 	private final boolean tryExistingGridProxy;
 
-	private final GrisuSwingClient client;
-
 
 	private LoginProgressPanel progressPanel = null;
 
 	private final List<ServiceInterfaceHolder> siHolders;
 
-	/**
-	 * @wbp.parser.constructor
-	 */
-	public LoginPanel(GrisuSwingClient client) {
-		this(client, null);
-	}
+
 
 	/**
 	 * Create the panel.
@@ -46,7 +40,6 @@ public class LoginPanel extends JPanel implements ServiceInterfaceHolder {
 	public LoginPanel(GrisuSwingClient client,
 			List<ServiceInterfaceHolder> siHolders) {
 
-		this.client = client;
 		if (siHolders == null) {
 			this.siHolders = new LinkedList<ServiceInterfaceHolder>();
 		} else {
@@ -87,6 +80,14 @@ public class LoginPanel extends JPanel implements ServiceInterfaceHolder {
 		return loginPanel;
 	}
 
+	private LoginProgressPanel getProgressPanel() {
+
+		if (progressPanel == null) {
+			progressPanel = new LoginProgressPanel();
+		}
+		return progressPanel;
+	}
+
 	// private JPanel getLoginPanel() {
 	// if (loginPanel == null) {
 	// loginPanel = new JPanel();
@@ -107,21 +108,12 @@ public class LoginPanel extends JPanel implements ServiceInterfaceHolder {
 	// return multiLoginPanel;
 	// }
 
-	private LoginProgressPanel getProgressPanel() {
-
-		if (progressPanel == null) {
-			progressPanel = new LoginProgressPanel();
-		}
-		return progressPanel;
-	}
-
 	public void setServiceInterface(final ServiceInterface si) {
 
 
 		try {
 			getProgressPanel().setLoginToBackend(si);
 			switchToProgressPanel();
-			client.setServiceInterface(si);
 			for (final ServiceInterfaceHolder sih : siHolders) {
 				sih.setServiceInterface(si);
 			}
@@ -131,6 +123,10 @@ public class LoginPanel extends JPanel implements ServiceInterfaceHolder {
 			myLogger.error(ie.getLocalizedMessage(), ie);
 			switchToLoginPanel();
 		}
+	}
+
+	public void setSessionClient(SessionClient sc) {
+		getLoginPanel().setSessionClient(sc);
 	}
 
 	private void switchToClientPanel() {

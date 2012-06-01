@@ -3,87 +3,48 @@ package grisu.frontend.view.cli;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManagerNew;
-import grisu.jcommons.configuration.CommonGridProperties;
 import grith.gridsession.GridClient;
-import grith.gridsession.GridSessionCred;
-import grith.jgrith.cred.AbstractCred;
-import grith.jgrith.cred.Cred;
-import grith.jgrith.cred.callbacks.CliCallback;
+import grith.jgrith.cred.GridLoginParameters;
 
-import java.util.List;
-
-public class GrisuCliClient extends GridClient {
-
+public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 
 
 	public static void main(String[] args) {
 
-		// System.setProperty(Property.USE_GRID_SESSION.toString(), "false");
-		GrisuCliClient gcc = new GrisuCliClient(args);
+		GrisuCliClient<DefaultCliParameters> gcc = new GrisuCliClient<DefaultCliParameters>(new DefaultCliParameters(),
+				args);
 
-
-		execute(gcc, false);
+		gcc.start();
 
 	}
 
-	protected final String[] args;
-	private GridLoginParameters loginParams = null;
-	private Cred cred = null;
+	// protected final String[] args;
 
 	private ServiceInterface si;
 
-	public GrisuCliClient(String[] args) {
-		super();
+
+	private final T cliParams;
+
+	public GrisuCliClient(T params) {
+		super(GridLoginParameters.createFromGridCliParameters(params));
+		this.cliParams = params;
+	}
+
+
+	public GrisuCliClient(T params, String[] args) {
+		super(GridLoginParameters.createFromCommandlineArgs(params, args));
+		// this.args = args;
+		this.cliParams = params;
+
 		LoginManagerNew.initEnvironment();
-		this.args = args;
 	}
 
-	public Cred getCredential() {
-		if ((cred == null) || getLoginParameters().isNologin()) {
+	public T getCliParameters() {
 
-			if (CommonGridProperties.getDefault().useGridSession()) {
-
-				cred = new GridSessionCred();
-				if (!cred.isValid()) {
-
-					if (!getLoginParameters().validConfig()) {
-						myLogger.debug("Trying to retieve remaining login details.");
-						getLoginParameters().setCallback(new CliCallback());
-						getLoginParameters().populate();
-					}
-
-					cred.init(getLoginParameters().getCredProperties());
-
-				}
-			} else {
-				if (!getLoginParameters().validConfig()) {
-					myLogger.debug("Trying to retieve remaining login details.");
-					getLoginParameters().setCallback(new CliCallback());
-					getLoginParameters().populate();
-				}
-				cred = AbstractCred.loadFromConfig(getLoginParameters()
-						.getCredProperties());
-			}
-		}
-		return cred;
+		return this.cliParams;
 	}
 
-	public GridLoginParameters getLoginParameters() {
-		if (loginParams == null) {
-			loginParams = GridLoginParameters.createFromCommandlineArgs(args);
 
-			if (loginParams.isLogout()) {
-				getCredential().destroy();
-				System.exit(0);
-			}
-
-		}
-		return loginParams;
-	}
-
-	public List<String> getOtherParameters() {
-		return getLoginParameters().getOtherParameters();
-	}
 
 	public ServiceInterface getServiceInterface() throws LoginException {
 		if ((si == null) || getLoginParameters().isNologin()) {
@@ -94,8 +55,7 @@ public class GrisuCliClient extends GridClient {
 	}
 
 	@Override
-	public void run() {
-
+	protected void run() {
 
 		System.out.println("Example grisu client.");
 		ServiceInterface si = null;
@@ -110,5 +70,6 @@ public class GrisuCliClient extends GridClient {
 		System.out.println(si.getInterfaceInfo(null));
 
 	}
+
 
 }

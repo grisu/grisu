@@ -4,6 +4,7 @@ package grisu.frontend.view.swing.login;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManagerNew;
+import grith.gridsession.SessionClient;
 import grith.gridsession.view.CredCreationPanel;
 import grith.jgrith.cred.Cred;
 
@@ -131,10 +132,11 @@ public class GrisuLoginPanel extends JPanel {
 		if (advancedLoginPanelOptions == null) {
 			advancedLoginPanelOptions = new AdvancedLoginPanelOptions();
 			advancedLoginPanelOptions
-			.setBorder(new LineBorder(Color.LIGHT_GRAY));
+					.setBorder(new LineBorder(Color.LIGHT_GRAY));
 		}
 		return advancedLoginPanelOptions;
 	}
+
 	private CredCreationPanel getCredCreationPanel() {
 		if (credCreationPanel == null) {
 			credCreationPanel = new CredCreationPanel();
@@ -147,5 +149,8 @@ public class GrisuLoginPanel extends JPanel {
 			loginButton.setAction(getAction());
 		}
 		return loginButton;
+	}
+	public void setSessionClient(SessionClient sc) {
+		getCredCreationPanel().setSessionClient(sc);
 	}
 }

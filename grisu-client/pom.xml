@@ -102,11 +102,7 @@
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.beust</groupId>
-			<artifactId>jcommander</artifactId>
-			<version>1.25</version>
-		</dependency>
+
 
 
 <!-- 		<dependency> -->

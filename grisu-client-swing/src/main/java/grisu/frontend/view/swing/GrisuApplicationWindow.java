@@ -12,6 +12,7 @@ import grisu.frontend.view.swing.utils.AdvancedSettingsPanel;
 import grisu.jcommons.utils.HttpProxyPanel;
 import grisu.model.dto.GridFile;
 import grith.gridsession.GridClient;
+import grith.jgrith.cred.GridLoginParameters;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -56,12 +57,12 @@ WindowListener, ServiceInterfaceHolder {
 
 	private final Set<ServiceInterfacePanel> configPanels;
 
-	public GrisuApplicationWindow() {
+	public GrisuApplicationWindow() throws Exception {
 		this((ServiceInterfacePanel) null);
 	}
 
-	public GrisuApplicationWindow(ServiceInterfacePanel panel) {
-
+	public GrisuApplicationWindow(ServiceInterfacePanel panel) throws Exception {
+		super(new GridLoginParameters());
 		initialize();
 
 		menu = new GrisuMenu(this);
@@ -84,9 +85,12 @@ WindowListener, ServiceInterfaceHolder {
 
 	/**
 	 * Launch the application.
+	 * 
+	 * @throws Exception
 	 */
-	public GrisuApplicationWindow(Set<ServiceInterfacePanel> configpanels) {
-
+	public GrisuApplicationWindow(Set<ServiceInterfacePanel> configpanels)
+			throws Exception {
+		super(new GridLoginParameters());
 		initialize();
 
 		menu = new GrisuMenu(this);
@@ -230,7 +234,9 @@ WindowListener, ServiceInterfaceHolder {
 
 		final List<ServiceInterfaceHolder> siHolders = ImmutableList
 				.of((ServiceInterfaceHolder) this);
+
 		final LoginPanel lp = new LoginPanel(mainPanel, siHolders);
+		lp.setSessionClient(this);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}
 
@@ -249,6 +255,7 @@ WindowListener, ServiceInterfaceHolder {
 
 		this.si = si;
 		this.menu.setServiceInterface(si);
+		this.mainPanel.setServiceInterface(si);
 		initOptionalStuff(si);
 		refreshJobCreationPanels();
 
