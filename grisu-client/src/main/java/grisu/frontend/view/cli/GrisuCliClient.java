@@ -9,12 +9,12 @@ import grith.jgrith.cred.GridLoginParameters;
 public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 
 		GrisuCliClient<DefaultCliParameters> gcc = new GrisuCliClient<DefaultCliParameters>(new DefaultCliParameters(),
 				args);
 
-		gcc.start();
+		gcc.run();
 
 	}
 
@@ -25,13 +25,13 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 
 	private final T cliParams;
 
-	public GrisuCliClient(T params) {
+	public GrisuCliClient(T params) throws Exception {
 		super(GridLoginParameters.createFromGridCliParameters(params));
 		this.cliParams = params;
 	}
 
 
-	public GrisuCliClient(T params, String[] args) {
+	public GrisuCliClient(T params, String[] args) throws Exception {
 		super(GridLoginParameters.createFromCommandlineArgs(params, args));
 		// this.args = args;
 		this.cliParams = params;
@@ -54,7 +54,6 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 		return si;
 	}
 
-	@Override
 	protected void run() {
 
 		System.out.println("Example grisu client.");
