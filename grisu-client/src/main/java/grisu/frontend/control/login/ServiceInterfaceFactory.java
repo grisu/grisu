@@ -166,14 +166,14 @@ public final class ServiceInterfaceFactory {
 				final int backend_version = serviceInterface
 						.getInterfaceVersion();
 
-				if (backend_version > LoginManagerNew.REQUIRED_BACKEND_API_VERSION) {
+				if (backend_version > LoginManager.REQUIRED_BACKEND_API_VERSION) {
 					throw new LoginException(
 							"Sorry, could not login. Your client version is no longer supported by the server.\n"
 									+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"
 									+ "If you have the latest version and are still experiencing this problem please contact\n"
 									+ "eresearch-admin@list.auckland.ac.nz\n"
 									+ "with a description of the issue.");
-				} else if (backend_version < LoginManagerNew.REQUIRED_BACKEND_API_VERSION) {
+				} else if (backend_version < LoginManager.REQUIRED_BACKEND_API_VERSION) {
 					throw new LoginException(
 							"Sorry, could not login. Your client version is incompatible with the server.\n"
 									+ "Please download the latest version from:\nhttp://code.ceres.auckland.ac.nz/stable-downloads\n"

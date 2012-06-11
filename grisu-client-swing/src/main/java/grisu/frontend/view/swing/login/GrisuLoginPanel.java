@@ -3,7 +3,7 @@ package grisu.frontend.view.swing.login;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
-import grisu.frontend.control.login.LoginManagerNew;
+import grisu.frontend.control.login.LoginManager;
 import grith.gridsession.SessionClient;
 import grith.gridsession.view.CredCreationPanel;
 import grith.jgrith.cred.Cred;
@@ -59,7 +59,7 @@ public class GrisuLoginPanel extends JPanel {
 					Cred cred = getCredCreationPanel().createCredential();
 
 					try {
-						ServiceInterface si = LoginManagerNew.login(backend, cred,
+						ServiceInterface si = LoginManager.login(backend, cred,
 								false);
 						try {
 							siHolder.setServiceInterface(si);

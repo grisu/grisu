@@ -16,7 +16,9 @@ import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
+import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.cred.Cred;
+import grith.jgrith.cred.callbacks.CliCallback;
 import grith.jgrith.utils.CertificateFiles;
 
 import java.io.File;
@@ -36,7 +38,7 @@ import org.slf4j.MDC;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 
-public class LoginManagerNew {
+public class LoginManager {
 
 	public static int REQUIRED_BACKEND_API_VERSION = 16;
 	public static final String DEFAULT_BACKEND = "testbed";
@@ -44,7 +46,7 @@ public class LoginManagerNew {
 
 
 	static final Logger myLogger = LoggerFactory
-			.getLogger(LoginManagerNew.class.getName());
+			.getLogger(LoginManager.class.getName());
 
 	public static final ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
 			.put("local", "Local")
@@ -188,8 +190,7 @@ public class LoginManagerNew {
 	}
 
 	public static ServiceInterface login(String backend, Cred cred,
-			boolean displayCliProgress)
-					throws LoginException {
+			boolean displayCliProgress) throws LoginException {
 
 		if (StringUtils.isBlank(backend)) {
 			String defaultUrl = ClientPropertiesManager
@@ -210,7 +211,6 @@ public class LoginManagerNew {
 			}
 			initEnvironment();
 
-
 			try {
 				addPluginsToClasspath();
 			} catch (final IOException e2) {
@@ -221,7 +221,7 @@ public class LoginManagerNew {
 
 			// do the cacert thingy
 			try {
-				final URL cacertURL = LoginManagerNew.class
+				final URL cacertURL = LoginManager.class
 						.getResource("/ipsca.pem");
 				final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
 
@@ -290,6 +290,16 @@ public class LoginManagerNew {
 			}
 		}
 
+	}
+
+	public static ServiceInterface loginCommandline(String backend)
+			throws LoginException {
+
+		LoginManager.initEnvironment();
+
+		AbstractCred c = AbstractCred.loadFromConfig(null, new CliCallback());
+
+		return login(backend, c, true);
 	}
 
 	public static String setClientName(String name) {

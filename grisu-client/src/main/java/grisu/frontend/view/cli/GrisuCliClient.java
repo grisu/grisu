@@ -2,7 +2,7 @@ package grisu.frontend.view.cli;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginException;
-import grisu.frontend.control.login.LoginManagerNew;
+import grisu.frontend.control.login.LoginManager;
 import grith.gridsession.GridClient;
 import grith.jgrith.cred.GridLoginParameters;
 
@@ -36,7 +36,7 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 		// this.args = args;
 		this.cliParams = params;
 
-		LoginManagerNew.initEnvironment();
+		LoginManager.initEnvironment();
 	}
 
 	public T getCliParameters() {
@@ -48,7 +48,7 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 
 	public ServiceInterface getServiceInterface() throws LoginException {
 		if ((si == null) || getLoginParameters().isNologin()) {
-			si = LoginManagerNew.login(getCliParameters().getBackend(),
+			si = LoginManager.login(getCliParameters().getBackend(),
 					getCredential(), true);
 		}
 		return si;

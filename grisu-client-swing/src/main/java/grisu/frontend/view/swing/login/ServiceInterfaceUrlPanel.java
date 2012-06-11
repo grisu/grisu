@@ -1,6 +1,6 @@
 package grisu.frontend.view.swing.login;
 
-import grisu.frontend.control.login.LoginManagerNew;
+import grisu.frontend.control.login.LoginManager;
 import grisu.settings.ClientPropertiesManager;
 
 import javax.swing.DefaultComboBoxModel;
@@ -30,7 +30,7 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 		for (final String url : ClientPropertiesManager
 				.getServiceInterfaceUrls()) {
 
-			final String posAlias = LoginManagerNew.SERVICEALIASES.inverse()
+			final String posAlias = LoginManager.SERVICEALIASES.inverse()
 					.get(
 							url);
 			if (StringUtils.isNotBlank(posAlias)) {
@@ -64,7 +64,7 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 
 			String defaultUrl = ClientPropertiesManager
 					.getDefaultServiceInterfaceUrl();
-			final String posAlias = LoginManagerNew.SERVICEALIASES.inverse()
+			final String posAlias = LoginManager.SERVICEALIASES.inverse()
 					.get(
 					defaultUrl);
 			if (StringUtils.isNotBlank(posAlias)) {

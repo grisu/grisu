@@ -3,7 +3,7 @@ package grisu.frontend.view.swing;
 import grisu.GrisuVersion;
 import grisu.X;
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginManagerNew;
+import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.model.events.ApplicationEventListener;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.login.LoginPanel;
@@ -169,7 +169,7 @@ WindowListener, ServiceInterfaceHolder {
 	 */
 	private void initialize() {
 
-		LoginManagerNew.initEnvironment();
+		LoginManager.initEnvironment();
 
 		new ApplicationEventListener();
 
