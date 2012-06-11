@@ -48,7 +48,7 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 
 	public ServiceInterface getServiceInterface() throws LoginException {
 		if ((si == null) || getLoginParameters().isNologin()) {
-			si = LoginManagerNew.login(getLoginParameters().getBackend(),
+			si = LoginManagerNew.login(getCliParameters().getBackend(),
 					getCredential(), true);
 		}
 		return si;
