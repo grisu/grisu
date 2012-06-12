@@ -11,7 +11,7 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang.StringUtils;
-import org.python.google.common.base.Objects;
+import com.google.common.base.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -2,14 +2,17 @@ package grisu.frontend.view.swing.login;
 
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
 import grith.gridsession.SessionClient;
 import grith.gridsession.view.CredCreationPanel;
 import grith.jgrith.cred.Cred;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -18,6 +21,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +31,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
-public class GrisuLoginPanel extends JPanel {
+public class GrisuLoginPanel extends JPanel implements PropertyChangeListener {
 
 	private class LoginAction extends AbstractAction {
 		public LoginAction() {
@@ -36,58 +41,23 @@ public class GrisuLoginPanel extends JPanel {
 
 		public void actionPerformed(ActionEvent e) {
 
-			Thread t = new Thread() {
-				@Override
-				public void run() {
+			if (siHolder == null) {
+				myLogger.error("No serviceInterfaceHolder attached to this panel.");
+				return;
+			}
+			loggingIn = true;
+			lockUI(true);
+			credCreationPanel.createCredential();
 
-					SwingUtilities.invokeLater(new Thread() {
-
-						@Override
-						public void run() {
-							setEnabled(false);
-						}
-
-					});
-
-					if (siHolder == null) {
-						myLogger.error("No serviceInterfaceHolder attached to this panel.");
-						return;
-					}
-
-					String backend = getAdvancedLoginPanelOptions()
-							.getServiceInterfaceUrl();
-					Cred cred = getCredCreationPanel().createCredential();
-
-					try {
-						ServiceInterface si = LoginManager.login(backend, cred,
-								false);
-						try {
-							siHolder.setServiceInterface(si);
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
-						}
-
-					} catch (LoginException e1) {
-
-						e1.printStackTrace();
-					} finally {
-						SwingUtilities.invokeLater(new Thread() {
-
-							@Override
-							public void run() {
-								setEnabled(true);
-							}
-
-						});
-					}
-				}
-			};
-
-			t.setName("GUI login thread");
-			t.start();
 
 		}
 	}
+
+	public static final Cursor WAIT_CURSOR = Cursor
+			.getPredefinedCursor(Cursor.WAIT_CURSOR);
+
+	public static final Cursor DEFAULT_CURSOR =
+			Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuLoginPanel.class.getName());
@@ -98,6 +68,8 @@ public class GrisuLoginPanel extends JPanel {
 	private Action action;
 
 	private final ServiceInterfaceHolder siHolder;
+
+	private boolean loggingIn = false;
 
 	/**
 	 * Create the panel.
@@ -117,7 +89,7 @@ public class GrisuLoginPanel extends JPanel {
 		add(getCredCreationPanel(), "2, 2, fill, fill");
 		add(getAdvancedLoginPanelOptions(), "2, 4, fill, fill");
 		add(getLoginButton(), "2, 6, right, default");
-
+		getCredCreationPanel().addPropertyChangeListener(this);
 
 	}
 
@@ -132,17 +104,17 @@ public class GrisuLoginPanel extends JPanel {
 		if (advancedLoginPanelOptions == null) {
 			advancedLoginPanelOptions = new AdvancedLoginPanelOptions();
 			advancedLoginPanelOptions
-					.setBorder(new LineBorder(Color.LIGHT_GRAY));
+			.setBorder(new LineBorder(Color.LIGHT_GRAY));
 		}
 		return advancedLoginPanelOptions;
 	}
-
 	private CredCreationPanel getCredCreationPanel() {
 		if (credCreationPanel == null) {
 			credCreationPanel = new CredCreationPanel();
 		}
 		return credCreationPanel;
 	}
+
 	private JButton getLoginButton() {
 		if (loginButton == null) {
 			loginButton = new JButton("Login");
@@ -150,7 +122,75 @@ public class GrisuLoginPanel extends JPanel {
 		}
 		return loginButton;
 	}
+
+	private void lockUI(final boolean lock) {
+
+		getAdvancedLoginPanelOptions().lockUI(lock);
+
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				if (lock) {
+					setCursor(WAIT_CURSOR);
+				} else {
+					setCursor(DEFAULT_CURSOR);
+				}
+				getLoginButton().setEnabled(!lock);
+			}
+		});
+	}
+
+	public void propertyChange(PropertyChangeEvent evt) {
+
+		if (evt.getSource() != credCreationPanel) {
+			return;
+		}
+
+		if ("creatingCredential".equals(evt.getPropertyName())) {
+			boolean creating = (Boolean) evt.getNewValue();
+			if (!loggingIn) {
+				lockUI(creating);
+			}
+		}
+
+		if ("credential".equals(evt.getPropertyName())) {
+			String backend = getAdvancedLoginPanelOptions()
+					.getServiceInterfaceUrl();
+
+			Cred cred = getCredCreationPanel().getCredential();
+
+			try {
+				ServiceInterface si = LoginManager.login(backend, cred, false);
+				try {
+					siHolder.setServiceInterface(si);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+
+			} catch (Throwable ex) {
+				if (ex.getCause() != null) {
+					ex = ex.getCause();
+				}
+				final String msg = ex.getLocalizedMessage();
+				final ErrorInfo info = new ErrorInfo("Login error",
+						"Login to backend '" + backend + "' failed.", msg,
+						"Error", ex,
+						Level.SEVERE, null);
+
+				final JXErrorPane pane = new JXErrorPane();
+				pane.setErrorInfo(info);
+
+				JXErrorPane.showDialog(GrisuLoginPanel.this, pane);
+				return;
+			} finally {
+				lockUI(false);
+			}
+
+		}
+	}
+
 	public void setSessionClient(SessionClient sc) {
 		getCredCreationPanel().setSessionClient(sc);
 	}
+
 }

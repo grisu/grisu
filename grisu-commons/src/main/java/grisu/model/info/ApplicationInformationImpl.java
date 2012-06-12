@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.python.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 
 /**
  * Default implementation for {@link ApplicationInformation}.

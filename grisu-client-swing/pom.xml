@@ -28,11 +28,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.swinglabs</groupId>
-			<artifactId>swingx-core</artifactId>
-			<version>1.6.2-2</version>
-		</dependency>
-		<dependency>
 			<groupId>furbelow</groupId>
 			<artifactId>furbelow</artifactId>
 			<version>1.0</version>
@@ -80,6 +75,11 @@
 			<groupId>com.jgoodies</groupId>
 			<artifactId>jgoodies-common</artifactId>
 			<version>1.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.swinglabs.swingx</groupId>
+			<artifactId>swingx-core</artifactId>
+			<version>1.6.3</version>
 		</dependency>
 	</dependencies>
 

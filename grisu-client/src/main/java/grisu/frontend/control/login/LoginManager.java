@@ -203,6 +203,8 @@ public class LoginManager {
 			backend = defaultUrl;
 		}
 
+		ClientPropertiesManager.setDefaultServiceInterfaceUrl(backend);
+
 		backend = getLoginUrl(backend);
 		try {
 			if (displayCliProgress) {
