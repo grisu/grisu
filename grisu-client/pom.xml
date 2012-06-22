@@ -113,7 +113,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>grid-session</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>0.1-rc1</version>
 		</dependency>
 	</dependencies>
 
