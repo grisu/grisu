@@ -1,5 +1,8 @@
 package grisu.control.exceptions;
 
+import javax.xml.ws.WebFault;
+
+@WebFault(faultBean = "grisu.control.jaxws.exceptions.TemplateException")
 public class TemplateException extends Exception {
 
 	public TemplateException() {

@@ -1,5 +1,8 @@
 package grisu.control.exceptions;
 
+import javax.xml.ws.WebFault;
+
+@WebFault(faultBean = "grisu.control.jaxws.exceptions.StatusException")
 public class StatusException extends Exception {
 
 	public StatusException() {
