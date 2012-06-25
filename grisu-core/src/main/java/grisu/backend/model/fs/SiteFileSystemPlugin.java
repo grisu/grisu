@@ -210,10 +210,22 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 			}
 
 			for (final String child : childs.keySet()) {
-				final GridFile childFile = new GridFile(gridPath + "/" + child);
+				String rootUrl = FileManager.ensureTrailingSlash(childs
+						.get(child).iterator().next()
+						.getRootUrl());
+				String vpath = FileManager.ensureTrailingSlash(gridPath)
+						+ child;
+				final GridFile childFile;
+				if (rootUrl.endsWith(child + "/")) {
+					childFile = new GridFile(rootUrl);
+				} else {
+					childFile = new GridFile(vpath);
+				}
+				childFile.setPath(vpath);
 				childFile.setVirtual(true);
-				childFile.setPath(gridPath + "/" + child);
+
 				for (final MountPoint mp : childs.get(child)) {
+					// System.out.println(mp.getRootUrl());
 					childFile.addFqan(mp.getFqan());
 					childFile.addSite(mp.getSite());
 					result.addFqan(mp.getFqan());

@@ -886,11 +886,16 @@ public class FileManager {
 				return result;
 			}
 		} else {
-			url = parent.getUrl() + "/" + s;
+			url = ensureTrailingSlash(parent.getUrl()) + s;
 
 			final boolean result = serviceInterface.mkdir(url);
 			if (result) {
 				EventBus.publish(new FolderCreatedEvent(url));
+				// String optionalPath = parent.getPath();
+				// if (StringUtils.isNotBlank(optionalPath)) {
+				// optionalPath = ensureTrailingSlash(optionalPath) + s;
+				// EventBus.publish(new FolderCreatedEvent(optionalPath));
+				// }
 			}
 			return result;
 
