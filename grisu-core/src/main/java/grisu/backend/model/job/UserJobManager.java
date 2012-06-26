@@ -216,6 +216,7 @@ public class UserJobManager {
 		}
 
 		try {
+			getUser().getBatchJobManager().getBatchJobFromDatabase(jobname);
 			return getUser().getBatchJobManager().archiveBatchJob(jobname, url);
 		} catch (final NoSuchJobException e) {
 			final Job job = getJobFromDatabaseOrFileSystem(jobname);

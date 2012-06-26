@@ -4,11 +4,12 @@ import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
 import grisu.frontend.model.job.JobException;
 import grisu.frontend.model.job.JobObject;
-import grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
+import grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 import grisu.frontend.view.swing.jobmonitoring.single.appSpecific.AppSpecificViewerPanel;
 import grisu.frontend.view.swing.utils.BackgroundActionProgressDialogSmall;
 import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoActionStatus;
+import grisu.model.dto.GridFile;
 import grisu.model.status.StatusObject;
 
 import java.awt.Cursor;
@@ -20,6 +21,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -39,6 +41,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -109,7 +112,8 @@ PropertyChangeListener, JobDetailPanel {
 	private JScrollPane scrollPane_1;
 	private JEditorPane logTextArea;
 
-	private FileListWithPreviewPanel fileListWithPreviewPanel;
+	// private FileListWithPreviewPanel fileListWithPreviewPanel;
+	private GridFileManagementPanel fileManagementPanel;
 	private final ServiceInterface si;
 	private JLabel lblApplication;
 	private JLabel lblJobname;
@@ -208,7 +212,7 @@ PropertyChangeListener, JobDetailPanel {
 
 								final StatusObject so = StatusObject
 										.waitForActionToFinish(si, tmp, 5,
- true);
+												true);
 
 								d.close();
 
@@ -313,12 +317,14 @@ PropertyChangeListener, JobDetailPanel {
 		return cleanButton;
 	}
 
-	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
-		if (fileListWithPreviewPanel == null) {
-			fileListWithPreviewPanel = new FileListWithPreviewPanel(si, null,
-					null, false, true, false, true, false);
+
+	private GridFileManagementPanel getFileManagementPanel() {
+		if ( fileManagementPanel == null ) {
+			List<GridFile> left = Lists.newArrayList();
+			fileManagementPanel = new GridFileManagementPanel(si, left, null);
+			fileManagementPanel.setRightPanelToPreview(true);
 		}
-		return fileListWithPreviewPanel;
+		return fileManagementPanel;
 	}
 
 	private JideTabbedPane getJideTabbedPane() {
@@ -327,7 +333,7 @@ PropertyChangeListener, JobDetailPanel {
 			jideTabbedPane.setTabPlacement(SwingConstants.TOP);
 
 			jideTabbedPane.addTab("Job directory", null,
-					getFileListWithPreviewPanel(), null);
+					getFileManagementPanel(), null);
 			jideTabbedPane.addTab("Properties", getScrollPane_1());
 			jideTabbedPane.addTab("Log", getScrollPane_1_1());
 		}
@@ -554,7 +560,7 @@ PropertyChangeListener, JobDetailPanel {
 
 			final int status = (Integer) evt.getNewValue();
 			if ((status >= JobConstants.ACTIVE)) {
-				getFileListWithPreviewPanel().refresh();
+				getFileManagementPanel().refresh();
 
 				if (status >= JobConstants.FINISHED_EITHER_WAY) {
 
@@ -590,8 +596,7 @@ PropertyChangeListener, JobDetailPanel {
 		getStatusRefreshButton().setEnabled(true);
 		getJobnameTextField().setText(job.getJobname());
 
-		getFileListWithPreviewPanel().setRootUrl(job.getJobDirectoryUrl());
-		getFileListWithPreviewPanel().setCurrentUrl(job.getJobDirectoryUrl());
+		getFileManagementPanel().setRootUrl(job.getJobDirectoryUrl());
 		getTxtNa().setText(JobConstants.translateStatus(job.getStatus(false)));
 
 		final int status = job.getStatus(false);

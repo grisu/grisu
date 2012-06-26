@@ -1,7 +1,6 @@
 package grisu.frontend.view.swing.files.virtual;
 
 import grisu.control.ServiceInterface;
-import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.view.swing.files.GridFileListListener;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
@@ -14,8 +13,6 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.JideSplitPane;
 
@@ -51,22 +48,7 @@ GridFileListListener {
 			this.leftRoots.add(gridRoot);
 			this.leftRoots.add(localRoot);
 		} else {
-
-			if (leftRoots.size() == 1) {
-				Set<GridFile> childs = leftRoots.get(0).getChildren();
-				if ((childs == null) || (childs.size() == 0)) {
-					try {
-						childs = fm.ls(leftRoots.get(0)).getChildren();
-					} catch (RemoteFileSystemException e) {
-						childs = Sets.newHashSet((new GridFile(leftRoots.get(0)
-								.getUrl(), false, e)));
-					}
-				}
-				this.leftRoots = Lists.newArrayList(childs);
-
-			} else {
-				this.leftRoots = leftRoots;
-			}
+			this.leftRoots = leftRoots;
 		}
 
 		if (rightRoots == null) {
@@ -129,5 +111,24 @@ GridFileListListener {
 
 		// nothing to do here
 
+	}
+
+	public void refresh() {
+		getFileListPanel().refresh();
+		throw new RuntimeException("Notimplementedyet");
+
+	}
+
+	public void setRightPanelToPreview(boolean preview) {
+		if ( preview ) {
+			getListAndPreviewPanel().switchToPreview();
+		} else {
+			getListAndPreviewPanel().switchToFileList();
+		}
+	}
+
+	public void setRootUrl(String url) {
+		GridFile root = new GridFile(url);
+		getFileListPanel().setRootUrl(root);
 	}
 }

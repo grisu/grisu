@@ -33,7 +33,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class VirtualFileSystemTreePanel extends JPanel implements
-		GridFileListPanel {
+GridFileListPanel {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(VirtualFileSystemTreePanel.class.getName());
@@ -251,7 +251,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 
 	}
 
-	public void setRootUrl(String url) {
+	public void setRootUrl(GridFile url) {
 		// TODO Auto-generated method stub
 
 	}

@@ -3,6 +3,7 @@ package grisu.frontend.view.swing.files.virtual;
 import grisu.control.ServiceInterface;
 import grisu.control.events.FileDeletedEvent;
 import grisu.control.events.FolderCreatedEvent;
+import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.fileTransfers.FileTransferEvent;
 import grisu.frontend.view.swing.files.GridFileListListener;
 import grisu.frontend.view.swing.files.GridFileListPanel;
@@ -46,13 +47,15 @@ import org.netbeans.swing.outline.OutlineModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class GridFileTreePanel extends JPanel implements GridFileListPanel,
-		EventSubscriber {
+EventSubscriber {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GridFileTreePanel.class.getName());
@@ -100,7 +103,9 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 	private DefaultTreeModel model;
 
-	private final List<GridFile> roots;
+	private List<GridFile> roots;
+
+	private GridFile root;
 
 	private LazyLoadingTreeController controller;
 
@@ -129,27 +134,13 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		this.si = si;
 		this.displayHiddenFiles = displayHiddenFiles;
 		this.extensionsToDisplay = extensionsToDisplay;
-		if (roots == null) {
-			// GridFile p = new GridFile(
-			// "grid://groups/ARCS/BeSTGRID/Drug_discovery/Local//");
-			// p.setIsVirtual(false);
-			// p.setName("Personal files");
-			// p.setPath("grid://groups/ARCS/BeSTGRID/Drug_discovery/Local//");
-			final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
-					.getFileManager().getGridRoot();
-			final GridFile localRoot = GrisuRegistryManager.getDefault(si)
-					.getFileManager().getLocalRoot();
-			this.roots = new LinkedList<GridFile>();
-			this.roots.add(gridRoot);
-			this.roots.add(localRoot);
 
-		} else {
-			this.roots = roots;
-		}
 		this.useAsDropTarget = useAsDropTarget;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
+		setRoots(roots);
+
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -166,7 +157,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		EventBus.subscribe(FolderCreatedEvent.class, this);
 		EventBus.subscribe(FileDeletedEvent.class, this);
 
-		initialize(this.roots);
+		initialize();
 	}
 
 	synchronized public void addGridFileListListener(GridFileListListener l) {
@@ -175,12 +166,6 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		}
 		listeners.addElement(l);
 	}
-
-	// private void fileClickOccured() {
-	//
-	// fireFilesSelected(getSelectedFiles());
-	//
-	// }
 
 	private void fileDoubleClickOccured() {
 
@@ -203,6 +188,12 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		}
 
 	}
+
+	// private void fileClickOccured() {
+	//
+	// fireFilesSelected(getSelectedFiles());
+	//
+	// }
 
 	private void fireFileDoubleClicked(final GridFile file) {
 		// if we have no mountPointsListeners, do nothing...
@@ -384,11 +375,41 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		return this;
 	}
 
+	private synchronized List<GridFile> getRoots() {
+		if ( this.root != null ) {
+			if ( this.roots == null ) {
+				Set<GridFile> childs = root.getChildren();
+				if ((childs == null) || (childs.size() == 0)) {
+					try {
+						childs = fm.ls(root).getChildren();
+					} catch (RemoteFileSystemException e) {
+						childs = Sets
+								.newHashSet((new GridFile(root
+										.getUrl(), false, e)));
+					}
+					this.roots = Lists.newArrayList(childs);
+				}
+			}
+		} else {
+			if ( this.roots == null ) {
+				final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
+						.getFileManager().getGridRoot();
+				final GridFile localRoot = GrisuRegistryManager.getDefault(si)
+						.getFileManager().getLocalRoot();
+				this.roots = new LinkedList<GridFile>();
+				this.roots.add(gridRoot);
+				this.roots.add(localRoot);
+			}
+
+		}
+		return this.roots;
+	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
 			scrollPane
-					.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+			.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			scrollPane.setViewportView(getOutline());
 
 		}
@@ -415,7 +436,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		return si;
 	}
 
-	private void initialize(List<GridFile> roots) {
+	private void initialize() {
 
 		final GridFileTreeNode rootNode = new GridFileTreeNode(fm, "virtual");
 
@@ -423,7 +444,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		rootNode.setModel(model);
 		controller = new LazyLoadingTreeController(model);
 
-		for (final GridFile f : roots) {
+		for (final GridFile f : getRoots()) {
 			rootNode.add(new GridFileTreeNode(fm, f, controller,
 					displayHiddenFiles, extensionsToDisplay));
 		}
@@ -470,8 +491,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 	}
 
 	public void refresh() {
-		// TODO Auto-generated method stub
-
+		initialize();
 	}
 
 	public void refreshFolder(String url) {
@@ -571,8 +591,28 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 	}
 
-	public void setRootUrl(String url) {
-		// TODO Auto-generated method stub
+	public void setRoots(List<GridFile> rootsNew) {
+		this.root = null;
+		this.roots = null;
+		if (rootsNew != null) {
+
+			if (rootsNew.size() == 1) {
+				setRootUrl(rootsNew.get(0));
+			} else {
+				this.roots = rootsNew;
+				refresh();
+			}
+		} else {
+			refresh();
+		}
+	}
+
+	public void setRootUrl(GridFile root) {
+
+		this.root = root;
+		this.roots = null;
+
+		refresh();
 
 	}
 

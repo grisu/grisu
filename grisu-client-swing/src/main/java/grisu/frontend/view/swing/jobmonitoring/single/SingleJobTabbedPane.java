@@ -17,6 +17,7 @@ import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
@@ -25,7 +26,7 @@ import org.bushe.swing.event.EventSubscriber;
 import com.jidesoft.swing.JideTabbedPane;
 
 public class SingleJobTabbedPane extends JPanel implements
-		SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
+SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 
 	private JideTabbedPane jideTabbedPane;
 	private SimpleSingleJobsGrid grid;
@@ -103,7 +104,14 @@ public class SingleJobTabbedPane extends JPanel implements
 			@Override
 			public void run() {
 				final Component c = getJideTabbedPane().getSelectedComponent();
-				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				SwingUtilities.invokeLater(new Thread() {
+					@Override
+					public void run() {
+						c.setCursor(Cursor
+								.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+					}
+				});
 
 				JobDetailPanel temp = panels.get(bj.getJobname());
 				if (panels.get(bj.getJobname()) == null) {
@@ -115,7 +123,7 @@ public class SingleJobTabbedPane extends JPanel implements
 					getJideTabbedPane().setSelectedComponent(temp.getPanel());
 				} catch (final IllegalArgumentException e) {
 					getJideTabbedPane()
-							.addTab(bj.getJobname(), temp.getPanel());
+					.addTab(bj.getJobname(), temp.getPanel());
 					getJideTabbedPane().setSelectedComponent(temp.getPanel());
 				} finally {
 					c.setCursor(Cursor
