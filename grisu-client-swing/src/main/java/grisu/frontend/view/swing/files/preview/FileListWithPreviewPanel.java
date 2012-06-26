@@ -40,7 +40,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
-		FileListListener, EventSubscriber<FileTransactionFailedEvent> {
+FileListListener, EventSubscriber<FileTransactionFailedEvent> {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(FileListWithPreviewPanel.class.getName());
@@ -201,8 +201,8 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 
 				}
 			});
-			comboBox.setModel(new DefaultComboBoxModel(new String[] { PREVIEW,
-					FILE_LIST }));
+			comboBox.setModel(new DefaultComboBoxModel(new String[] { PREVIEW }));
+			comboBox.setEnabled(false);
 		}
 		return comboBox;
 	}
@@ -287,7 +287,7 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 			rightCardPanel = new JPanel();
 			rightCardPanel.setLayout(new CardLayout());
 			rightCardPanel.add(getGenericFileViewer(), PREVIEW);
-			rightCardPanel.add(getRightFileListWrapperPanel(), FILE_LIST);
+			// rightCardPanel.add(getRightFileListWrapperPanel(), FILE_LIST);
 		}
 		return rightCardPanel;
 	}
@@ -402,10 +402,10 @@ public class FileListWithPreviewPanel extends JPanel implements FileListPanel,
 
 	private void setRightPanel(String panel) {
 
-		if (PREVIEW.equals(panel) || FILE_LIST.equals(panel)) {
-			final CardLayout cl = (CardLayout) (getRightCardPanel().getLayout());
-			cl.show(getRightCardPanel(), panel);
-		}
+		// if (PREVIEW.equals(panel) || FILE_LIST.equals(panel)) {
+		// final CardLayout cl = (CardLayout) (getRightCardPanel().getLayout());
+		// cl.show(getRightCardPanel(), panel);
+		// }
 
 	}
 
