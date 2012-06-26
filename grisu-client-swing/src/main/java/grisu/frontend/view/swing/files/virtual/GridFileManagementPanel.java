@@ -1,7 +1,9 @@
 package grisu.frontend.view.swing.files.virtual;
 
 import grisu.control.ServiceInterface;
+import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.view.swing.files.GridFileListListener;
+import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
 
@@ -12,14 +14,17 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.JideSplitPane;
 
 public class GridFileManagementPanel extends JPanel implements
-		GridFileListListener {
+GridFileListListener {
 	private JideSplitPane jideSplitPane;
 
 	private final ServiceInterface si;
+	private final FileManager fm;
 
 	private GridFileTreePanel fileListPanel;
 	private ListAndPreviewFilePanel listAndPreviewPanel;
@@ -36,6 +41,7 @@ public class GridFileManagementPanel extends JPanel implements
 
 		super();
 		this.si = si;
+		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		if (leftRoots == null) {
 			final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
 					.getFileManager().getGridRoot();
@@ -45,7 +51,22 @@ public class GridFileManagementPanel extends JPanel implements
 			this.leftRoots.add(gridRoot);
 			this.leftRoots.add(localRoot);
 		} else {
-			this.leftRoots = leftRoots;
+
+			if (leftRoots.size() == 1) {
+				Set<GridFile> childs = leftRoots.get(0).getChildren();
+				if ((childs == null) || (childs.size() == 0)) {
+					try {
+						childs = fm.ls(leftRoots.get(0)).getChildren();
+					} catch (RemoteFileSystemException e) {
+						childs = Sets.newHashSet((new GridFile(leftRoots.get(0)
+								.getUrl(), false, e)));
+					}
+				}
+				this.leftRoots = Lists.newArrayList(childs);
+
+			} else {
+				this.leftRoots = leftRoots;
+			}
 		}
 
 		if (rightRoots == null) {
