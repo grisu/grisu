@@ -247,11 +247,15 @@ public class GT4Submitter extends JobSubmitter {
 		// jobname
 		final Element jobname = output.createElement("jobname");
 		final String jobname_string = JsdlHelpers.getJobname(jsdl);
-		// because of some pbs restrictions we have to keep the jobname to 6
-		// chars
-		if (jobname_string.length() > 6) {
-			jobname.setTextContent(jobname_string.substring(jobname_string
-					.length() - 6));
+		if (ServerPropertiesManager.getShortenJobname()) {
+			// because of some pbs restrictions we have to keep the jobname to 6
+			// chars
+			if (jobname_string.length() > 6) {
+				jobname.setTextContent(jobname_string.substring(jobname_string
+						.length() - 6));
+			} else {
+				jobname.setTextContent(jobname_string);
+			}
 		} else {
 			jobname.setTextContent(jobname_string);
 		}

@@ -2,6 +2,7 @@ package grisu.backend.model.job.gt5;
 
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.model.FileManager;
+import grisu.settings.ServerPropertiesManager;
 
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -73,8 +74,10 @@ public class RSLFactory {
 
 		// job name
 		String jobname = JsdlHelpers.getJobname(jsdl);
-		jobname = (jobname == null) ? "" : jobname.substring(Math.max(0,
-				jobname.length() - 6));
+		if (ServerPropertiesManager.getShortenJobname()) {
+			jobname = (jobname == null) ? "" : jobname.substring(Math.max(0,
+					jobname.length() - 6));
+		}
 
 		addWhenNotBlank(result, "jobname", jobname);
 

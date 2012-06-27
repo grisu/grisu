@@ -754,12 +754,31 @@ public final class ServerPropertiesManager {
 		return config;
 	}
 
+	public static boolean getShortenJobname() {
+		boolean shorten = false;
+
+		try {
+			try {
+				shorten = getServerConfiguration().getBoolean(
+						"General.shortenJobname");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				// myLogger.debug(e.getLocalizedMessage(), e);
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e.getLocalizedMessage());
+		}
+		return shorten;
+	}
+
+
 	public static TidGenerator getTidGenerator() {
 
 		return new SecureRandomTid();
 
 	}
-
 
 	public static boolean getVerifyAfterArchive() {
 		boolean verify = false;
