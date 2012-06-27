@@ -2,12 +2,13 @@ package grisu.model;
 
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
+import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.exceptions.StatusException;
 import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
+import grisu.model.dto.GridFile;
 import grisu.model.files.FileSystemItem;
-import grisu.model.files.GlazedFile;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.info.dto.Application;
@@ -44,9 +45,10 @@ import net.sf.ehcache.util.NamedThreadFactory;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
-import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 /**
  * The implemenation of {@link UserEnvironmentManager}.
@@ -412,9 +414,16 @@ EventSubscriber<FqanEvent> {
 			cachedBookmarkFilesystemList = new LinkedList<FileSystemItem>();
 			for (final String bookmark : getBookmarks().keySet()) {
 				final String url = getBookmarks().get(bookmark);
-				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
-						FileSystemItem.Type.BOOKMARK, getFileManager()
-						.createGlazedFileFromUrl(url)));
+				try {
+					cachedBookmarkFilesystemList.add(new FileSystemItem(
+							bookmark, FileSystemItem.Type.BOOKMARK,
+							getFileManager().createGridFile(url)));
+				} catch (RemoteFileSystemException e) {
+					cachedBookmarkFilesystemList.add(new FileSystemItem(
+							bookmark, FileSystemItem.Type.BOOKMARK,
+							new GridFile(url, false, e)));
+				}
+
 			}
 		}
 		return cachedBookmarkFilesystemList;
@@ -606,14 +615,14 @@ EventSubscriber<FqanEvent> {
 		return FqanHelpers.getFullFqan(getAllAvailableFqans(), uniqueGroupname);
 	}
 
-	public TreeModel getGroupTreeFileModel(GlazedFile root) {
-
-		if (groupFileTreemodel == null) {
-			groupFileTreemodel = new UserspaceFileTreeModel(serviceInterface,
-					root);
-		}
-		return groupFileTreemodel;
-	}
+	// public TreeModel getGroupTreeFileModel(GlazedFile root) {
+	//
+	// if (groupFileTreemodel == null) {
+	// groupFileTreemodel = new UserspaceFileTreeModel(serviceInterface,
+	// root);
+	// }
+	// return groupFileTreemodel;
+	// }
 
 	public synchronized List<FileSystemItem> getLocalFileSystems() {
 
@@ -623,12 +632,12 @@ EventSubscriber<FqanEvent> {
 			final File userHome = new File(System.getProperty("user.home"));
 			cachedLocalFilesystemList.add(new FileSystemItem(
 					userHome.getName(), FileSystemItem.Type.LOCAL,
-					new GlazedFile(userHome)));
+					new GridFile(userHome)));
 
 			for (final File file : File.listRoots()) {
 				cachedLocalFilesystemList.add(new FileSystemItem(
 						file.getName(), FileSystemItem.Type.LOCAL,
-						new GlazedFile(file)));
+						new GridFile(file)));
 			}
 		}
 		return cachedLocalFilesystemList;
@@ -872,7 +881,7 @@ EventSubscriber<FqanEvent> {
 			cachedRemoteFilesystemList = new LinkedList<FileSystemItem>();
 			for (final String site : getAllAvailableSites()) {
 				cachedRemoteFilesystemList.add(new FileSystemItem(site,
-						FileSystemItem.Type.REMOTE, new GlazedFile(site)));
+						FileSystemItem.Type.REMOTE, new GridFile(site)));
 			}
 		}
 		return cachedRemoteFilesystemList;
@@ -941,9 +950,16 @@ EventSubscriber<FqanEvent> {
 			getFileSystems().remove(temp);
 			return temp;
 		} else {
-			final FileSystemItem temp = new FileSystemItem(alias,
-					FileSystemItem.Type.BOOKMARK, getFileManager()
-					.createGlazedFileFromUrl(url));
+			FileSystemItem temp;
+			try {
+				temp = new FileSystemItem(alias,
+						FileSystemItem.Type.BOOKMARK, getFileManager()
+						.createGridFile(url));
+			} catch (RemoteFileSystemException e) {
+				temp = new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK,
+						new GridFile(alias, true, e));
+			}
+
 			getBookmarks().put(alias, url);
 			getBookmarksFilesystems().add(temp);
 			getFileSystems().add(temp);

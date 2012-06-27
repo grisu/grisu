@@ -1,8 +1,8 @@
 package grisu.frontend.view.swing.jobcreation.widgets;
 
-import grisu.frontend.view.swing.files.GrisuFileDialog;
+import grisu.frontend.view.swing.files.GridFileSelectionDialog;
 import grisu.frontend.view.swing.utils.FirstItemPromptItemRenderer;
-import grisu.model.files.GlazedFile;
+import grisu.model.dto.GridFile;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,7 +29,7 @@ public class SingleInputFile extends AbstractWidget {
 
 	protected final DefaultComboBoxModel fileModel = new DefaultComboBoxModel();
 
-	private GrisuFileDialog fileDialog = null;
+	private GridFileSelectionDialog fileDialog = null;
 
 	public final String selString = "Please select a file";
 	private boolean displayHiddenFiles = false;
@@ -59,7 +59,7 @@ public class SingleInputFile extends AbstractWidget {
 	public void displayHiddenFiles(boolean display) {
 		this.displayHiddenFiles = display;
 		if (fileDialog != null) {
-			fileDialog.displayHiddenFiles(display);
+			fileDialog.setDisplayHiddenFiles(display);
 		}
 	}
 
@@ -71,7 +71,7 @@ public class SingleInputFile extends AbstractWidget {
 
 					final String oldValue = getValue();
 
-					final GlazedFile file = popupFileDialogAndAskForFile();
+					final GridFile file = popupFileDialogAndAskForFile();
 
 					if (file == null) {
 						return;
@@ -116,7 +116,7 @@ public class SingleInputFile extends AbstractWidget {
 		return comboBox;
 	}
 
-	protected GrisuFileDialog getFileDialog() {
+	protected GridFileSelectionDialog getFileDialog() {
 
 		if (fileDialog == null) {
 
@@ -150,7 +150,7 @@ public class SingleInputFile extends AbstractWidget {
 			// fileDialog.displayHiddenFiles(displayHiddenFiles);
 		}
 		fileDialog.setExtensionsToDisplay(extensions);
-		fileDialog.displayHiddenFiles(displayHiddenFiles);
+		fileDialog.setDisplayHiddenFiles(displayHiddenFiles);
 		return fileDialog;
 
 	}
@@ -193,7 +193,7 @@ public class SingleInputFile extends AbstractWidget {
 
 	}
 
-	protected GlazedFile popupFileDialogAndAskForFile() {
+	protected GridFile popupFileDialogAndAskForFile() {
 
 		if (getServiceInterface() == null) {
 			getMylogger().error(
@@ -203,15 +203,15 @@ public class SingleInputFile extends AbstractWidget {
 
 		getFileDialog().setVisible(true);
 
-		final GlazedFile file = getFileDialog().getSelectedFile();
-		getFileDialog().clearSelection();
+		final GridFile file = getFileDialog().getSelectedFile();
+		// getFileDialog().clearSelection();
 
-		final GlazedFile currentDir = getFileDialog().getCurrentDirectory();
-
-		if (StringUtils.isNotBlank(getHistoryKey())) {
-			getHistoryManager().addHistoryEntry(getHistoryKey() + "_last_dir",
-					currentDir.getUrl());
-		}
+		// final Grid currentDir = getFileDialog().getCurrentDirectory();
+		//
+		// if (StringUtils.isNotBlank(getHistoryKey())) {
+		// getHistoryManager().addHistoryEntry(getHistoryKey() + "_last_dir",
+		// currentDir.getUrl());
+		// }
 
 		return file;
 	}
@@ -223,7 +223,7 @@ public class SingleInputFile extends AbstractWidget {
 		}
 	}
 
-	public void setFileDialog(GrisuFileDialog d) {
+	public void setFileDialog(GridFileSelectionDialog d) {
 		this.fileDialog = d;
 	}
 

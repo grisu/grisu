@@ -60,10 +60,6 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 				!watchSingleApplication, false, false, applicationsToWatch);
 	}
 
-	public void addDefaultFileNavigationTaskPane() {
-		getGrisuCenterPanel().addDefaultFileManagementPanel();
-		getGrisuNavigationPanel().addDefaultFileManagementPanel();
-	}
 
 	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
 		getGrisuCenterPanel().addGroupFileManagementPanel(left, right);

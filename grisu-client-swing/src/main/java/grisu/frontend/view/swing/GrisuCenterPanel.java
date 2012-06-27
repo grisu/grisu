@@ -3,13 +3,11 @@ package grisu.frontend.view.swing;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.control.utils.ApplicationsManager;
-import grisu.frontend.view.swing.files.preview.FileListWithPreviewPanel;
 import grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.jobmonitoring.batch.MultiBatchJobMonitoringGrid;
 import grisu.frontend.view.swing.jobmonitoring.single.MultiSingleJobMonitoringGrid;
 import grisu.model.dto.GridFile;
-import grisu.settings.ClientPropertiesManager;
 
 import java.awt.CardLayout;
 import java.beans.PropertyChangeListener;
@@ -40,7 +38,6 @@ public class GrisuCenterPanel extends JPanel {
 	private final ServiceInterface si;
 	private final RunningJobManager rjm;
 	private LoadingPanel loadingPanel;
-	private FileListWithPreviewPanel fileListWithPreviewPanel;
 	private GridFileManagementPanel groupFileListPanel;
 
 	private final Map<String, JobCreationPanel> availableJobCreationPanels = new LinkedHashMap<String, JobCreationPanel>();
@@ -74,9 +71,6 @@ public class GrisuCenterPanel extends JPanel {
 		add(wrapperPanel, "2, 2, fill, fill");
 	}
 
-	public void addDefaultFileManagementPanel() {
-		wrapperPanel.add(getFileListWithPreviewPanel(), FILE_MANAGEMENT_PANEL);
-	}
 
 	public void addGroupFileManagementPanel(List<GridFile> left,
 			List<GridFile> right) {
@@ -184,15 +178,6 @@ public class GrisuCenterPanel extends JPanel {
 		return availableJobCreationPanels;
 	}
 
-	private FileListWithPreviewPanel getFileListWithPreviewPanel() {
-		if (fileListWithPreviewPanel == null) {
-			fileListWithPreviewPanel = new FileListWithPreviewPanel(si, null,
-					ClientPropertiesManager.getLastUsedLeftUrl(), true, true,
-					true, true, true, true);
-
-		}
-		return fileListWithPreviewPanel;
-	}
 
 	private GridFileManagementPanel getGroupFileManagementPanel(
 			List<GridFile> left, List<GridFile> right) {

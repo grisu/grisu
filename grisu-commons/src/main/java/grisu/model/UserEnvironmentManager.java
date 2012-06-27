@@ -5,7 +5,6 @@ import grisu.control.exceptions.StatusException;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.files.FileSystemItem;
-import grisu.model.files.GlazedFile;
 import grisu.model.info.dto.Application;
 import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
@@ -14,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-
-import javax.swing.tree.TreeModel;
 
 /**
  * Wrapps information about the user and the available resources to him
@@ -261,17 +258,6 @@ public interface UserEnvironmentManager {
 	 */
 	String getFullFqan(String uniqueGroupname);
 
-	/**
-	 * Returns a {@link TreeModel} that can be used to traverse through a group
-	 * based view of all the users filesystems.
-	 * 
-	 * @param root
-	 *            the root of the view or null for a view with all the users
-	 *            groups at root level
-	 * 
-	 * @return the model
-	 */
-	TreeModel getGroupTreeFileModel(GlazedFile root);
 
 	/**
 	 * Returns all local filesystems.

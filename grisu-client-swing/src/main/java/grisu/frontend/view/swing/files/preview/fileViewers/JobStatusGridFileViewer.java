@@ -1,7 +1,6 @@
 package grisu.frontend.view.swing.files.preview.fileViewers;
 
 import grisu.frontend.control.clientexceptions.FileTransactionException;
-import grisu.frontend.view.swing.files.FileListActionPanel;
 import grisu.frontend.view.swing.files.preview.GridFileViewer;
 import grisu.model.FileManager;
 import grisu.model.dto.GridFile;
@@ -105,7 +104,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 
 		ImageIcon icon = null;
 		try {
-			icon = new ImageIcon(FileListActionPanel.class.getClassLoader()
+			icon = new ImageIcon(JobStatusGridFileViewer.class.getClassLoader()
 					.getResource(path));
 		} catch (final Exception e) {
 			myLogger.error(e.getLocalizedMessage(), e);

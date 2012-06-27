@@ -3,8 +3,8 @@ package grisu.frontend.view.swing.files;
 import grisu.control.ServiceInterface;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
+import grisu.model.dto.GridFile;
 import grisu.model.files.FileSystemItem;
-import grisu.model.files.GlazedFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +62,7 @@ public class FileSystemsManager {
 
 	}
 
-	public void addBookmark(String alias, GlazedFile file) {
+	public void addBookmark(String alias, GridFile file) {
 		final FileSystemItem temp = this.em.setBookmark(alias, file.getUrl());
 		allFileSystems.add(temp);
 	}

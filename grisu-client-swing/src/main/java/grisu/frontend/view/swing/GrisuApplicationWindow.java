@@ -111,9 +111,6 @@ WindowListener, ServiceInterfaceHolder {
 
 	}
 
-	public void addDefaultFileNavigationTaskPane() {
-		mainPanel.addDefaultFileNavigationTaskPane();
-	}
 
 	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
 		mainPanel.addGroupFileListPanel(left, right);

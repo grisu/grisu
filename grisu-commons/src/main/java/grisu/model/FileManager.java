@@ -6,7 +6,6 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
-import grisu.model.files.GlazedFile;
 import grisu.model.info.dto.DtoStringList;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
@@ -22,7 +21,6 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -613,17 +611,6 @@ public class FileManager {
 
 	}
 
-	/**
-	 * @param source
-	 * @param target
-	 * @param overwrite
-	 * @throws FileTransactionException
-	 * @Deprecated don't use {@link GlazedFiles} anymore (if you can help it)
-	 */
-	public void cp(GlazedFile source, GlazedFile target, boolean overwrite)
-			throws FileTransactionException {
-		cp(source.getUrl(), target.getUrl(), overwrite);
-	}
 
 	/**
 	 * Copies {@link GridFile} grid files (remote or local).
@@ -644,29 +631,6 @@ public class FileManager {
 		cp(source.getUrl(), targetDir.getUrl(), overwrite);
 	}
 
-	/**
-	 * Copies a set of {@link GridFile}s to a target directory.
-	 * 
-	 * @param sources
-	 *            the source files
-	 * @param targetDirectory
-	 *            the target directory
-	 * @param overwrite
-	 *            whether to overwrite the target file if it exists
-	 * @throws FileTransactionException
-	 *             if the copying fails (for example because overwrite is false
-	 *             and target exists
-	 * @deprecated don't use {@link GlazedFile anymore}
-	 */
-	@Deprecated
-	public void cp(Set<GlazedFile> sources, GlazedFile targetDirectory,
-			boolean overwrite) throws FileTransactionException {
-
-		for (final GlazedFile source : sources) {
-			cp(source, targetDirectory, overwrite);
-		}
-
-	}
 
 	/**
 	 * Copies a set of {@link GridFile}s to a target directory.
@@ -805,51 +769,6 @@ public class FileManager {
 
 	}
 
-	/**
-	 * @param currentDirectory
-	 * @param s
-	 * @return
-	 * @deprecated don't use {@link GlazedFile} anymore
-	 */
-	@Deprecated
-	public boolean createFolder(GlazedFile currentDirectory, String s) {
-
-		if (!GlazedFile.Type.FILETYPE_FOLDER.equals(currentDirectory.getType())) {
-			return false;
-		}
-
-		String url = null;
-		if (isLocal(currentDirectory.getUrl())) {
-
-			url = currentDirectory.getUrl() + File.separator + s;
-			final File newFolder = getFileFromUriOrPath(url);
-
-			if (newFolder.exists()) {
-				myLogger.debug("Folder " + newFolder.toString()
-						+ " already exists. Not creating it.");
-				return false;
-			} else {
-				final boolean result = newFolder.mkdirs();
-				if (result) {
-					EventBus.publish(new FolderCreatedEvent(url));
-				}
-				return result;
-			}
-		} else {
-			url = currentDirectory.getUrl() + "/" + s;
-
-			try {
-				final boolean result = serviceInterface.mkdir(url);
-				if (result) {
-					EventBus.publish(new FolderCreatedEvent(url));
-				}
-				return result;
-			} catch (final RemoteFileSystemException e) {
-				return false;
-			}
-		}
-
-	}
 
 	/**
 	 * Create a new folder in a parent directory
@@ -907,43 +826,6 @@ public class FileManager {
 			throws RemoteFileSystemException {
 
 		createFolder(createGridFile(parentUrl), s);
-
-	}
-
-	/**
-	 * @param url
-	 * @return
-	 * @deprecated don't use {@link GlazedFile} anymore
-	 */
-	@Deprecated
-	public GlazedFile createGlazedFileFromUrl(String url) {
-
-		if (FileManager.isLocal(url)) {
-			final File file = getFileFromUriOrPath(url);
-			return new GlazedFile(file);
-		} else {
-			return new GlazedFile(url, serviceInterface);
-		}
-
-	}
-
-	/**
-	 * Use this method to create a GlazedFile from a url and you already know
-	 * which type (file, folder) the file should be. That saves time in having
-	 * to look up the type.
-	 * 
-	 * @param url
-	 * @param type
-	 * @return
-	 */
-	public GlazedFile createGlazedFileFromUrl(String url, GlazedFile.Type type) {
-
-		if (FileManager.isLocal(url)) {
-			final File file = getFileFromUriOrPath(url);
-			return new GlazedFile(file);
-		} else {
-			return new GlazedFile(url, serviceInterface, type);
-		}
 
 	}
 
@@ -1533,25 +1415,6 @@ public class FileManager {
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
-	/**
-	 * @param parent
-	 * @return
-	 * @throws RemoteFileSystemException
-	 * @Deprecated don't use {@link GlazedFile} anymore
-	 */
-	public synchronized List<GlazedFile> ls(GlazedFile parent)
-			throws RemoteFileSystemException {
-
-		final List<GlazedFile> result = new ArrayList<GlazedFile>();
-
-		final GridFile folder = ls(parent.getUrl());
-
-		for (final GridFile f : folder.getChildren()) {
-			result.add(new GlazedFile(f));
-		}
-
-		return result;
-	}
 
 	/**
 	 * Returns the children of the specified folder.

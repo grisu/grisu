@@ -3,7 +3,6 @@ package grisu.frontend.view.swing.jobcreation.widgets;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.view.swing.files.GridFileSelectionDialog;
-import grisu.frontend.view.swing.files.GrisuFileDialog;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
@@ -31,7 +30,7 @@ public abstract class AbstractWidget extends JPanel {
 	static final Logger myLogger = LoggerFactory
 			.getLogger(SingleInputFile.class.getName());
 
-	public static GrisuFileDialog createFileDialog(ServiceInterface si,
+	public static GridFileSelectionDialog createFileDialog(ServiceInterface si,
 			String historyKey, String[] extensions, boolean displayHiddenFiles,
 			Window owner) {
 
@@ -57,12 +56,12 @@ public abstract class AbstractWidget extends JPanel {
 						.toString();
 			}
 		}
-		final GrisuFileDialog fileDialog = new GrisuFileDialog(owner, si,
-				startUrl);
+		final GridFileSelectionDialog fileDialog = new GridFileSelectionDialog(
+				owner, si);
 		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		fileDialog.setExtensionsToDisplay(extensions);
-		fileDialog.displayHiddenFiles(displayHiddenFiles);
+		fileDialog.setDisplayHiddenFiles(displayHiddenFiles);
 
 		fileDialog.centerOnOwner();
 

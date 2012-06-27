@@ -6,7 +6,6 @@ import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.model.job.JobObject;
 import grisu.model.FileManager;
 import grisu.model.dto.GridFile;
-import grisu.model.files.GlazedFile;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -57,11 +56,6 @@ public class FileTransaction implements Comparable<FileTransaction> {
 
 	private final String id = UUID.randomUUID().toString();
 
-	public FileTransaction(FileManager fm, Set<GlazedFile> sources,
-			GlazedFile target, boolean overwrite) {
-
-		this(fm, GlazedFile.extractUrls(sources), target.getUrl(), overwrite);
-	}
 
 	public FileTransaction(FileManager fm, Set<GridFile> sources,
 			GridFile target, boolean overwrite) {
