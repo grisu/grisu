@@ -307,7 +307,7 @@ public class LoginManager {
 	public static String setClientName(String name) {
 
 		if (StringUtils.isBlank(name)) {
-			name = "Unknown";
+			name = "n/a";
 		}
 		CLIENT_NAME = name;
 		MDC.put("client", name);

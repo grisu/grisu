@@ -12,6 +12,7 @@ import grisu.control.exceptions.StatusException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.control.fileTransfers.FileTransaction;
 import grisu.frontend.control.fileTransfers.FileTransactionManager;
+import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.model.events.JobCleanedEvent;
 import grisu.frontend.model.events.JobStatusEvent;
 import grisu.frontend.model.events.NewJobEvent;
@@ -45,10 +46,11 @@ import javax.persistence.Transient;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+
+import com.google.common.collect.Maps;
 
 /**
  * A model class that hides all the complexity of creating and submitting a job.
@@ -467,6 +469,12 @@ Comparable<JobObject> {
 			EventBus.publish(this.getJobname(), new JobStatusEvent(this,
 					this.status, JobConstants.UNDEFINED));
 		}
+
+		myLogger.debug("Adding grisu client information to environment.");
+		String client = LoginManager.getClientName();
+		String version = LoginManager.getClientVersion();
+		addEnvironmentVariable("GRISU_CLIENT", client);
+		addEnvironmentVariable("GRISU_CLIENT_VERSION", version);
 
 		try {
 			setJobname(serviceInterface.createJob(
