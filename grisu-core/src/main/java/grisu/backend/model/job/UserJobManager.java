@@ -2212,7 +2212,10 @@ public class UserJobManager {
 
 			for (MountPoint mp : getUser().getMountPoints(job.getFqan())) {
 
-				if (mp.getRootUrl().startsWith(d.getFilesystem().getUrl())) {
+				String mpRoot = mp.getRootUrl();
+				String dirFsUrl = d.getFilesystem().getUrl();
+
+				if (mpRoot.startsWith(dirFsUrl)) {
 
 					if (!mp.isVolatileFileSystem()) {
 						mountPointToUseNonVolatile = mp;

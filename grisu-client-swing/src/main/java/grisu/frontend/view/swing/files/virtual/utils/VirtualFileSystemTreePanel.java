@@ -69,6 +69,7 @@ GridFileListPanel {
 	private Vector<GridFileListListener> listeners;
 	private GridFileListPanelContextMenu popupMenu;
 
+	private final boolean displayFiles = true;
 	private final boolean displayHiddenFiles = false;
 	private final String[] extensionsToDisplay = null;
 
@@ -197,6 +198,7 @@ GridFileListPanel {
 		try {
 			for (final GridFile f : fm.ls(root).getChildren()) {
 				rootNode.add(new GridFileTreeNode(fm, f, controller,
+						displayFiles,
 						displayHiddenFiles, extensionsToDisplay));
 			}
 		} catch (final RemoteFileSystemException e) {

@@ -62,6 +62,7 @@ import org.apache.commons.vfs.FileSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -195,7 +196,7 @@ public class User {
 	private Map<String, String> mountPointCache = Collections
 			.synchronizedMap(new HashMap<String, String>());
 
-	private final Map<String, Set<MountPoint>> mountPointsPerFqanCache = new TreeMap<String, Set<MountPoint>>();
+	private final Map<String, ImmutableSet<MountPoint>> mountPointsPerFqanCache = new TreeMap<String, ImmutableSet<MountPoint>>();
 	private Set<MountPoint> mountPointsAutoMounted = new HashSet<MountPoint>();
 
 	private Set<MountPoint> allMountPoints = null;
@@ -1255,7 +1256,7 @@ public class User {
 	}
 
 	@Transient
-	public Set<MountPoint> getMountPoints(String fqan) {
+	public ImmutableSet<MountPoint> getMountPoints(String fqan) {
 		if (fqan == null) {
 			fqan = Constants.NON_VO_FQAN;
 		}
@@ -1282,7 +1283,7 @@ public class User {
 						}
 					}
 				}
-				mountPointsPerFqanCache.put(fqan, mps);
+				mountPointsPerFqanCache.put(fqan, ImmutableSet.copyOf(mps));
 			}
 			return mountPointsPerFqanCache.get(fqan);
 		}
@@ -1437,7 +1438,7 @@ public class User {
 			return rootfolder;
 
 		} catch (final Exception e) {
-			// e.printStackTrace();
+			e.printStackTrace();
 			throw new RemoteFileSystemException("Could not list directory "
 					+ directory + ": " + e.getLocalizedMessage());
 		}

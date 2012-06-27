@@ -115,7 +115,6 @@ GridFileListListener {
 
 	public void refresh() {
 		getFileListPanel().refresh();
-		throw new RuntimeException("Notimplementedyet");
 
 	}
 

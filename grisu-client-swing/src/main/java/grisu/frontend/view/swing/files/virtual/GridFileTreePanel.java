@@ -98,7 +98,8 @@ EventSubscriber {
 	private Vector<GridFileListListener> listeners;
 	private GridFileListPanelContextMenu popupMenu;
 
-	private boolean displayHiddenFiles;
+	private boolean displayHiddenFiles = false;
+	private boolean displayFiles = true;
 	private String[] extensionsToDisplay;
 
 	private DefaultTreeModel model;
@@ -122,16 +123,18 @@ EventSubscriber {
 
 	public GridFileTreePanel(ServiceInterface si, List<GridFile> root,
 			boolean useAsDropTarget) {
-		this(si, root, useAsDropTarget, false, null);
+		this(si, root, useAsDropTarget, true, false, null);
 	}
 
 	/**
 	 * Create the panel.
 	 */
 	public GridFileTreePanel(ServiceInterface si, List<GridFile> roots,
-			boolean useAsDropTarget, boolean displayHiddenFiles,
+			boolean useAsDropTarget, boolean displayFiles,
+			boolean displayHiddenFiles,
 			String[] extensionsToDisplay) {
 		this.si = si;
+		this.displayFiles = displayFiles;
 		this.displayHiddenFiles = displayHiddenFiles;
 		this.extensionsToDisplay = extensionsToDisplay;
 
@@ -445,7 +448,7 @@ EventSubscriber {
 		controller = new LazyLoadingTreeController(model);
 
 		for (final GridFile f : getRoots()) {
-			rootNode.add(new GridFileTreeNode(fm, f, controller,
+			rootNode.add(new GridFileTreeNode(fm, f, controller, displayFiles,
 					displayHiddenFiles, extensionsToDisplay));
 		}
 
@@ -491,6 +494,7 @@ EventSubscriber {
 	}
 
 	public void refresh() {
+		System.out.println("REFEREREREWRWERWERWERWER");
 		initialize();
 	}
 
@@ -552,15 +556,21 @@ EventSubscriber {
 
 	}
 
+	public void setDisplayFiles(boolean displayFiles) {
+		this.displayFiles = displayFiles;
+		refresh();
+	}
+
 	public void setDisplayHiddenFiles(boolean display) {
 
 		this.displayHiddenFiles = display;
-
+		refresh();
 	}
 
 	public void setExtensionsToDisplay(String[] extensions) {
 
 		this.extensionsToDisplay = extensions;
+		refresh();
 	}
 
 	private void setLoading(final boolean loading) {

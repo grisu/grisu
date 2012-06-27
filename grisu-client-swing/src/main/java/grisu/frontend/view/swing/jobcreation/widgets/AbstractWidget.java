@@ -2,8 +2,8 @@ package grisu.frontend.view.swing.jobcreation.widgets;
 
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.frontend.view.swing.files.GridFileSelectionDialog;
 import grisu.frontend.view.swing.files.GrisuFileDialog;
-import grisu.frontend.view.swing.files.virtual.GridFileTreeDialog;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
@@ -69,10 +69,12 @@ public abstract class AbstractWidget extends JPanel {
 		return fileDialog;
 	}
 
-	public static GridFileTreeDialog createGridFileDialog(ServiceInterface si,
-			List<GridFile> roots, String historyKey, String[] extensions,
+	public static GridFileSelectionDialog createGridFileDialog(
+			ServiceInterface si,
+			List<GridFile> roots, String historyKey,
+			String[] extensions, boolean displayFiles,
 			boolean displayHiddenFiles, boolean foldersSelectable,
-			boolean displayLocalFileSystems, Window owner) {
+			int selectionMode, Window owner) {
 
 		if (si == null) {
 			return null;
@@ -97,12 +99,17 @@ public abstract class AbstractWidget extends JPanel {
 			}
 		}
 
-		final GridFileTreeDialog fileDialog = new GridFileTreeDialog(owner, si,
-				roots, displayHiddenFiles, extensions, foldersSelectable,
-				displayLocalFileSystems, startUrl);
-		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		final GridFileSelectionDialog fileDialog = new GridFileSelectionDialog(
+				owner, si);
+		fileDialog.setDisplayHiddenFiles(displayHiddenFiles);
+		fileDialog.setDisplayFiles(displayFiles);
+		fileDialog.setExtensionsToDisplay(extensions);
+		fileDialog.setFoldersSelectable(foldersSelectable);
+		if (selectionMode >= 0) {
+			fileDialog.setSelectionMode(selectionMode);
+		}
 
-		fileDialog.centerOnOwner();
+		fileDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		return fileDialog;
 	}
