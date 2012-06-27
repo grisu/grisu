@@ -108,11 +108,9 @@ PropertyChangeListener, JobDetailPanel {
 	private JobObject job;
 	private JideTabbedPane jideTabbedPane;
 	private JScrollPane scrollPane;
-	// private JTextArea propertiesTextArea;
 	private JScrollPane scrollPane_1;
 	private JEditorPane logTextArea;
 
-	// private FileListWithPreviewPanel fileListWithPreviewPanel;
 	private GridFileManagementPanel fileManagementPanel;
 	private final ServiceInterface si;
 	private JLabel lblApplication;
@@ -500,7 +498,7 @@ PropertyChangeListener, JobDetailPanel {
 								statusRefreshButton.setCursor(old);
 							}
 						}.start();
-
+						getFileManagementPanel().refresh();
 					}
 
 				}
@@ -559,7 +557,7 @@ PropertyChangeListener, JobDetailPanel {
 			setProperties();
 
 			final int status = (Integer) evt.getNewValue();
-			if ((status >= JobConstants.ACTIVE)) {
+			if ((status > JobConstants.READY_TO_SUBMIT)) {
 				getFileManagementPanel().refresh();
 
 				if (status >= JobConstants.FINISHED_EITHER_WAY) {

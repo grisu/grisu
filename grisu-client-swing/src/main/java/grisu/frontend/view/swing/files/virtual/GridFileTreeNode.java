@@ -86,6 +86,10 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 
 	}
 
+	public boolean isExpanded() {
+		return areChildrenLoaded();
+	}
+
 	@Override
 	public MutableTreeNode[] loadChildren(DefaultTreeModel model) {
 

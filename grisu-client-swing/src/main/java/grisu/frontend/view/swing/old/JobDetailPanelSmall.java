@@ -1,4 +1,4 @@
-package grisu.frontend.view.swing.jobmonitoring.single;
+package grisu.frontend.view.swing.old;
 
 import javax.swing.JPanel;
 

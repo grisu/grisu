@@ -22,6 +22,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,6 +39,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
@@ -85,21 +88,36 @@ EventSubscriber {
 		});
 	}
 
+	public static TreePath getPath(TreeNode treeNode) {
+		List<Object> nodes = new ArrayList<Object>();
+		if (treeNode != null) {
+			nodes.add(treeNode);
+			treeNode = treeNode.getParent();
+			while (treeNode != null) {
+				nodes.add(0, treeNode);
+				treeNode = treeNode.getParent();
+			}
+		}
+
+		return nodes.isEmpty() ? null : new TreePath(nodes.toArray());
+	}
+
 	private final ServiceInterface si;
 	private final UserEnvironmentManager uem;
 	private final FileManager fm;
 	private JScrollPane scrollPane;
+
 	private Outline outline;
 
 	private GridFile oldDir;
 
 	private boolean useAsDropTarget = true;
-
 	private Vector<GridFileListListener> listeners;
-	private GridFileListPanelContextMenu popupMenu;
 
+	private GridFileListPanelContextMenu popupMenu;
 	private boolean displayHiddenFiles = false;
 	private boolean displayFiles = true;
+
 	private String[] extensionsToDisplay;
 
 	private DefaultTreeModel model;
@@ -109,6 +127,8 @@ EventSubscriber {
 	private GridFile root;
 
 	private LazyLoadingTreeController controller;
+
+	private volatile boolean isInitializing = false;
 
 	/**
 	 * @wbp.parser.constructor
@@ -131,8 +151,7 @@ EventSubscriber {
 	 */
 	public GridFileTreePanel(ServiceInterface si, List<GridFile> roots,
 			boolean useAsDropTarget, boolean displayFiles,
-			boolean displayHiddenFiles,
-			String[] extensionsToDisplay) {
+			boolean displayHiddenFiles, String[] extensionsToDisplay) {
 		this.si = si;
 		this.displayFiles = displayFiles;
 		this.displayHiddenFiles = displayHiddenFiles;
@@ -163,11 +182,49 @@ EventSubscriber {
 		initialize();
 	}
 
+	// private void fileClickOccured() {
+	//
+	// fireFilesSelected(getSelectedFiles());
+	//
+	// }
+
 	synchronized public void addGridFileListListener(GridFileListListener l) {
 		if (listeners == null) {
 			listeners = new Vector<GridFileListListener>();
 		}
 		listeners.addElement(l);
+	}
+
+	private void expandNodes(List<GridFile> files) {
+
+		if (controller == null) {
+			myLogger.debug("Controller not initialized, not checking nodes");
+			return;
+		}
+
+
+
+		final OutlineModel m = (OutlineModel) getOutline().getModel();
+
+		for (int i = 0; i < m.getRowCount(); i++) {
+
+			final Object n = m.getValueAt(i, 0);
+
+			if (n instanceof GridFileTreeNode) {
+
+				final GridFileTreeNode node = (GridFileTreeNode) n;
+				final GridFile f = (GridFile) node.getUserObject();
+
+				if (files.contains(f)) {
+					myLogger.debug("Expanding: " + f.getUrl());
+					TreePath p = getPath(node);
+					m.getTreePathSupport().expandPath(p);
+				}
+
+			}
+		}
+
+		return;
 	}
 
 	private void fileDoubleClickOccured() {
@@ -191,12 +248,6 @@ EventSubscriber {
 		}
 
 	}
-
-	// private void fileClickOccured() {
-	//
-	// fireFilesSelected(getSelectedFiles());
-	//
-	// }
 
 	private void fireFileDoubleClicked(final GridFile file) {
 		// if we have no mountPointsListeners, do nothing...
@@ -328,6 +379,35 @@ EventSubscriber {
 		return null;
 	}
 
+	private List<GridFile> getCurrentlyExpandedNodes() {
+
+		if (controller == null) {
+			myLogger.debug("Controller not initialized, not checking nodes");
+			return Lists.newArrayList();
+		}
+
+		final OutlineModel m = (OutlineModel) getOutline().getModel();
+
+		List<GridFile> expanded = Lists.newArrayList();
+		for (int i = 0; i < m.getRowCount(); i++) {
+
+			final Object n = m.getValueAt(i, 0);
+
+			if (n instanceof GridFileTreeNode) {
+
+				final GridFileTreeNode node = (GridFileTreeNode) n;
+				if (node.isExpanded()) {
+					final GridFile f = (GridFile) node.getUserObject();
+					expanded.add(f);
+					myLogger.debug("node expanded: " + f.getUrl());
+				}
+
+			}
+		}
+		return expanded;
+
+	}
+
 	private Outline getOutline() {
 		if (outline == null) {
 			outline = new Outline();
@@ -379,22 +459,21 @@ EventSubscriber {
 	}
 
 	private synchronized List<GridFile> getRoots() {
-		if ( this.root != null ) {
-			if ( this.roots == null ) {
+		if (this.root != null) {
+			if (this.roots == null) {
 				Set<GridFile> childs = root.getChildren();
 				if ((childs == null) || (childs.size() == 0)) {
 					try {
 						childs = fm.ls(root).getChildren();
 					} catch (RemoteFileSystemException e) {
-						childs = Sets
-								.newHashSet((new GridFile(root
-										.getUrl(), false, e)));
+						childs = Sets.newHashSet((new GridFile(root.getUrl(),
+								false, e)));
 					}
 					this.roots = Lists.newArrayList(childs);
 				}
 			}
 		} else {
-			if ( this.roots == null ) {
+			if (this.roots == null) {
 				final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
 						.getFileManager().getGridRoot();
 				final GridFile localRoot = GrisuRegistryManager.getDefault(si)
@@ -441,22 +520,53 @@ EventSubscriber {
 
 	private void initialize() {
 
-		final GridFileTreeNode rootNode = new GridFileTreeNode(fm, "virtual");
-
-		model = new DefaultTreeModel(rootNode);
-		rootNode.setModel(model);
-		controller = new LazyLoadingTreeController(model);
-
-		for (final GridFile f : getRoots()) {
-			rootNode.add(new GridFileTreeNode(fm, f, controller, displayFiles,
-					displayHiddenFiles, extensionsToDisplay));
+		if (isInitializing) {
+			return;
 		}
 
-		final OutlineModel m = DefaultOutlineModel.createOutlineModel(model,
-				new GridFileTreeTableRowModel(), false, "File");
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				// setEnabled(false);
+				getOutline().setEnabled(false);
+			}
+		});
 
-		m.getTreePathSupport().addTreeWillExpandListener(controller);
-		getOutline().setModel(m);
+		try {
+
+
+			isInitializing = true;
+			final GridFileTreeNode rootNode = new GridFileTreeNode(fm,
+					"virtual");
+
+			model = new DefaultTreeModel(rootNode);
+
+			rootNode.setModel(model);
+			controller = new LazyLoadingTreeController(model);
+
+			for (final GridFile f : getRoots()) {
+				rootNode.add(new GridFileTreeNode(fm, f, controller,
+						displayFiles, displayHiddenFiles, extensionsToDisplay));
+			}
+
+			final OutlineModel m = DefaultOutlineModel.createOutlineModel(
+					model, new GridFileTreeTableRowModel(), false, "File");
+
+			m.getTreePathSupport().addTreeWillExpandListener(controller);
+			getOutline().setModel(m);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			isInitializing = false;
+			SwingUtilities.invokeLater(new Thread() {
+				@Override
+				public void run() {
+					getOutline().setEnabled(true);
+					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				}
+			});
+		}
 
 	}
 
@@ -493,9 +603,24 @@ EventSubscriber {
 		}
 	}
 
-	public void refresh() {
-		System.out.println("REFEREREREWRWERWERWERWER");
-		initialize();
+	public synchronized void refresh() {
+
+		if (this.root != null) {
+			this.roots = null;
+		}
+
+		final List<GridFile> exp = getCurrentlyExpandedNodes();
+
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				initialize();
+				expandNodes(exp);
+			}
+		};
+		t.setName("filepanelupdate");
+		t.start();
+
 	}
 
 	public void refreshFolder(String url) {
