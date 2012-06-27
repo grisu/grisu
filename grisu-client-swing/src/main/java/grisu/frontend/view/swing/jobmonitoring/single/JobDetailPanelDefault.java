@@ -35,6 +35,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
@@ -490,12 +491,29 @@ PropertyChangeListener, JobDetailPanel {
 						new Thread() {
 							@Override
 							public void run() {
-								final Cursor old = statusRefreshButton
-										.getCursor();
-								statusRefreshButton.setCursor(Cursor
-										.getPredefinedCursor(Cursor.WAIT_CURSOR));
-								job.getStatus(true);
-								statusRefreshButton.setCursor(old);
+								SwingUtilities.invokeLater(new Thread() {
+									@Override
+									public void run() {
+										statusRefreshButton.setCursor(Cursor
+												.getPredefinedCursor(Cursor.WAIT_CURSOR));
+										getTxtNa().setText("Getting status...");
+									}
+								});
+
+								try {
+									job.getStatus(true);
+								} finally {
+									SwingUtilities.invokeLater(new Thread() {
+										@Override
+										public void run() {
+											statusRefreshButton.setCursor(Cursor
+													.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+											getTxtNa().setText(
+													job.getStatusString(false));
+										}
+									});
+
+								}
 							}
 						}.start();
 						getFileManagementPanel().refresh();
@@ -545,30 +563,35 @@ PropertyChangeListener, JobDetailPanel {
 		return txtNa;
 	}
 
-	public void propertyChange(PropertyChangeEvent evt) {
+	public void propertyChange(final PropertyChangeEvent evt) {
 
 		if (evt.getPropertyName().equals("status")) {
 
-			getTxtNa()
-			.setText(
-					JobConstants.translateStatus((Integer) (evt
-							.getNewValue())));
-			setLog();
-			setProperties();
+			SwingUtilities.invokeLater(new Thread() {
+				@Override
+				public void run() {
+					getTxtNa().setText(
+							JobConstants.translateStatus((Integer) (evt
+									.getNewValue())));
+					setLog();
+					setProperties();
+					final int status = (Integer) evt.getNewValue();
+					if ((status > JobConstants.READY_TO_SUBMIT)) {
+						getFileManagementPanel().refresh();
 
-			final int status = (Integer) evt.getNewValue();
-			if ((status > JobConstants.READY_TO_SUBMIT)) {
-				getFileManagementPanel().refresh();
+						if (status >= JobConstants.FINISHED_EITHER_WAY) {
 
-				if (status >= JobConstants.FINISHED_EITHER_WAY) {
+							getKillButton().setEnabled(false);
+							getCleanButton().setEnabled(true);
+							getArchiveButton().setEnabled(true);
 
-					getKillButton().setEnabled(false);
-					getCleanButton().setEnabled(true);
-					getArchiveButton().setEnabled(true);
+						}
 
+					}
 				}
+			});
 
-			}
+
 		}
 	}
 

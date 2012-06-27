@@ -204,25 +204,30 @@ EventSubscriber {
 
 
 
-		final OutlineModel m = (OutlineModel) getOutline().getModel();
+		try {
+			final OutlineModel m = (OutlineModel) getOutline().getModel();
+			for (int i = 0; i < m.getRowCount(); i++) {
 
-		for (int i = 0; i < m.getRowCount(); i++) {
+				final Object n = m.getValueAt(i, 0);
 
-			final Object n = m.getValueAt(i, 0);
+				if (n instanceof GridFileTreeNode) {
 
-			if (n instanceof GridFileTreeNode) {
+					final GridFileTreeNode node = (GridFileTreeNode) n;
+					final GridFile f = (GridFile) node.getUserObject();
 
-				final GridFileTreeNode node = (GridFileTreeNode) n;
-				final GridFile f = (GridFile) node.getUserObject();
+					if (files.contains(f)) {
+						myLogger.debug("Expanding: " + f.getUrl());
+						TreePath p = getPath(node);
+						m.getTreePathSupport().expandPath(p);
+					}
 
-				if (files.contains(f)) {
-					myLogger.debug("Expanding: " + f.getUrl());
-					TreePath p = getPath(node);
-					m.getTreePathSupport().expandPath(p);
 				}
-
 			}
+		} catch (ClassCastException e) {
+			myLogger.debug("No outline model yet.");
+			return;
 		}
+
 
 		return;
 	}
@@ -408,7 +413,7 @@ EventSubscriber {
 
 	}
 
-	private Outline getOutline() {
+	private synchronized Outline getOutline() {
 		if (outline == null) {
 			outline = new Outline();
 			outline.setRootVisible(false);
@@ -450,6 +455,7 @@ EventSubscriber {
 				}
 
 			});
+			myLogger.debug("Outline created");
 		}
 		return outline;
 	}
@@ -605,7 +611,9 @@ EventSubscriber {
 
 	public synchronized void refresh() {
 
+		System.out.println("REFRESH: " + this.root);
 		if (this.root != null) {
+
 			this.roots = null;
 		}
 
@@ -729,7 +737,7 @@ EventSubscriber {
 	public void setRoots(List<GridFile> rootsNew) {
 		this.root = null;
 		this.roots = null;
-		if (rootsNew != null) {
+		if ((rootsNew != null) && (rootsNew.size() > 0)) {
 
 			if (rootsNew.size() == 1) {
 				setRootUrl(rootsNew.get(0));
