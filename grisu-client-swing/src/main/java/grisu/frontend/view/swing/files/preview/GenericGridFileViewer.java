@@ -33,7 +33,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class GenericGridFileViewer extends JPanel implements GridFileViewer,
-		GridFileListListener {
+GridFileListListener {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GenericGridFileViewer.class.getName());
@@ -60,9 +60,11 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 				final GridFileViewer viewerClass = (GridFileViewer) (Class
 						.forName(f).newInstance());
 
-				for (final String t : viewerClass.getSupportedMimeTypes()) {
-					if (match.getMimeType().contains(t)) {
-						return viewerClass;
+				if (viewerClass != null) {
+					for (final String t : viewerClass.getSupportedMimeTypes()) {
+						if (match.getMimeType().contains(t)) {
+							return viewerClass;
+						}
 					}
 				}
 			} catch (final Exception e) {
@@ -71,20 +73,6 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 
 		}
 
-		// // if null, try known ones
-		// FileViewer viewer = new PlainTextFileViewer();
-		// for (String t : viewer.getSupportedMimeTypes()) {
-		// if (match.getMimeType().contains(t)) {
-		// return viewer;
-		// }
-		// }
-
-		// viewer = new ImageFileViewer();
-		// for (String t : viewer.getSupportedMimeTypes()) {
-		// if (match.getMimeType().contains(t)) {
-		// return viewer;
-		// }
-		// }
 
 		return null;
 	}
@@ -295,12 +283,12 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 										getRootPane(),
 										"The file you selected is bigger than the default threshold\n"
 												+ FileAndUrlHelpers
-														.calculateSizeString(FileManager
-																.getDownloadFileSizeThreshold())
-												+ "bytes. It may take a long time to load.\n"
-												+ "Do you still want to preview that file?",
-										"Warning: big file",
-										JOptionPane.YES_NO_OPTION);
+												.calculateSizeString(FileManager
+														.getDownloadFileSizeThreshold())
+														+ "bytes. It may take a long time to load.\n"
+														+ "Do you still want to preview that file?",
+														"Warning: big file",
+														JOptionPane.YES_NO_OPTION);
 
 						if (n == JOptionPane.NO_OPTION) {
 							showsValidViewerAtTheMoment = false;
