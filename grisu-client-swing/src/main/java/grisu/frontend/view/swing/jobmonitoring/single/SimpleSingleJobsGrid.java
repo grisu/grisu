@@ -7,6 +7,7 @@ import grisu.frontend.model.job.JobObject;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -20,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
@@ -82,6 +84,9 @@ public class SimpleSingleJobsGrid extends JPanel {
 	private JMenuItem mntmKillSelectedJobs;
 	private JMenuItem mntmKillAndClean;
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public SimpleSingleJobsGrid(ServiceInterface si,
 			EventList<JobObject> jobList) {
 		this.si = si;
@@ -327,13 +332,21 @@ public class SimpleSingleJobsGrid extends JPanel {
 			message.append(job.getJobname() + "\n");
 		}
 
-		final int n = JOptionPane.showConfirmDialog(getRootPane(),
-				message.toString(), "Kill and clean job(s)",
+		JTextArea text = new JTextArea();
+		text.setText(message.toString());
+		text.setLineWrap(false);
+		JScrollPane scrollPane = new JScrollPane(new JTextArea(
+				message.toString()));
+		scrollPane.setPreferredSize(new Dimension(320, 240));
+
+		final int n = JOptionPane.showConfirmDialog(getRootPane(), scrollPane,
+				"Kill and clean job(s)",
 				JOptionPane.YES_NO_OPTION);
 
 		if (n == JOptionPane.YES_OPTION) {
 
 			lockUI(true);
+
 
 			for (final JobObject job : getSelectedJobs()) {
 				// getTable().getSelectionModel().clearSelection();
