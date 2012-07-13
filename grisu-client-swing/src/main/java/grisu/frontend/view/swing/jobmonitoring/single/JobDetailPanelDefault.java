@@ -320,7 +320,8 @@ PropertyChangeListener, JobDetailPanel {
 	private GridFileManagementPanel getFileManagementPanel() {
 		if ( fileManagementPanel == null ) {
 			List<GridFile> left = Lists.newArrayList();
-			fileManagementPanel = new GridFileManagementPanel(si, left, null);
+			fileManagementPanel = new GridFileManagementPanel(si, left, null,
+					false, true);
 			fileManagementPanel.setRightPanelToPreview(true);
 		}
 		return fileManagementPanel;
@@ -516,7 +517,7 @@ PropertyChangeListener, JobDetailPanel {
 								}
 							}
 						}.start();
-						getFileManagementPanel().refresh();
+						getFileManagementPanel().refresh(true);
 					}
 
 				}

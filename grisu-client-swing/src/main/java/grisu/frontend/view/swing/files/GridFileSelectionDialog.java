@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JButton;
@@ -78,7 +79,8 @@ GridFileListListener {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			gridFileTreePanel = new GridFileTreePanel(si);
+			List<GridFile> roots = GridFileTreePanel.getDefaultRoots(si);
+			gridFileTreePanel = new GridFileTreePanel(si, roots);
 			gridFileTreePanel
 			.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			gridFileTreePanel.addGridFileListListener(this);

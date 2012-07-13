@@ -163,7 +163,7 @@ public class GrisuCenterPanel extends JPanel {
 		});
 
 		getMultiSingleJobMonitoringGrid()
-				.displayGridForApplication(application);
+		.displayGridForApplication(application);
 
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
@@ -182,7 +182,8 @@ public class GrisuCenterPanel extends JPanel {
 	private GridFileManagementPanel getGroupFileManagementPanel(
 			List<GridFile> left, List<GridFile> right) {
 		if (groupFileListPanel == null) {
-			groupFileListPanel = new GridFileManagementPanel(si, left, right);
+			groupFileListPanel = new GridFileManagementPanel(si, left, right,
+					true, true);
 
 		}
 		return groupFileListPanel;

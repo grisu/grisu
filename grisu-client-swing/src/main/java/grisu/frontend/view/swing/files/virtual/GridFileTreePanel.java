@@ -11,6 +11,7 @@ import grisu.frontend.view.swing.files.GridFileTransferHandler;
 import grisu.frontend.view.swing.files.contextMenu.DefaultGridFileContextMenu;
 import grisu.frontend.view.swing.files.contextMenu.GridFileListPanelContextMenu;
 import grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeController;
+import grisu.model.FileCache;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
@@ -24,6 +25,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,7 @@ import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
+import org.python.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +65,54 @@ EventSubscriber {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GridFileTreePanel.class.getName());
+
+	public final static String LOCAL_ALIAS = "Local files";
+	public final static String REMOTE_ALIAS = "Remote files";
+
+	private static List<GridFile> defaultFileRoots = null;
+
+	public static final LinkedHashMap<String, String> defaultRoots = Maps
+			.newLinkedHashMap();
+
+	public static synchronized final List<GridFile> getDefaultRoots(
+			ServiceInterface si) {
+
+		if (defaultFileRoots == null) {
+			defaultFileRoots = new LinkedList<GridFile>();
+
+			for (String alias : defaultRoots.keySet()) {
+				if (LOCAL_ALIAS.equals(alias) && (defaultRoots.get(alias) == null)) {
+					final GridFile localRoot = GrisuRegistryManager.getDefault(si)
+							.getFileManager().getLocalRoot();
+					defaultFileRoots.add(localRoot);
+				} else if (REMOTE_ALIAS.equals(alias)
+						&& (defaultRoots.get(alias) == null)) {
+					final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
+							.getFileManager().getGridRoot();
+					defaultFileRoots.add(gridRoot);
+				} else {
+					GridFile file = null;
+					try {
+						file = GrisuRegistryManager.getDefault(si).getFileManager()
+								.createGridFile(defaultRoots.get(alias));
+						file.setName(alias);
+						defaultFileRoots.add(file);
+
+					} catch (final RemoteFileSystemException e) {
+						myLogger.error(e.getLocalizedMessage(), e);
+					}
+				}
+			}
+		}
+
+		return defaultFileRoots;
+
+	}
+
+	{
+		defaultRoots.put(REMOTE_ALIAS, null);
+		defaultRoots.put(LOCAL_ALIAS, null);
+	}
 
 	public static final String EXTENSIONS_KEY = "extensions";
 	public static final String FOLDERS_SELECTABLE_KEY = "folders_selectable";
@@ -609,11 +660,14 @@ EventSubscriber {
 		}
 	}
 
-	public synchronized void refresh() {
+	public void refresh() {
+		refresh(false);
+	}
 
-		System.out.println("REFRESH: " + this.root);
+	public synchronized void refresh(boolean forceRefresh) {
+
 		if (this.root != null) {
-
+			FileCache.remove(this.root);
 			this.roots = null;
 		}
 

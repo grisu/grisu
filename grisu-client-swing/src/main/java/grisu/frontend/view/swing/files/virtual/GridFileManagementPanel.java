@@ -7,17 +7,27 @@ import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
 
 import java.awt.BorderLayout;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import javax.swing.JPanel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.JideSplitPane;
 
 public class GridFileManagementPanel extends JPanel implements
 GridFileListListener {
+
+
+
+	static final Logger myLogger = LoggerFactory
+			.getLogger(GridFileManagementPanel.class.getName());
+
+
+
 	private JideSplitPane jideSplitPane;
 
 	private final ServiceInterface si;
@@ -30,40 +40,60 @@ GridFileListListener {
 	private final List<GridFile> rightRoots;
 
 	public GridFileManagementPanel(ServiceInterface si) {
-		this(si, null, null);
+		this(si, null, null, true, true);
 	}
 
 	public GridFileManagementPanel(ServiceInterface si,
-			List<GridFile> leftRoots, List<GridFile> rightRoots) {
+			List<GridFile> leftRoots, List<GridFile> rightRoots,
+			final boolean preloadLeftRootFolders,
+			final boolean preloadRightRootFolders) {
 
 		super();
 		this.si = si;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		if (leftRoots == null) {
-			final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
-					.getFileManager().getGridRoot();
-			final GridFile localRoot = GrisuRegistryManager.getDefault(si)
-					.getFileManager().getLocalRoot();
-			this.leftRoots = new LinkedList<GridFile>();
-			this.leftRoots.add(gridRoot);
-			this.leftRoots.add(localRoot);
+
+			this.leftRoots = GridFileTreePanel.getDefaultRoots(si);
+
 		} else {
 			this.leftRoots = leftRoots;
 		}
 
 		if (rightRoots == null) {
-			final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
-					.getFileManager().getGridRoot();
-			final GridFile localRoot = GrisuRegistryManager.getDefault(si)
-					.getFileManager().getLocalRoot();
-			this.rightRoots = new LinkedList<GridFile>();
-			this.rightRoots.add(gridRoot);
-			this.rightRoots.add(localRoot);
+			this.rightRoots = GridFileTreePanel.getDefaultRoots(si);
 		} else {
-			this.rightRoots = leftRoots;
+			this.rightRoots = rightRoots;
 		}
 		setLayout(new BorderLayout(0, 0));
 		add(getJideSplitPane(), BorderLayout.CENTER);
+
+		if (preloadLeftRootFolders || preloadRightRootFolders) {
+			// pre-loading folders....
+			final List<GridFile> tmpLeft = this.leftRoots;
+			final List<GridFile> tmpRight = this.rightRoots;
+			Thread t = new Thread() {
+				@Override
+				public void run() {
+					if (preloadLeftRootFolders) {
+						for (GridFile folder : tmpLeft) {
+							myLogger.debug("preloading url: " + folder.getUrl());
+							getFileListPanel().refreshFolder(folder.getUrl());
+						}
+					}
+
+					if (preloadRightRootFolders) {
+						for (GridFile folder : tmpRight) {
+							myLogger.debug("preloading url: " + folder.getUrl());
+							getListAndPreviewPanel().refreshFolder(folder.getUrl());
+						}
+					}
+				}
+			};
+			t.setName("PreloadingFolders");
+			t.setPriority(Thread.MIN_PRIORITY);
+			t.start();
+		}
+
 	}
 
 	public void directoryChanged(GridFile newDirectory) {
@@ -114,8 +144,12 @@ GridFileListListener {
 	}
 
 	public void refresh() {
-		getFileListPanel().refresh();
+		getFileListPanel().refresh(false);
 
+	}
+
+	public void refresh(boolean forceRefresh) {
+		getFileListPanel().refresh(forceRefresh);
 	}
 
 	public void setRightPanelToPreview(boolean preview) {

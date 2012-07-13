@@ -46,6 +46,7 @@ import net.sf.ehcache.util.NamedThreadFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
+import org.python.modules.synchronize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1415,12 +1416,15 @@ public class FileManager {
 		return folder.listOfAllFilesUnderThisFolder();
 	}
 
-
 	/**
 	 * Returns the children of the specified folder.
 	 * 
+	 * Uses the local cache.
+	 * 
 	 * @param parent
 	 *            the folder to list
+	 * @param forceRefresh
+	 *            whether to use the file listing cache (false) or not (true)
 	 * @return the children of the folder
 	 * @throws RemoteFileSystemException
 	 *             if the folder can't be accessed
@@ -1429,9 +1433,39 @@ public class FileManager {
 
 		GridFile folder = null;
 		if (StringUtils.isNotBlank(parent.getPath())) {
-			folder = ls(parent.getPath());
+			folder = ls(parent.getPath(), false);
 		} else {
-			folder = ls(parent.getUrl());
+			folder = ls(parent.getUrl(), false);
+		}
+
+		if (folder == null) {
+			return null;
+		}
+
+		return folder;
+
+	}
+
+
+	/**
+	 * Returns the children of the specified folder.
+	 * 
+	 * @param parent
+	 *            the folder to list
+	 * @param forceRefresh
+	 *            whether to use the file listing cache (false) or not (true)
+	 * @return the children of the folder
+	 * @throws RemoteFileSystemException
+	 *             if the folder can't be accessed
+	 */
+	public GridFile ls(GridFile parent, boolean forceRefresh)
+			throws RemoteFileSystemException {
+
+		GridFile folder = null;
+		if (StringUtils.isNotBlank(parent.getPath())) {
+			folder = ls(parent.getPath(), forceRefresh);
+		} else {
+			folder = ls(parent.getUrl(), forceRefresh);
 		}
 
 		if (folder == null) {
@@ -1445,6 +1479,8 @@ public class FileManager {
 	/**
 	 * Returns the children of the specified folder.
 	 * 
+	 * Doesn't force a refresh (means: uses cache)
+	 * 
 	 * @param url
 	 *            the url of the folder to list
 	 * @return the children of the folder
@@ -1452,7 +1488,21 @@ public class FileManager {
 	 *             if the folder can't be accessed
 	 */
 	public GridFile ls(String url) throws RemoteFileSystemException {
-		return ls(url, 1);
+		return ls(url, false, 1);
+	}
+
+	/**
+	 * Returns the children of the specified folder.
+	 * 
+	 * @param url
+	 *            the url of the folder to list
+	 *            @param forceRefresh whether to use the file listing cache (false) or not (true)
+	 * @return the children of the folder
+	 * @throws RemoteFileSystemException
+	 *             if the folder can't be accessed
+	 */
+	public GridFile ls(String url, boolean forceRefresh) throws RemoteFileSystemException {
+		return ls(url, forceRefresh, 1);
 	}
 
 	/**
@@ -1464,6 +1514,8 @@ public class FileManager {
 	 * 
 	 * @param url
 	 *            the url of the root folder
+	 * @param forceRefresh
+	 *            whether to use the file listing cache (false) or not (true)
 	 * @param recursionLevel
 	 *            the recursion level
 	 * @return a structure of {@link GridFile}s that mirrors the remote
@@ -1471,10 +1523,11 @@ public class FileManager {
 	 * @throws RemoteFileSystemException
 	 *             if one of the child files/folders can't be accessed
 	 */
-	public GridFile ls(String url, int recursionLevel)
+	public GridFile ls(String url, boolean forceRefresh, int recursionLevel)
 			throws RemoteFileSystemException {
 
 		url = ensureUriFormat(url);
+
 
 		if (isLocal(url)) {
 
@@ -1494,9 +1547,18 @@ public class FileManager {
 		} else {
 
 			try {
-				final GridFile result = serviceInterface
-						.ls(url, recursionLevel);
-				return result;
+				if (!forceRefresh) {
+					GridFile cache = FileCache.getFileList(url);
+					if (cache != null) {
+						return cache;
+					}
+				}
+				synchronized (url) {
+					final GridFile result = serviceInterface
+							.ls(url, recursionLevel);
+					FileCache.putFileList(url, result);
+					return result;
+				}
 			} catch (final RemoteFileSystemException e) {
 
 				throw e;

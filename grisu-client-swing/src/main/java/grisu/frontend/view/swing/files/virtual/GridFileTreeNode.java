@@ -31,6 +31,8 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 	private final String[] extensionsToDisplay;
 	private final LazyLoadingTreeController controller;
 
+	private boolean forceRefresh = false;
+
 	public GridFileTreeNode(FileManager fm, GridFile userObject) {
 		this(fm, userObject, null, true, true, null);
 	}
@@ -100,8 +102,10 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 		final GridFile temp = ((GridFile) getUserObject());
 		temp.setChildren(null);
 		try {
-			final Set<GridFile> dfo = fm.ls((GridFile) getUserObject())
+			final Set<GridFile> dfo = fm.ls((GridFile) getUserObject(),
+					forceRefresh)
 					.getChildren();
+			forceRefresh = false;
 			if (dfo == null) {
 				return new MutableTreeNode[0];
 			}
@@ -166,6 +170,8 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 		if (isLeaf()) {
 			return;
 		}
+
+		forceRefresh = true;
 
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
