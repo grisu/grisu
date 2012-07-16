@@ -17,6 +17,7 @@ public class FileCache {
 	static final Logger myLogger = LoggerFactory.getLogger(FileCache.class);
 	public static CacheManager cache = null;
 	public static Cache fileSystemCache = null;
+	public static Cache shortCache = null;
 
 	static {
 		try {
@@ -42,6 +43,11 @@ public class FileCache {
 			fileSystemCache = cache.getCache("filesystem");
 			if (fileSystemCache == null) {
 				myLogger.debug("filesystem cache is null");
+			}
+
+			shortCache = cache.getCache("short");
+			if (shortCache == null) {
+				myLogger.debug("short cache is null");
 			}
 		} catch (final Exception e) {
 			myLogger.error(e.getLocalizedMessage(), e);
