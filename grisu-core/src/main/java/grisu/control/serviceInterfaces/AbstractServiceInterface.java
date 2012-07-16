@@ -195,7 +195,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				if (url == null) {
 					url = myLogger.getClass().getResource("/grisu-ehcache.xml");
 				}
-				cache = CacheManager.create(url);
+				cache = new CacheManager(url);
 				cache.setName("grisu");
 			}
 

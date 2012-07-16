@@ -2,6 +2,9 @@ package grisu.model;
 
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.DtoProperty;
+
+import java.net.URL;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
@@ -12,12 +15,43 @@ import org.slf4j.LoggerFactory;
 public class FileCache {
 
 	static final Logger myLogger = LoggerFactory.getLogger(FileCache.class);
+	public static CacheManager cache = null;
+	public static Cache fileSystemCache = null;
 
-	public static final CacheManager cacheManager = CacheManager.create();
-	public static final Cache fileSystemCache = CacheManager.getInstance()
-			.getCache("filesystem");
+	static {
+		try {
+
+			for (CacheManager cm : CacheManager.ALL_CACHE_MANAGERS) {
+				if (cm.getName().equals("grisu-client")) {
+					cache = cm;
+					break;
+				}
+			}
+			if (cache == null) {
+				URL url = ClassLoader
+						.getSystemResource("/grisu-client.ehcache.xml");
+				if (url == null) {
+					url = myLogger.getClass().getResource(
+							"/grisu-client.ehcache.xml");
+				}
+				cache = new CacheManager(url);
+				cache.setName("grisu-client");
+			}
+
+
+			fileSystemCache = cache.getCache("filesystem");
+			if (fileSystemCache == null) {
+				myLogger.debug("filesystem cache is null");
+			}
+		} catch (final Exception e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+		}
+	}
 
 	public static GridFile getFileList(String url) {
+		// if (StringUtils.isBlank(url)) {
+		// return null;
+		// }
 		Element file = fileSystemCache.get(url);
 		if (file == null) {
 			return null;
