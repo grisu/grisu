@@ -14,29 +14,34 @@ public class SshKeyCopyFrame extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 
 		LoginManager.initEnvironment();
 		EventQueue.invokeLater(new Runnable() {
 
 			public void run() {
 				try {
-					SshKeyCopyFrame frame = new SshKeyCopyFrame();
+					SshKeyCopyFrame frame = new SshKeyCopyFrame(args);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
+
+
 	}
 
 	private JPanel contentPane;
 	private PanSSHKeyCopyPanel panSSHKeyCopyPanel;
 
+	private final String[] args;
+
 	/**
 	 * Create the frame.
 	 */
-	public SshKeyCopyFrame() {
+	public SshKeyCopyFrame(String[] args) {
+		this.args = args;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 674, 523);
 		contentPane = new JPanel();
@@ -49,6 +54,10 @@ public class SshKeyCopyFrame extends JFrame {
 	private PanSSHKeyCopyPanel getPanSSHKeyCopyPanel() {
 		if (panSSHKeyCopyPanel == null) {
 			panSSHKeyCopyPanel = new PanSSHKeyCopyPanel();
+			if (args.length == 2) {
+				panSSHKeyCopyPanel.setTemplatePath(args[0]);
+				panSSHKeyCopyPanel.setMobaxtermpath(args[1]);
+			}
 		}
 		return panSSHKeyCopyPanel;
 	}

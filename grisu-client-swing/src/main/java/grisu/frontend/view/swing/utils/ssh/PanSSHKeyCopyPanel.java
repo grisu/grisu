@@ -35,6 +35,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -57,6 +58,8 @@ public class PanSSHKeyCopyPanel extends JPanel {
 	private JPasswordField confirmPasswordField;
 	private JLabel lblNewLabel;
 
+	private String templatePath, mobaxtermpath;
+
 	/**
 	 * Create the panel.
 	 */
@@ -73,10 +76,8 @@ public class PanSSHKeyCopyPanel extends JPanel {
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(58dlu;default)"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(24dlu;default)"),
 				FormFactory.RELATED_GAP_ROWSPEC,
@@ -95,15 +96,16 @@ public class PanSSHKeyCopyPanel extends JPanel {
 		add(getBtnNewButton(), "8, 6, right, default");
 		add(getScrollPane_1(), "2, 10, 7, 1, fill, fill");
 
-
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				getInfoPane().scrollRectToVisible(new Rectangle(1, 1, 1, 1));
 			}
 		});
 
-		if ( GridSshKey.gridsshkeyExists() ) {
-			addLogMessage("SSH key already exists in "+CommonGridProperties.getDefault().getGridSSHKey()+". (Re-)using that...");
+		if (GridSshKey.gridsshkeyExists()) {
+			addLogMessage("SSH key already exists in "
+					+ CommonGridProperties.getDefault().getGridSSHKey()
+					+ ". (Re-)using that...");
 		} else {
 			addLogMessage("SSH key does not yet exist in "
 					+ CommonGridProperties.getDefault().getGridSSHKey()
@@ -113,7 +115,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 	}
 
 	private void addLogMessage(String msg) {
-		progressLog.append(msg+"\n");
+		progressLog.append(msg + "\n");
 		SwingUtilities.invokeLater(new Thread() {
 			@Override
 			public void run() {
@@ -141,6 +143,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 		return;
 
 	}
+
 
 	private JButton getBtnNewButton() {
 		if (btnNewButton == null) {
@@ -354,6 +357,22 @@ public class PanSSHKeyCopyPanel extends JPanel {
 							e1.printStackTrace();
 						}
 					}
+
+					if (StringUtils.isNotBlank(templatePath)
+							&& StringUtils.isNotBlank(mobaxtermpath)
+							&& StringUtils.isNotBlank(username)) {
+
+						addLogMessage("Creating mobaxterm ini file...");
+
+						MobaXtermIniCreator c = new MobaXtermIniCreator(
+								templatePath, mobaxtermpath, username);
+
+						c.create();
+
+						addLogMessage("File created in " + mobaxtermpath);
+
+					}
+
 				} finally {
 					getBtnNewButton().setText("Close");
 					getBtnNewButton().setEnabled(true);
@@ -364,6 +383,11 @@ public class PanSSHKeyCopyPanel extends JPanel {
 		t.setName("COPY_SSH_KEY_THREAD");
 		t.start();
 	}
+
+	public void setMobaxtermpath(String mobaxtermpath) {
+		this.mobaxtermpath = mobaxtermpath;
+	}
+
 
 	private void setPasswordStatus(final String msg, final boolean enableButton) {
 
@@ -382,5 +406,9 @@ public class PanSSHKeyCopyPanel extends JPanel {
 		});
 
 
+	}
+
+	public void setTemplatePath(String templatePath) {
+		this.templatePath = templatePath;
 	}
 }
