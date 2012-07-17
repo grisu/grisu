@@ -28,10 +28,10 @@ import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Maps;
 import com.sun.xml.ws.developer.JAXWSProperties;
 
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
@@ -187,8 +187,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			return service;
 
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			e.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Could not create JaxwsServiceInterface: "
 							+ e.getLocalizedMessage(), e);
