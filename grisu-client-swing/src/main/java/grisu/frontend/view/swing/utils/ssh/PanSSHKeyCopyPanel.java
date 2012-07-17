@@ -358,7 +358,11 @@ public class PanSSHKeyCopyPanel extends JPanel {
 						}
 					}
 
-					if (StringUtils.isNotBlank(templatePath)
+					String currentOs = System.getProperty("os.name")
+							.toUpperCase();
+
+					if (currentOs.contains("WINDOWS")
+							&& StringUtils.isNotBlank(templatePath)
 							&& StringUtils.isNotBlank(mobaxtermpath)
 							&& StringUtils.isNotBlank(username)) {
 
