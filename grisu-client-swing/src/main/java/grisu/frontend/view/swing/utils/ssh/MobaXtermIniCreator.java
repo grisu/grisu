@@ -46,6 +46,7 @@ public class MobaXtermIniCreator {
 					.replaceAll("PAN_USERNAME", panusername);
 
 			String homeDir = System.getProperty("user.home");
+			homeDir = homeDir.replaceAll("\\", "\\\\");
 			replacement = replacement.replaceAll("HOME_DIR", homeDir);
 
 			return replacement;
