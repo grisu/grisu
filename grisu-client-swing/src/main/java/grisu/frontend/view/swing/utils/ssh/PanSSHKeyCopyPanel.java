@@ -302,7 +302,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 					addLogMessage("Logging into grid...");
 					ServiceInterface si = null;
 					try {
-						si = LoginManager.login("local", cred, false);
+						si = LoginManager.login("nesi", cred, false);
 					} catch (LoginException e) {
 						e.printStackTrace();
 					}
