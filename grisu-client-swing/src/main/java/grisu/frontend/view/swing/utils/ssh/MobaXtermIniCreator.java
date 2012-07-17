@@ -30,6 +30,9 @@ public class MobaXtermIniCreator {
 		try {
 			FileUtils.write(new File(mobaXtermPath + File.separator
 					+ "MobaXterm.ini"), ini);
+
+			FileUtils.write(new File(mobaXtermPath + File.separator
+					+ "MobaXterm.ini.auto"), ini);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
