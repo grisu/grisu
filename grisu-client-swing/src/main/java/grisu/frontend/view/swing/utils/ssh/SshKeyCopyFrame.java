@@ -1,5 +1,7 @@
 package grisu.frontend.view.swing.utils.ssh;
 
+import grisu.frontend.control.login.LoginManager;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
@@ -13,6 +15,8 @@ public class SshKeyCopyFrame extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+
+		LoginManager.initEnvironment();
 		EventQueue.invokeLater(new Runnable() {
 
 			public void run() {
@@ -27,7 +31,7 @@ public class SshKeyCopyFrame extends JFrame {
 	}
 
 	private JPanel contentPane;
-	private SshKeyPanel sshKeyCopyPanel;
+	private PanSSHKeyCopyPanel panSSHKeyCopyPanel;
 
 	/**
 	 * Create the frame.
@@ -39,13 +43,13 @@ public class SshKeyCopyFrame extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
-		contentPane.add(getSshKeyCopyPanel(), BorderLayout.CENTER);
+		contentPane.add(getPanSSHKeyCopyPanel(), BorderLayout.CENTER);
 	}
 
-	private SshKeyPanel getSshKeyCopyPanel() {
-		if (sshKeyCopyPanel == null) {
-			sshKeyCopyPanel = new SshKeyPanel();
+	private PanSSHKeyCopyPanel getPanSSHKeyCopyPanel() {
+		if (panSSHKeyCopyPanel == null) {
+			panSSHKeyCopyPanel = new PanSSHKeyCopyPanel();
 		}
-		return sshKeyCopyPanel;
+		return panSSHKeyCopyPanel;
 	}
 }

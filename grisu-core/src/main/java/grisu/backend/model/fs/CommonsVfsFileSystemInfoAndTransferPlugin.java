@@ -108,8 +108,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				MountPoint mp = user
 						.getResponsibleMountpointForAbsoluteFile(url);
 				// replacing with absolute path
-				url = url.replaceFirst("~", mp.getPath());
-				url = FileManager.removeDoubleSlashes(url);
+				if (mp != null) {
+					url = url.replaceFirst("~", mp.getPath());
+					url = FileManager.removeDoubleSlashes(url);
+				}
 			}
 
 			root = fsCache.getFileSystem(url, fqan);
@@ -424,6 +426,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 			final MountPoint mp = user
 					.getResponsibleMountpointForAbsoluteFile(url);
+
+			if (url.contains("~")) {
+				url = fo.getURL().toString();
+			}
 
 			final GridFile folder = new GridFile(url, lastModified);
 
