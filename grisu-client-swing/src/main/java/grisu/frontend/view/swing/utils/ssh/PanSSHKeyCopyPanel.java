@@ -331,17 +331,24 @@ public class PanSSHKeyCopyPanel extends JPanel {
 					String authorized_key_file = tmp+"/.ssh/authorized_keys";
 					try {
 						File authKeyFile = fm.downloadFile(authorized_key_file);
-						addLogMessage("Downloading authorized_keys file, appending grid ssh key and uploading it again...");
+						addLogMessage("Downloading authorized_keys file...");
 
 						try {
 							String pub = FileUtils
 									.readFileToString(new File(CommonGridProperties
 											.getDefault().getGridSSHCert()));
 
-							FileUtils.writeStringToFile(authKeyFile, pub, true);
+							String current_auth_file_content = FileUtils
+									.readFileToString(authKeyFile);
+							if (current_auth_file_content.contains(pub)) {
+								addLogMessage("Key already in authorized_keys file, doing nothing.");
+							} else {
+								addLogMessage("Appending grid ssh key and uploading authorized_keys file...");
+								FileUtils.writeStringToFile(authKeyFile, pub, true);
 
-							fm.uploadFile(authKeyFile, authorized_key_file, true);
-							addLogMessage("File uploaded. All good.");
+								fm.uploadFile(authKeyFile, authorized_key_file, true);
+								addLogMessage("File uploaded. All good.");
+							}
 
 						} catch (Exception e1) {
 							e1.printStackTrace();
