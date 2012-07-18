@@ -35,7 +35,6 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -147,7 +146,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 
 	private JButton getBtnNewButton() {
 		if (btnNewButton == null) {
-			btnNewButton = new JButton("OK");
+			btnNewButton = new JButton("Start");
 			btnNewButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					if ("Close".equals(btnNewButton.getText())) {
@@ -190,7 +189,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 			infoPane.setContentType("text/html");
 			StringBuffer text = new StringBuffer(
 					"<h3>Enable ssh access to the Pan cluster</h3>");
-			text.append("<p>This application helps you to setup access to the Pan login node. In order to start the process, provide your institution credentials and click the button below.</p>");
+			text.append("<p>This application helps you to setup ssh access to the Pan login node. In order to start the process, provide your institution credentials and click the button below.</p>");
 			if (GridSshKey.gridsshkeyExists()) {
 				text.append("<p>You already seem to have a ssh private key in "
 						+ CommonGridProperties.getDefault().getGridSSHKey()
@@ -365,23 +364,20 @@ public class PanSSHKeyCopyPanel extends JPanel {
 						}
 					}
 
-					String currentOs = System.getProperty("os.name")
-							.toUpperCase();
+					addLogMessage("Creating ssh client configs...");
 
-					if (currentOs.contains("WINDOWS")
-							&& StringUtils.isNotBlank(templatePath)
-							&& StringUtils.isNotBlank(mobaxtermpath)
-							&& StringUtils.isNotBlank(username)) {
+					if ( GridSshKey.createMobaXTermIniFile(templatePath, mobaxtermpath, username) ) {
 
-						addLogMessage("Creating mobaxterm ini file...");
+						addLogMessage("");
+						addLogMessage("Ini file for MobaXterm created in "
+								+ mobaxtermpath);
+					}
 
-						MobaXtermIniCreator c = new MobaXtermIniCreator(
-								templatePath, mobaxtermpath, username);
-
-						c.create();
-
-						addLogMessage("File created in " + mobaxtermpath);
-
+					if ( GridSshKey.createSSHConfigFile(username)) {
+						addLogMessage("");
+						addLogMessage("Config entry for pan ssh access created. When using the commandline, just issue the following command to log in:" );
+						addLogMessage("");
+						addLogMessage("\tssh pan");
 					}
 
 				} finally {
