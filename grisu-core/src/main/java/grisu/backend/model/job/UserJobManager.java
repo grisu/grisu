@@ -51,7 +51,6 @@ import javax.persistence.Transient;
 import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.lang.StringUtils;
-import org.globus.exec.utils.ManagedJobFactoryConstants;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
@@ -2634,28 +2633,23 @@ public class UserJobManager {
 		// String translatedJobDescription =
 		// submitter.convertJobDescription(job);
 
-		String host = JsdlHelpers.getCandidateHosts(jsdl)[0];
-		// TODO change that once I know how to handle queues properly
+		String tmp = JsdlHelpers.getCandidateHosts(jsdl)[0];
 
-		// String queue = null;
-		if (host.indexOf(":") != -1) {
-			// queue = host.substring(0, host.indexOf(":"));
-			host = host.substring(host.indexOf(":") + 1);
+		Queue queue = AbstractServiceInterface.informationManager.getResource(
+				Queue.class, tmp);
+
+		if (queue == null) {
+			throw new ServerJobSubmissionException("Can't find queue for: "
+					+ tmp);
 		}
-		myLogger.debug("Submission host is: " + host);
+
+		String host = queue.getGateway().getHost();
+		myLogger.debug("Submission host is: " + queue.getGateway().getHost());
 
 		// don't know whether factory type should be in here or in the
 		// GT4Submitter (more likely the latter)
-		String factoryType = null;
-		if (host.indexOf("#") != -1) {
-			factoryType = host.substring(host.indexOf("#") + 1);
-			if ((factoryType == null) || (factoryType.length() == 0)) {
-				factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
-			}
-			host = host.substring(0, host.indexOf("#"));
-		} else {
-			factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
-		}
+		String factoryType = queue.getFactoryType();
+
 		job.addJobProperty(Constants.FACTORY_TYPE_KEY, factoryType);
 
 		myLogger.debug("FactoryType is: " + factoryType);
@@ -2779,6 +2773,11 @@ public class UserJobManager {
 					.getJobDescription())[0];
 			final Queue resource = AbstractServiceInterface.informationManager
 					.getResource(Queue.class, candidate);
+
+			if (resource == null) {
+				throw new JobSubmissionException(
+						"Can't find queue for string: " + candidate);
+			}
 
 			String version = resource.getGateway().getMiddleware().getVersion();
 
