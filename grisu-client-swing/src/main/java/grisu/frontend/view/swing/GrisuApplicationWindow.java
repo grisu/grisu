@@ -1,6 +1,5 @@
 package grisu.frontend.view.swing;
 
-import grisu.GrisuVersion;
 import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
@@ -201,7 +200,7 @@ WindowListener, ServiceInterfaceHolder {
 
 		frame = new JXFrame();
 		String title = null;
-		final String clientVersion = GrisuVersion.get("this-client");
+		final String clientVersion = LoginManager.getClientVersion();
 		if (StringUtils.containsIgnoreCase(clientVersion, "snapshot")) {
 			title = getName() + "  (DEVELOPMENT VERSION)";
 		} else {

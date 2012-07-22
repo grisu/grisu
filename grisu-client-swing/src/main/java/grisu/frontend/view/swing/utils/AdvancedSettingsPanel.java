@@ -30,7 +30,6 @@ ServiceInterfacePanel {
 	private JButton btnClear;
 
 	private ServiceInterface si = null;
-	private JLabel lblUseoldSitebased;
 	private JLabel lblNewLabel;
 	private JTextField textField;
 	private JButton btnApply;
@@ -50,14 +49,12 @@ ServiceInterfacePanel {
 				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
 		add(getLblClearFilesystemCache(), "2, 2, 3, 1");
-		add(getBtnClear(), "8, 2, right, default");
-		add(getLblUseoldSitebased(), "2, 4, 3, 1");
-		add(getLblNewLabel(), "2, 6, left, default");
-		add(getTextField(), "4, 6, 3, 1, fill, default");
-		add(getBtnApply(), "8, 6, right, default");
+		add(getBtnClear(), "8, 2, fill, default");
+		add(getLblNewLabel(), "2, 4, left, default");
+		add(getTextField(), "4, 4, 3, 1, fill, default");
+		add(getBtnApply(), "8, 4, fill, default");
 	}
 
 	private JButton getBtnApply() {
@@ -112,14 +109,6 @@ ServiceInterfacePanel {
 			lblNewLabel = new JLabel("MyProxy host");
 		}
 		return lblNewLabel;
-	}
-
-	private JLabel getLblUseoldSitebased() {
-		if (lblUseoldSitebased == null) {
-			lblUseoldSitebased = new JLabel(
-					"Use (old) site-based file management panel");
-		}
-		return lblUseoldSitebased;
 	}
 
 	public JPanel getPanel() {

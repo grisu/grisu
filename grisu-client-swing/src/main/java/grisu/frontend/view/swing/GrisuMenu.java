@@ -2,6 +2,7 @@ package grisu.frontend.view.swing;
 
 import grisu.GrisuVersion;
 import grisu.control.ServiceInterface;
+import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.view.swing.utils.SettingsDialog;
 
 import java.awt.Color;
@@ -68,7 +69,7 @@ public class GrisuMenu extends JMenuBar {
 		getToolsMenu().add(getSettingsItem());
 
 		// check whether development release - if so, use red background color
-		final String clientVersion = GrisuVersion.get("this-client");
+		final String clientVersion = LoginManager.getClientVersion();
 		if (StringUtils.containsIgnoreCase(clientVersion, "snapshot")) {
 			isDevelopmentVersion = true;
 			setOpaque(true);
@@ -163,8 +164,8 @@ public class GrisuMenu extends JMenuBar {
 
 				public void actionPerformed(ActionEvent e) {
 
-					final String clientVersion = GrisuVersion
-							.get("this-client");
+					final String clientVersion = LoginManager
+							.getClientVersion();
 
 					final String grisuclientversion = GrisuVersion
 							.get("grisu-client-lib");

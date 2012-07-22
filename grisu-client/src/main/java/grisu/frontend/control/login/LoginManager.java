@@ -319,6 +319,7 @@ public class LoginManager {
 	}
 
 	public static String setClientVersion(String version) {
+		Thread.dumpStack();
 		if (StringUtils.isBlank(version)) {
 			version = "n/a";
 		}
