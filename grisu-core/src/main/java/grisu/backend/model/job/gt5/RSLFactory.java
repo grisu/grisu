@@ -1,7 +1,11 @@
 package grisu.backend.model.job.gt5;
 
+import grisu.jcommons.constants.Constants;
+import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.model.FileManager;
+import grisu.model.info.dto.Module;
+import grisu.model.info.dto.Package;
 import grisu.settings.ServerPropertiesManager;
 
 import java.util.Map;
@@ -12,11 +16,15 @@ import org.globus.rsl.Binding;
 import org.globus.rsl.Bindings;
 import org.globus.rsl.NameOpValue;
 import org.globus.rsl.RslNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 public class RSLFactory {
 
 	private static RSLFactory singleton = null;
+
+	public static final Logger myLogger = LoggerFactory.getLogger(RSLFactory.class);
 
 	public static RSLFactory getRSLFactory() {
 		if (singleton == null) {
@@ -24,6 +32,8 @@ public class RSLFactory {
 		}
 		return singleton;
 	}
+
+	private InformationManager infoManager = null;
 
 	private int commitTimeout = 5;
 
@@ -182,49 +192,58 @@ public class RSLFactory {
 
 	private String[] getModulesFromMDS(final Document jsdl) {
 
-		return new String[] {};
-		// String[] modules_string = JsdlHelpers.getModules(jsdl);
-		// if (modules_string != null) {
-		// return modules_string;
-		// }
-		// // mds based
-		// final String application = JsdlHelpers.getApplicationName(jsdl);
-		// String version = JsdlHelpers.getApplicationVersion(jsdl);
-		// final String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
-		// String subLoc = null;
-		//
-		// if ((subLocs != null)
-		// && (subLocs.length > 0)
-		// && (StringUtils.isNotBlank(subLocs[0]) && (StringUtils
-		// .isNotBlank(application)))
-		// && (!Constants.GENERIC_APPLICATION_NAME.equals(application))) {
-		//
-		// subLoc = subLocs[0];
-		//
-		// } else {
-		// return new String[] {};
-		// }
-		//
-		// if (StringUtils.isBlank(version)) {
-		// version = Constants.NO_VERSION_INDICATOR_STRING;
-		// }
-		//
-		// final Package pkg = this.informationManager
-		// .getApplicationDetails(application, version, subLoc);
-		// final Module m = pkg.getModule();
-		// if (m == null) {
-		// return new String[] {};
-		// }
-		// modules_string = new String[] { m.getModule() };
-		// if (modules_string != null) {
-		// return modules_string;
-		// } else {
-		// return new String[] {};
 
+		String[] modules_string = JsdlHelpers.getModules(jsdl);
+		if (modules_string != null) {
+			return modules_string;
+		}
+
+		if ( this.infoManager == null ) {
+			myLogger.debug("No infomanager set, not looking up modules...");
+			return new String[]{};
+		}
+		// mds based
+		final String application = JsdlHelpers.getApplicationName(jsdl);
+		String version = JsdlHelpers.getApplicationVersion(jsdl);
+		final String[] subLocs = JsdlHelpers.getCandidateHosts(jsdl);
+		String subLoc = null;
+
+		if ((subLocs != null)
+				&& (subLocs.length > 0)
+				&& (StringUtils.isNotBlank(subLocs[0]) && (StringUtils
+						.isNotBlank(application)))
+						&& (!Constants.GENERIC_APPLICATION_NAME.equals(application))) {
+
+			subLoc = subLocs[0];
+
+		} else {
+			return new String[] {};
+		}
+
+		if (StringUtils.isBlank(version)) {
+			version = Constants.NO_VERSION_INDICATOR_STRING;
+		}
+
+		final Package pkg = this.infoManager.getPackage(application, version, subLoc);
+
+		final Module m = pkg.getModule();
+		if (m == null) {
+			return new String[] {};
+		}
+		modules_string = new String[] { m.getModule() };
+		if (modules_string != null) {
+			return modules_string;
+		} else {
+			return new String[] {};
+		}
 
 	}
 
 	public void setCommitTimeout(int commitTimeout) {
 		this.commitTimeout = commitTimeout;
+	}
+
+	public void setInformationManager(InformationManager im) {
+		this.infoManager = im;
 	}
 }

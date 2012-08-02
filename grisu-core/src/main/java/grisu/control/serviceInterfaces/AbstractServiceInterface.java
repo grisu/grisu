@@ -9,6 +9,7 @@ import grisu.backend.model.job.Job;
 import grisu.backend.model.job.Jobhelper;
 import grisu.backend.model.job.UserBatchJobManager;
 import grisu.backend.model.job.UserJobManager;
+import grisu.backend.model.job.gt5.RSLFactory;
 import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
@@ -208,6 +209,9 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (final Exception e) {
 			myLogger.error(e.getLocalizedMessage(), e);
 		}
+
+		// setting info manager
+		RSLFactory.getRSLFactory().setInformationManager(informationManager);
 	}
 
 	public static final String BACKEND_VERSION = GrisuVersion.get("grisu-core");
