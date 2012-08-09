@@ -157,8 +157,10 @@ public class RSLFactory {
 		}
 
 		// total memory
-		final Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
+		Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
 		if ((memory != null) && (memory >= 0)) {
+			// for mpi, we need the specified memory per cpu
+			memory = memory * pcount;
 			result.add(new NameOpValue("max_memory", NameOpValue.EQ, ""
 					+ (memory / (1024 * 1024))));
 		}
