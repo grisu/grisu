@@ -96,10 +96,9 @@
 
 
 		<dependency>
-			<groupId>bouncycastle</groupId>
+			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15</artifactId>
-			<version>145</version>
-			<type>jar</type>
+			<version>${bcprov.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -113,7 +112,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>grid-session</artifactId>
-			<version>0.1-rc2-SNAPSHOT</version>
+			<version>0.1</version>
 		</dependency>
 	</dependencies>
 

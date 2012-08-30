@@ -182,7 +182,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.7-rc3-SNAPSHOT</version>
+			<version>0.7</version>
 		</dependency>
 
 		<dependency>
@@ -308,7 +308,4 @@
 	</build>
 
 
-	<properties>
-		<grid-jcommons.version>2.0.2-SNAPSHOT</grid-jcommons.version>
-	</properties>
 </project>
