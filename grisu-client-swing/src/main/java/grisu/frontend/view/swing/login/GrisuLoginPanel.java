@@ -151,6 +151,7 @@ public class GrisuLoginPanel extends JPanel implements PropertyChangeListener {
 			if (!loggingIn) {
 				lockUI(creating);
 			}
+			return;
 		}
 
 		if ("credential".equals(evt.getPropertyName())) {

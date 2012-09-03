@@ -18,6 +18,7 @@ import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
 import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.cred.Cred;
+import grith.jgrith.cred.ProxyCred;
 import grith.jgrith.cred.callbacks.CliCallback;
 import grith.jgrith.utils.CertificateFiles;
 
@@ -191,6 +192,25 @@ public class LoginManager {
 
 	}
 
+	public static ServiceInterface login(String backend,
+			boolean displayCliProgress) throws NoCredentialException,
+			LoginException {
+
+		Cred c = null;
+		try {
+			c = new ProxyCred();
+		} catch (Exception e) {
+			throw new NoCredentialException();
+		}
+
+		if (!c.isValid()) {
+			throw new NoCredentialException();
+		}
+
+		return login(backend, c, displayCliProgress);
+
+	}
+
 	public static ServiceInterface login(String backend, Cred cred,
 			boolean displayCliProgress) throws LoginException {
 
@@ -250,6 +270,12 @@ public class LoginManager {
 			if (displayCliProgress) {
 				CliHelpers.setIndeterminateProgress("Uploading credential...",
 						true);
+			}
+
+			try {
+				cred.saveProxy();
+			} catch (Exception e) {
+				myLogger.error("Can't save proxy to disk", e);
 			}
 
 			try {
