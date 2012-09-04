@@ -107,7 +107,7 @@
 		<dependency>
 			<groupId>org.vpac.historyRepeater</groupId>
 			<artifactId>historyRepeater</artifactId>
-			<version>0.5-SNAPSHOT</version>
+			<version>0.5</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>log4j</artifactId>
@@ -182,7 +182,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.7.1-SNAPSHOT</version>
+			<version>0.7.1</version>
 		</dependency>
 
 		<dependency>
@@ -343,7 +343,4 @@
 	</build>
 
 
-	<properties>
-		<grid-jcommons.version>2.0.3-SNAPSHOT</grid-jcommons.version>
-	</properties>
 </project>

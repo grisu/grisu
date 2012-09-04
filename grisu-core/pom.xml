@@ -319,11 +319,15 @@
 		<dependency>
 			<groupId>nz.nesi</groupId>
 			<artifactId>grin</artifactId>
-			<version>0.1</version>
+			<version>0.1.1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>orika-core</artifactId>
 					<groupId>ma.glasnost.orika</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>grid-jcommons</artifactId>
+					<groupId>grisu</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>

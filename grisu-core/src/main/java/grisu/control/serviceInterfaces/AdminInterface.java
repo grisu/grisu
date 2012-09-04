@@ -58,7 +58,16 @@ public class AdminInterface {
 
 			if (Constants.ALL_USERS.equals(userdn)) {
 
+				List<User> allUsers = userdao.findAllUsers();
+
+				for (User user : allUsers) {
+					myLogger.debug("Clearing mountpointcache for user "
+							+ user.getDn());
+					user.clearMountPointCache(null);
+				}
+				
 				// CacheManager.getInstance();
+				myLogger.debug("clearing all user cache sessions...");
 				for (CacheManager cm : CacheManager.ALL_CACHE_MANAGERS) {
 					if (cm.getName().equals("grisu")) {
 						Cache usercache = cm.getCache("userCache");
@@ -72,23 +81,34 @@ public class AdminInterface {
 						break;
 					}
 				}
-
-
-				List<User> allUsers = userdao.findAllUsers();
-
-				for (User user : allUsers) {
-					myLogger.debug("Clearing mountpointcache for user "
-							+ user.getDn());
-					user.clearMountPointCache(null);
-				}
+				
 				return DtoStringList
 						.fromSingleString("All user mountpointchaches cleared.");
 			}
+		
 
 			// clear cache for all users
 			User user = userdao.findUserByDN(userdn);
 			myLogger.debug("Clearing mountpointcache for user " + user.getDn());
 			user.clearMountPointCache(null);
+			
+
+			// CacheManager.getInstance();
+			myLogger.debug("clearing all user cache sessions...");
+			for (CacheManager cm : CacheManager.ALL_CACHE_MANAGERS) {
+				if (cm.getName().equals("grisu")) {
+					Cache usercache = cm.getCache("userCache");
+					if (usercache != null) {
+						// for (Object key : usercache.getKeys()) {
+						// System.out.println("KEY: " + key);
+						// }
+						// keys are myproxyUsername[@<myproxyHost>]
+						usercache.removeAll();
+					}
+					break;
+				}
+			}
+			
 			return DtoStringList
 					.fromSingleString("Mountpointchache cleared for user "
 							+ user.getDn());
