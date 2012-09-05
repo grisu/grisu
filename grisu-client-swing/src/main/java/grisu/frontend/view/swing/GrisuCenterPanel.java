@@ -8,6 +8,7 @@ import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.jobmonitoring.batch.MultiBatchJobMonitoringGrid;
 import grisu.frontend.view.swing.jobmonitoring.single.MultiSingleJobMonitoringGrid;
 import grisu.model.dto.GridFile;
+import grisu.settings.ClientPropertiesManager;
 
 import java.awt.CardLayout;
 import java.beans.PropertyChangeListener;
@@ -18,6 +19,8 @@ import java.util.Map;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -261,6 +264,7 @@ public class GrisuCenterPanel extends JPanel {
 					.get(command[0]);
 			if (panel != null) {
 				displayJobCreationPanel(panel);
+				ClientPropertiesManager.setProperty("lastCreatePanel", StringUtils.join(command, ","));
 			}
 		}
 

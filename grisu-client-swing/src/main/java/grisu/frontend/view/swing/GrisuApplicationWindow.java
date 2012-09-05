@@ -10,6 +10,7 @@ import grisu.frontend.view.swing.login.ServiceInterfaceHolder;
 import grisu.frontend.view.swing.utils.AdvancedSettingsPanel;
 import grisu.jcommons.utils.HttpProxyPanel;
 import grisu.model.dto.GridFile;
+import grisu.settings.ClientPropertiesManager;
 import grith.gridsession.GridClient;
 import grith.jgrith.cred.GridLoginParameters;
 
@@ -42,6 +43,8 @@ WindowListener, ServiceInterfaceHolder {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuApplicationWindow.class.getName());
+	
+	public static String PANEL_TO_PRELOAD = null;
 
 	private ServiceInterface si;
 
@@ -257,6 +260,16 @@ WindowListener, ServiceInterfaceHolder {
 
 		for (final ServiceInterfacePanel panel : configPanels) {
 			panel.setServiceInterface(si);
+		}
+		
+		String lastPanel = PANEL_TO_PRELOAD;
+
+		if ( StringUtils.isBlank(lastPanel)) {
+			lastPanel = ClientPropertiesManager.getProperty("lastCreatePanel"); 
+		}
+		if ( StringUtils.isNotBlank(lastPanel)) {
+			String[] command = lastPanel.split(",");
+			this.mainPanel.getGrisuNavigationPanel().setNavigationCommand(command);
 		}
 
 	}
