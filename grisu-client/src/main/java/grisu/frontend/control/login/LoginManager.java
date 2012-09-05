@@ -5,24 +5,26 @@ import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.UncaughtExceptionHandler;
 import grisu.jcommons.configuration.CommonGridProperties;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
-import grisu.jcommons.exceptions.CredentialException;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
+import grisu.jcommons.utils.EnvironmentVariableHelpers;
 import grisu.jcommons.utils.JythonHelpers;
 import grisu.jcommons.view.cli.CliHelpers;
 import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grisu.utils.GrisuPluginFilenameFilter;
-import grith.jgrith.control.LoginParams;
-import grith.jgrith.credential.Credential;
-import grith.jgrith.credential.CredentialFactory;
+import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
+import grith.jgrith.cred.ProxyCred;
+import grith.jgrith.cred.callbacks.CliCallback;
 import grith.jgrith.utils.CertificateFiles;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -35,52 +37,67 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 
 public class LoginManager {
 
+
+
+	public static int REQUIRED_BACKEND_API_VERSION = 16;
+	public static final String DEFAULT_BACKEND = "testbed";
+	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
+
+
 	static final Logger myLogger = LoggerFactory
-			.getLogger(LoginManager.class
-					.getName());
+			.getLogger(LoginManager.class.getName());
+
+	public static final ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
+			.put("local", "Local")
+			.put("testbed",
+					"https://compute.test.nesi.org.nz/soap/GrisuService")
+					.put("bestgrid",
+							"https://compute.services.bestgrid.org/soap/GrisuService")
+							.put("nesi", "https://compute.nesi.org.nz/soap/GrisuService")
+							.put("dev",
+									"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+									.put("bestgrid-test",
+											"https://compute-test.services.bestgrid.org/soap/GrisuService")
+											.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
+											.put("local_ws", "http://localhost:8080/grisu-ws/soap/GrisuService")
+											.build();
+
+	public static final ImmutableMap<String, String> MYPROXY_SERVERS = new ImmutableMap.Builder<String, String>()
+			.put("Local",
+					GridEnvironment.getDefaultMyProxyServer() + ":"
+							+ GridEnvironment.getDefaultMyProxyPort())
+							.put("https://compute.test.nesi.org.nz/soap/GrisuService",
+									"myproxy.test.nesi.org.nz:7512")
+									.put("https://compute.nesi.org.nz/soap/GrisuService",
+											"myproxy.nesi.org.nz:7512")
+											.put("https://compute.services.bestgrid.org/soap/GrisuService",
+													"myproxy.nesi.org.nz:7512")
+													.put("https://compute-dev.services.bestgrid.org/soap/GrisuService",
+															"myproxy.nesi.org.nz:7512")
+															.put("https://compute-test.services.bestgrid.org/soap/GrisuService",
+																	"myproxy.nesi.org.nz:7512")
+																	.put("http://localhost:8080/grisu-ws/soap/GrisuService",
+																			GridEnvironment.getDefaultMyProxyServer() + ":"
+																					+ GridEnvironment.getDefaultMyProxyPort())
+																					.put("http://localhost:8080/soap/GrisuService",
+																							GridEnvironment.getDefaultMyProxyServer() + ":"
+																									+ GridEnvironment.getDefaultMyProxyPort()).build();
 
 	private static String CLIENT_NAME = setClientName(null);
-
 	private static String CLIENT_VERSION = setClientVersion(null);
-
 	public static String USER_SESSION = setUserSessionId(null);
 
 	public static volatile boolean environmentInitialized = false;
-	static final public ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
-			.put("local", "Local")
-			.put("bestgrid",
-					"https://compute.services.bestgrid.org/soap/GrisuService")
-					.put("dev",
-							"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-							.put("bestgrid-test",
-									"https://compute-test.services.bestgrid.org/soap/GrisuService")
-									.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
-									.put("local_ws",
-											"http://localhost:8080/grisu-ws/soap/GrisuService").build();
-	public static String httpProxyHost = null;
-
-	public static int httpProxyPort = 80;
-
-	public static String httpProxyUsername = null;
-
-	public static char[] httpProxyPassphrase = null;
-
-	public static int REQUIRED_BACKEND_API_VERSION = 15;
-
-	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
 
 	public static void addPluginsToClasspath() throws IOException {
 
 		ClasspathHacker.initFolder(Environment.getGrisuPluginDirectory(),
 				new GrisuPluginFilenameFilter());
 
-	}
-
-	public static void clearHttpProxyPassword() {
-		Arrays.fill(httpProxyPassphrase, 'x');
 	}
 
 	public static String getClientName() {
@@ -91,9 +108,36 @@ public class LoginManager {
 		return CLIENT_VERSION;
 	}
 
+	public static String getLoginUrl(String alias) {
+
+		String url = SERVICEALIASES.get(alias.toLowerCase());
+		if (StringUtils.isNotBlank(url)) {
+			return url;
+		} else {
+			return alias;
+		}
+
+	}
+
 	public static synchronized void initEnvironment() {
 
 		if (!environmentInitialized) {
+
+			// make sure tmp dir exists
+			String tmpdir = System.getProperty("java.io.tmpdir");
+			if (tmpdir.startsWith("~")) {
+				tmpdir = tmpdir.replaceFirst("~",
+						System.getProperty("user.home"));
+				System.setProperty("java.io.tmpdir", tmpdir);
+			}
+			File tmp = new File(tmpdir);
+			if (!tmp.exists()) {
+				myLogger.debug("Creating tmpdir: {}", tmpdir);
+				tmp.mkdirs();
+				if (!tmp.exists()) {
+					myLogger.error("Could not create tmp dir {}.", tmpdir);
+				}
+			}
 
 			java.util.logging.LogManager.getLogManager().reset();
 			// LoggerFactory.getLogger("root").setLevel(Level.OFF);
@@ -122,22 +166,68 @@ public class LoginManager {
 				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
+			try {
+				CertificateFiles.copyCACerts(false);
+			} catch (Exception e) {
+				myLogger.error("Problem copying root certificates.", e);
+			}
+
 			environmentInitialized = true;
 		}
 
 	}
 
-	public static ServiceInterface login() throws LoginException {
-		return login("Local");
+	public static synchronized void initGrisuClient(String clientname) {
+
+		Thread.currentThread().setName("main");
+
+		setClientName(clientname);
+
+		setClientVersion(grisu.jcommons.utils.Version
+				.get(clientname));
+
+		EnvironmentVariableHelpers.loadEnvironmentVariablesToSystemProperties();
+
+		initEnvironment();
+
 	}
 
-	public static ServiceInterface login(Credential cred,
-			LoginParams loginParams, boolean displayCliProgress)
-					throws LoginException {
+	public static ServiceInterface login(String backend,
+			boolean displayCliProgress) throws NoCredentialException,
+			LoginException {
 
-		String defaultUrl = ClientPropertiesManager
-				.getDefaultServiceInterfaceUrl();
+		Cred c = null;
+		try {
+			c = new ProxyCred();
+		} catch (Exception e) {
+			throw new NoCredentialException();
+		}
 
+		if (!c.isValid()) {
+			throw new NoCredentialException();
+		}
+
+		return login(backend, c, displayCliProgress);
+
+	}
+
+	public static ServiceInterface login(String backend, Cred cred,
+			boolean displayCliProgress) throws LoginException {
+
+		if (StringUtils.isBlank(backend)) {
+			String defaultUrl = ClientPropertiesManager
+					.getDefaultServiceInterfaceUrl();
+
+			if (StringUtils.isBlank(defaultUrl)) {
+				defaultUrl = DEFAULT_BACKEND;
+			}
+
+			backend = defaultUrl;
+		}
+
+		ClientPropertiesManager.setDefaultServiceInterfaceUrl(backend);
+
+		backend = getLoginUrl(backend);
 		try {
 			if (displayCliProgress) {
 				CliHelpers.setIndeterminateProgress(
@@ -145,30 +235,12 @@ public class LoginManager {
 			}
 			initEnvironment();
 
-			if (loginParams == null) {
-
-				if (StringUtils.isBlank(defaultUrl)) {
-					defaultUrl = "Local";
-				}
-				loginParams = new LoginParams(defaultUrl, null, null);
-
-			}
-
-			loginParams.setAliasMap(SERVICEALIASES);
-
 			try {
 				addPluginsToClasspath();
 			} catch (final IOException e2) {
 				// TODO Auto-generated catch block
 				myLogger.warn(e2.getLocalizedMessage(), e2);
 				throw new RuntimeException(e2);
-			}
-
-			try {
-				CertificateFiles.copyCACerts(true);
-			} catch (final Exception e1) {
-				// e1.printStackTrace();
-				myLogger.warn(e1.getLocalizedMessage(), e1);
 			}
 
 			// do the cacert thingy
@@ -196,12 +268,21 @@ public class LoginManager {
 			}
 
 			if (displayCliProgress) {
-				CliHelpers.setIndeterminateProgress("Uploading credential...", true);
+				CliHelpers.setIndeterminateProgress("Uploading credential...",
+						true);
 			}
+
+			try {
+				cred.saveProxy();
+			} catch (Exception e) {
+				myLogger.error("Can't save proxy to disk", e);
+			}
+
 			try {
 				cred.uploadMyProxy();
 			} catch (Exception e) {
-				throw new LoginException("Could not upload myproxy credential.", e);
+				throw new LoginException(
+						"Could not upload myproxy credential.", e);
 			}
 
 			ServiceInterface si;
@@ -210,22 +291,26 @@ public class LoginManager {
 						true);
 			}
 			try {
-				si = ServiceInterfaceFactory.createInterface(
-						loginParams.getLoginUrl(), cred.getMyProxyUsername(),
-						cred.getMyProxyPassword(), cred.getMyProxyServer(),
-						new Integer(cred.getMyProxyPort()).toString(),
-						loginParams.getHttpProxy(), loginParams.getHttpProxyPort(),
-						loginParams.getHttpProxyUsername(),
-						loginParams.getHttpProxyPassphrase());
+
+				si = ServiceInterfaceFactory.createInterface(backend,
+						cred.getMyProxyUsername(), cred.getMyProxyPassword(),
+						cred.getMyProxyHost(),
+						Integer.toString(cred.getMyProxyPort()), null, -1,
+						null, null);
+				// loginParams.getHttpProxy(),
+				// loginParams.getHttpProxyPort(),
+				// loginParams.getHttpProxyUsername(),
+				// loginParams.getHttpProxyPassphrase());
 			} catch (ServiceInterfaceException e) {
 				throw new LoginException("Could not login to backend.", e);
+			} catch (Throwable t) {
+				t.printStackTrace();
+				throw new LoginException("Error while loggin in: "
+						+ t.getLocalizedMessage());
 			}
 
-			loginParams.clearPasswords();
-
 			GrisuRegistryManager.registerServiceInterface(si, cred);
-			GrisuRegistryManager.getDefault(si).set(Constants.BACKEND,
-					loginParams.getLoginUrl());
+			GrisuRegistryManager.getDefault(si).set(Constants.BACKEND, backend);
 
 			return si;
 		} finally {
@@ -235,181 +320,22 @@ public class LoginManager {
 			}
 		}
 
-
-	}
-
-	public static ServiceInterface login(Credential cred,
-			String backend,
-			boolean displayCliProgress)
-					throws LoginException {
-		LoginParams params = new LoginParams(backend, null, null);
-		return login(cred, params, displayCliProgress);
-	}
-
-
-	public static ServiceInterface login(String backend)
-			throws LoginException {
-		Credential cred = null;
-		try {
-			cred = CredentialFactory.loadFromLocalProxy();
-		} catch (Exception e) {
-			throw new LoginException("Could not load default credential.", e);
-		}
-		return login(cred, backend, false);
-
-	}
-
-	public static ServiceInterface loginCommandline() throws LoginException {
-		return loginCommandline(LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS);
-	}
-
-	public static ServiceInterface loginCommandline(int proxy_lifetime_in_hours)
-			throws LoginException {
-		return loginCommandline("Local", proxy_lifetime_in_hours);
 	}
 
 	public static ServiceInterface loginCommandline(String backend)
 			throws LoginException {
-		return loginCommandline(backend,
-				LoginManager.DEFAULT_PROXY_LIFETIME_IN_HOURS);
+
+		LoginManager.initEnvironment();
+
+		AbstractCred c = AbstractCred.loadFromConfig(null, new CliCallback());
+
+		return login(backend, c, true);
 	}
-
-	public static ServiceInterface loginCommandline(String backend,
-			boolean saveCredToDisk, int proxy_lifetime_in_hours) throws LoginException {
-		return loginCommandline(backend, saveCredToDisk, proxy_lifetime_in_hours, -1);
-	}
-
-	public static ServiceInterface loginCommandline(String backend,
-			boolean saveCredToDisk, int proxyLifetimeInHours, int minProxyLifetimeInSeconds)
-					throws LoginException {
-
-		Credential c = null;
-
-		boolean validLocalProxy = false;
-
-		try {
-			c = Credential.load();
-			int lifetime = c.getRemainingLifetime();
-			if (lifetime >= minProxyLifetimeInSeconds) {
-				validLocalProxy = true;
-			} else {
-				validLocalProxy = false;
-			}
-		} catch (CredentialException ce) {
-			validLocalProxy = false;
-		}
-
-
-		if (validLocalProxy) {
-			CliHelpers.setIndeterminateProgress(
-					"Local credential found, logging in...", true);
-			try {
-				c.uploadMyProxy();
-			} finally {
-				CliHelpers.setIndeterminateProgress(false);
-			}
-
-		} else {
-			c = CredentialFactory.createFromCommandline(proxyLifetimeInHours);
-			if (saveCredToDisk) {
-				c.saveCredential();
-			}
-		}
-
-		return login(c, backend, true);
-
-	}
-
-	public static ServiceInterface loginCommandline(String backend, int proxy_lifetime_in_hours)
-			throws LoginException {
-		return loginCommandline(backend, true, proxy_lifetime_in_hours);
-	}
-
-	public static ServiceInterface loginCommandlineLocalProxy(String backend)
-			throws LoginException {
-		Credential c = Credential.load();
-
-		if ((c == null) || !c.isValid()) {
-			throw new CredentialException("Your session has expired. Please login and try again.");
-		}
-
-		return login(c, backend, true);
-	}
-
-	public static ServiceInterface loginCommandlineMyProxy(String backend,
-			String username, int proxy_lifetime_in_hours, boolean saveCredToDisk)
-					throws LoginException {
-
-		LoginParams p = new LoginParams(backend, username, null);
-
-		Credential c;
-		try {
-			c = CredentialFactory.createFromMyProxyCommandline(p,
-					proxy_lifetime_in_hours * 3600);
-			if (saveCredToDisk) {
-				c.saveCredential();
-			}
-		} catch (Exception e) {
-			throw new LoginException("Can't get credential from MyProxy.", e);
-		}
-
-		return login(c, backend, true);
-	}
-
-	public static ServiceInterface loginCommandlineShibboleth(String backend,
-			String username, String idp, boolean saveCredToDisk)
-					throws LoginException {
-
-		Credential c;
-		try {
-			c = CredentialFactory.createFromSlcsCommandline(username, idp,
-					DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
-			if (saveCredToDisk) {
-				c.saveCredential();
-			}
-		} catch (Exception e) {
-			throw new LoginException("Can't get credential from MyProxy.", e);
-		}
-
-		return login(c, backend, true);
-
-	}
-
-	public static ServiceInterface loginCommandlineX509cert(String backend,
-			int proxy_lifetime_in_hours,
-			boolean saveCredToDisk)
-					throws LoginException {
-		Credential c = CredentialFactory
-				.createFromLocalCertCommandline(proxy_lifetime_in_hours);
-		if (saveCredToDisk) {
-			c.saveCredential();
-		}
-		return login(c, backend, true);
-	}
-
-	public static void main(String[] args) throws LoginException {
-
-		// Credential c = CredentialFactory.createFromCommandline();
-
-		ServiceInterface si = loginCommandline("dev", 12);
-		System.out.println("");
-		System.out.println(si.getDN());
-	}
-
-	public static ServiceInterface myProxyLogin(String username,
-			char[] password, String backend, boolean displayCliProgress)
-					throws LoginException {
-
-		Credential c = CredentialFactory.createFromMyProxy(username, password,
-				DEFAULT_PROXY_LIFETIME_IN_HOURS * 3600);
-		return login(c, backend, displayCliProgress);
-	}
-
 
 	public static String setClientName(String name) {
 
 		if (StringUtils.isBlank(name)) {
-			name = "Unknown";
+			name = "n/a";
 		}
 		CLIENT_NAME = name;
 		MDC.put("client", name);
@@ -418,7 +344,8 @@ public class LoginManager {
 
 	}
 
-	public static String setClientVersion(String version ) {
+	public static String setClientVersion(String version) {
+
 		if (StringUtils.isBlank(version)) {
 			version = "n/a";
 		}

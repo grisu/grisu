@@ -5,15 +5,14 @@ import grisu.control.exceptions.StatusException;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.files.FileSystemItem;
-import grisu.model.files.GlazedFile;
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-
-import javax.swing.tree.TreeModel;
 
 /**
  * Wrapps information about the user and the available resources to him
@@ -49,21 +48,21 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return all applications
 	 */
-	String[] getAllAvailableApplications();
+	Application[] getAllAvailableApplications();
 
-	/**
-	 * All executables that are available for this user.
-	 * 
-	 * Internally, this method looks up all available submission locations for
-	 * the users VOs, then it retrieves the published applications on those
-	 * submission locations and gets the executables that are published for
-	 * those on each submission location.
-	 * 
-	 * Beware, this method can take very long to finish.
-	 * 
-	 * @return the executables
-	 */
-	Map<String, Set<String>> getAllAvailableExecutables();
+	// /**
+	// * All executables that are available for this user.
+	// *
+	// * Internally, this method looks up all available submission locations for
+	// * the users VOs, then it retrieves the published applications on those
+	// * submission locations and gets the executables that are published for
+	// * those on each submission location.
+	// *
+	// * Beware, this method can take very long to finish.
+	// *
+	// * @return the executables
+	// */
+	// Map<String, Set<String>> getAllAvailableExecutables();
 
 	/**
 	 * All of the users fqans, regardless of whether there is a filesystem
@@ -108,7 +107,7 @@ public interface UserEnvironmentManager {
 	 * 
 	 * @return all submissionLocations
 	 */
-	Set<String> getAllAvailableSubmissionLocations();
+	Set<Queue> getAllAvailableSubmissionLocations();
 
 	/**
 	 * A convenience method to get a list of all unique groupnames (shorter
@@ -259,17 +258,6 @@ public interface UserEnvironmentManager {
 	 */
 	String getFullFqan(String uniqueGroupname);
 
-	/**
-	 * Returns a {@link TreeModel} that can be used to traverse through a group
-	 * based view of all the users filesystems.
-	 * 
-	 * @param root
-	 *            the root of the view or null for a view with all the users
-	 *            groups at root level
-	 * 
-	 * @return the model
-	 */
-	TreeModel getGroupTreeFileModel(GlazedFile root);
 
 	/**
 	 * Returns all local filesystems.

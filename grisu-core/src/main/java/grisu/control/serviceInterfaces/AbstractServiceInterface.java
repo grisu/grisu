@@ -1,7 +1,6 @@
 package grisu.control.serviceInterfaces;
 
 import grisu.GrisuVersion;
-import grisu.backend.info.InformationManagerManager;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.backend.model.fs.UserFileManager;
@@ -10,6 +9,7 @@ import grisu.backend.model.job.Job;
 import grisu.backend.model.job.Jobhelper;
 import grisu.backend.model.job.UserBatchJobManager;
 import grisu.backend.model.job.UserJobManager;
+import grisu.backend.model.job.gt5.RSLFactory;
 import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
@@ -21,42 +21,42 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.interfaces.GridResource;
+import grisu.jcommons.interfaces.GrinformationManagerDozer;
 import grisu.jcommons.interfaces.InformationManager;
-import grisu.jcommons.interfaces.MatchMaker;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoApplicationDetails;
-import grisu.model.dto.DtoApplicationInfo;
 import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoGridResources;
-import grisu.model.dto.DtoHostsInfo;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
 import grisu.model.dto.DtoMountPoints;
-import grisu.model.dto.DtoProperties;
-import grisu.model.dto.DtoProperty;
-import grisu.model.dto.DtoStringList;
-import grisu.model.dto.DtoSubmissionLocations;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.DtoProperties;
+import grisu.model.info.dto.DtoProperty;
+import grisu.model.info.dto.DtoStringList;
+import grisu.model.info.dto.JobQueueMatch;
+import grisu.model.info.dto.Package;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Site;
+import grisu.model.info.dto.VO;
+import grisu.model.info.dto.Version;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
 import grith.jgrith.utils.CertificateFiles;
-import grith.jgrith.utils.VomsesFiles;
+import grith.jgrith.voms.VOManagement.VOManagement;
 
 import java.io.File;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.activation.DataHandler;
 import javax.annotation.security.RolesAllowed;
@@ -74,6 +74,10 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
+
+import com.google.common.base.Functions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 
 /**
  * This abstract class implements most of the methods of the
@@ -98,8 +102,14 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	static Logger myLogger = null;
 	public static CacheManager cache;
 
+	public static final InformationManager informationManager = new GrinformationManagerDozer(
+			ServerPropertiesManager.getInformationManagerConf());
+
 	private final static AdminInterface admin = new AdminInterface(null,
+			informationManager,
 			User.userdao);
+
+
 	static {
 
 		String logbackPath = "/etc/grisu/logback.xml";
@@ -154,8 +164,15 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
-			VomsesFiles.copyVomses(Arrays.asList(ServerPropertiesManager
-					.getVOsToUse()));
+
+			//String[] vos = ServerPropertiesManager.getVOsToUse();
+
+			Set<VO> vos = informationManager.getAllVOs();
+
+			VOManagement.setVOsToUse(vos);
+
+			//			VomsesFiles.copyVomses(Arrays.asList(ServerPropertiesManager
+			//					.getVOsToUse()));
 			CertificateFiles.copyCACerts(false);
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block
@@ -166,13 +183,24 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		// create ehcache manager singleton
 		try {
-			URL url = ClassLoader.getSystemResource("/grisu-ehcache.xml");
-			if (url == null) {
-				url = myLogger.getClass().getResource("/grisu-ehcache.xml");
+
+			// CacheManager.getInstance();
+			for (CacheManager cm : CacheManager.ALL_CACHE_MANAGERS) {
+				if (cm.getName().equals("grisu")) {
+					cache = cm;
+					break;
+				}
+			}
+			if (cache == null) {
+				URL url = ClassLoader.getSystemResource("/grisu-ehcache.xml");
+				if (url == null) {
+					url = myLogger.getClass().getResource("/grisu-ehcache.xml");
+				}
+				cache = new CacheManager(url);
+				cache.setName("grisu");
 			}
 
-			CacheManager.create(url);
-			cache = CacheManager.getInstance();
+			// cache = CacheManager.getInstance();
 
 			final Cache session = cache.getCache("session");
 			if (session == null) {
@@ -181,16 +209,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} catch (final Exception e) {
 			myLogger.error(e.getLocalizedMessage(), e);
 		}
+
+		// setting info manager
+		RSLFactory.getRSLFactory().setInformationManager(informationManager);
 	}
 
 	public static final String BACKEND_VERSION = GrisuVersion.get("grisu-core");
 
 	public static final String REFRESH_STATUS_PREFIX = "REFRESH_";
 
-	public static final InformationManager informationManager = createInformationManager();
+	// public static final InformationManager informationManager =
+	// createInformationManager();
 
 
-	public static final MatchMaker matchmaker = createMatchMaker();
+	// public static final MatchMaker matchmaker = createMatchMaker();
 
 	// private final Map<String, List<Job>> archivedJobs = new HashMap<String,
 	// List<Job>>();
@@ -198,16 +230,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	private static String hostname = null;
 
-	public static InformationManager createInformationManager() {
-		return InformationManagerManager
-				.getInformationManager(ServerPropertiesManager
-						.getInformationManagerConf());
-	}
 
-	public static MatchMaker createMatchMaker() {
-		return InformationManagerManager.getMatchMaker(ServerPropertiesManager
-				.getMatchMakerConf());
-	}
+	// public static InformationManager createInformationManager() {
+	// return InformationManagerManager
+	// .getInformationManager(ServerPropertiesManager
+	// .getInformationManagerConf());
+	// }
 
 	public static Cache eternalCache() {
 		return cache.getCache("eternal");
@@ -269,7 +297,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		final net.sf.ehcache.Element e = new net.sf.ehcache.Element(key, value);
 		sessionCache().put(e);
 	}
-
 	public static void putIntoShortCache(Object key, Object value) {
 		final net.sf.ehcache.Element e = new net.sf.ehcache.Element(key, value);
 		shortCache().put(e);
@@ -279,6 +306,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		return cache.getCache("session");
 	}
+
 	public static Cache shortCache() {
 		return cache.getCache("short");
 	}
@@ -350,7 +378,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// for now, until admin commands are only refreshing the config files,
 		// I'll not worry about it...
 		if (!admin.isAdmin(dn)) {
-			return DtoStringList.fromSingleString("No admin.");
+			return DtoStringList.fromSingleString("No admin: " + dn);
 		}
 
 		if (StringUtils.isBlank(command)) {
@@ -687,35 +715,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
-	public DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
-			String jsdlString, final String fqan,
-			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
 
-		Document jsdl;
-		try {
-			jsdl = SeveralXMLHelpers.fromString(jsdlString);
-		} catch (final Exception e) {
-			throw new RuntimeException(e);
+	public List<JobQueueMatch> findMatches(
+			final DtoProperties jobProperties, String fqan) {
+
+		if (fqan == null) {
+			fqan = Constants.NON_VO_FQAN;
 		}
-
-		// LinkedList<String> result = new LinkedList<String>();
-
-		List<GridResource> resources = null;
-		if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
-			resources = matchmaker.findAvailableResources(jsdl, fqan);
-		} else {
-			resources = matchmaker.findAllResources(jsdl, fqan);
-		}
-
-		return DtoGridResources.createGridResources(resources);
-
-	}
-
-	public DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			final DtoJob jobProperties, final String fqan,
-			boolean excludeResourcesWithLessCPUslotsFreeThanRequested) {
-
-		final LinkedList<String> result = new LinkedList<String>();
 
 		final Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
 		for (final DtoProperty jp : jobProperties.getProperties()) {
@@ -723,14 +729,30 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					jp.getValue());
 		}
 
-		List<GridResource> resources = null;
-		if (excludeResourcesWithLessCPUslotsFreeThanRequested) {
-			resources = matchmaker.findAvailableResources(converterMap, fqan);
-		} else {
-			resources = matchmaker.findAllResources(converterMap, fqan);
+		List<JobQueueMatch> resources = null;
+		resources = informationManager.findMatches(converterMap, fqan);
+
+		return resources;
+
+	}
+
+	public List<Queue> findQueues(final DtoProperties jobProperties, String fqan) {
+
+		if (fqan == null) {
+			fqan = Constants.NON_VO_FQAN;
 		}
 
-		return DtoGridResources.createGridResources(resources);
+		final Map<JobSubmissionProperty, String> converterMap = new HashMap<JobSubmissionProperty, String>();
+		for (final DtoProperty jp : jobProperties.getProperties()) {
+			converterMap.put(JobSubmissionProperty.fromString(jp.getKey()),
+					jp.getValue());
+		}
+
+		List<Queue> resources = null;
+		resources = informationManager.findQueues(converterMap, fqan);
+
+		return resources;
+
 	}
 
 	public DtoActionStatus getActionStatus(String actionHandle) {
@@ -780,21 +802,22 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
 	 */
-	public DtoStringList getAllAvailableApplications(final DtoStringList fqans) {
-		final Set<String> fqanList = new TreeSet<String>();
+	public Application[] getAllAvailableApplications(final DtoStringList fqans) {
 
 		if ((fqans == null) || (fqans.asSortedSet().size() == 0)) {
-			return DtoStringList.fromStringArray(informationManager
-					.getAllApplicationsOnGrid());
+			return informationManager.getAllApplicationsOnGrid().toArray(
+					new Application[] {});
+
 		}
 
+		final Set<Application> fqanList = Sets.newHashSet();
 		for (final String fqan : fqans.getStringList()) {
-			fqanList.addAll(Arrays.asList(informationManager
-					.getAllApplicationsOnGridForVO(fqan)));
+			fqanList.addAll(informationManager
+					.getAllApplicationsOnGridForVO(fqan));
 
 		}
 
-		return DtoStringList.fromStringArray(fqanList.toArray(new String[] {}));
+		return fqanList.toArray(new Application[] {});
 
 	}
 
@@ -803,32 +826,31 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getBatchJobManager().getAllBatchJobnames(application);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see grisu.control.ServiceInterface#getAllHosts()
-	 */
-	public synchronized DtoHostsInfo getAllHosts() {
-
-		final DtoHostsInfo info = DtoHostsInfo
-				.createHostsInfo(informationManager.getAllHosts());
-
-		return info;
-	}
+	// /*
+	// * (non-Javadoc)
+	// *
+	// * @see grisu.control.ServiceInterface#getAllHosts()
+	// */
+	// public synchronized DtoHostsInfo getAllHosts() {
+	//
+	// final DtoHostsInfo info = DtoHostsInfo
+	// .createHostsInfo(informationManager.getAllHosts());
+	//
+	// return info;
+	// }
 
 	public DtoStringList getAllJobnames(String application) {
 
 		return getJobManager().getAllJobnames(application);
 	}
 
-	public DtoStringList getAllSites() {
+	public Site[] getAllSites() {
 
 		final Date now = new Date();
-		final DtoStringList result = DtoStringList
-				.fromStringArray(informationManager.getAllSites());
+		List<Site> sites = informationManager.getAllSites();
 		myLogger.debug("Login benchmark - getting all sites: "
 				+ (new Date().getTime() - now.getTime()) + " ms");
-		return result;
+		return sites.toArray(new Site[] {});
 	}
 
 	/*
@@ -836,15 +858,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * 
 	 * @see grisu.control.ServiceInterface#getAllSubmissionLocations()
 	 */
-	public synchronized DtoSubmissionLocations getAllSubmissionLocations() {
+	public synchronized Queue[] getAllSubmissionLocations() {
 
-		final DtoSubmissionLocations locs = DtoSubmissionLocations
-				.createSubmissionLocationsInfo(informationManager
-						.getAllSubmissionLocations());
+		// final DtoSubmissionLocations locs = DtoSubmissionLocations
+		// .createSubmissionLocationsInfo(informationManager
+		// .getAllQueues());
 
-		locs.removeUnuseableSubmissionLocations(informationManager, df()
-				.getMountpoints());
-		return locs;
+		List<Queue> q = informationManager.getAllQueues();
+
+		// locs.removeUnuseableSubmissionLocations(informationManager, df()
+		// .getMountpoints());
+		return q.toArray(new Queue[] {});
 	}
 
 	/*
@@ -853,16 +877,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getAllSubmissionLocations(java
 	 * .lang.String)
 	 */
-	public DtoSubmissionLocations getAllSubmissionLocationsForFqan(
+	public Queue[] getAllSubmissionLocationsForFqan(
 			final String fqan) {
 
-		final DtoSubmissionLocations locs = DtoSubmissionLocations
-				.createSubmissionLocationsInfo(informationManager
-						.getAllSubmissionLocationsForVO(fqan));
-
-		locs.removeUnuseableSubmissionLocations(informationManager, df()
-				.getMountpoints());
-		return locs;
+		// final DtoSubmissionLocations locs = DtoSubmissionLocations
+		// .createSubmissionLocationsInfoFromQueues(informationManager
+		// .getAllSubmissionLocationsForVO(fqan));
+		Collection<Queue> q = informationManager.getAllQueuesForVO(fqan);
+		// locs.removeUnuseableSubmissionLocations(informationManager, df()
+		// .getMountpoints());
+		return q.toArray(new Queue[] {});
 
 	}
 
@@ -872,7 +896,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String, java.lang.String)
 	 */
-	public DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(
+	public Package getApplicationDetailsForVersionAndSubmissionLocation(
 			final String application, final String version,
 			final String submissionLocation) {
 
@@ -884,17 +908,20 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// myLogger.debug("Site is: " + site);
 		// }
 
-		return DtoApplicationDetails.createDetails(application,
-				informationManager.getApplicationDetails(application, version,
-						submissionLocation));
+		return informationManager.getPackage(application, version,
+				submissionLocation);
+		// return DtoApplicationDetails
+		// .createDetails(
+		// informationManager.getApplicationDetails(application, version,
+		// submissionLocation));
 	}
 
-	public String[] getApplicationPackagesForExecutable(String executable) {
-
-		return informationManager
-				.getApplicationsThatProvideExecutable(executable);
-
-	}
+	// public String[] getApplicationPackagesForExecutable(String executable) {
+	//
+	// return informationManager
+	// .getApplicationsThatProvideExecutable(executable);
+	//
+	// }
 
 	public DtoJobs getArchivedJobs(String application) {
 
@@ -990,8 +1017,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	private String getDefaultVersionForApplicationAtSite(
 			final String application, final String site) {
 
-		final String[] versions = informationManager
+		final Collection<Version> v = informationManager
 				.getVersionsOfApplicationOnSite(application, site);
+
+		final String[] versions = Collections2.transform(v,
+				Functions.toStringFunction()).toArray(new String[] {});
 		double latestVersion = 0;
 		int index = 0;
 		try {
@@ -1178,38 +1208,47 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().getActionStatuses();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see grisu.control.ServiceInterface#getSite(java.lang.String)
-	 */
-	public String getSite(final String host_or_url) {
+	// /*
+	// * (non-Javadoc)
+	// *
+	// * @see grisu.control.ServiceInterface#getSite(java.lang.String)
+	// */
+	// public String getSite(final String host_or_url) {
+	//
+	// return informationManager.getSiteForHostOrUrl(host_or_url);
+	//
+	// }
+	//
+	// /**
+	// * Returns the name of the site for the given submissionLocation.
+	// *
+	// * @param subLoc
+	// * the submissionLocation
+	// * @return the name of the site for the submissionLocation or null, if the
+	// * site can't be found
+	// */
+	// public String getSiteForSubmissionLocation(final String subLoc) {
+	//
+	// // subLoc = queuename@cluster:contactstring#JobManager
+	// // String queueName = subLoc.substring(0, subLoc.indexOf(":"));
+	// String contactString = "";
+	// if (subLoc.indexOf("#") > 0) {
+	// contactString = subLoc.substring(subLoc.indexOf(":") + 1,
+	// subLoc.indexOf("#"));
+	// } else {
+	// contactString = subLoc.substring(subLoc.indexOf(":") + 1);
+	// }
+	//
+	// return getSite(contactString);
+	// }
 
-		return informationManager.getSiteForHostOrUrl(host_or_url);
-
-	}
-
-	/**
-	 * Returns the name of the site for the given submissionLocation.
-	 * 
-	 * @param subLoc
-	 *            the submissionLocation
-	 * @return the name of the site for the submissionLocation or null, if the
-	 *         site can't be found
-	 */
-	public String getSiteForSubmissionLocation(final String subLoc) {
-
-		// subLoc = queuename@cluster:contactstring#JobManager
-		// String queueName = subLoc.substring(0, subLoc.indexOf(":"));
-		String contactString = "";
-		if (subLoc.indexOf("#") > 0) {
-			contactString = subLoc.substring(subLoc.indexOf(":") + 1,
-					subLoc.indexOf("#"));
-		} else {
-			contactString = subLoc.substring(subLoc.indexOf(":") + 1);
+	public String getSite(String host) {
+		Site site = informationManager.getSiteForHostOrUrl(host);
+		if (site == null) {
+			return null;
 		}
 
-		return getSite(contactString);
+		return site.getName();
 	}
 
 	/*
@@ -1220,8 +1259,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 */
 	public DtoStringList getStagingFileSystemForSubmissionLocation(
 			final String subLoc) {
-		return DtoStringList.fromStringArray(informationManager
-				.getStagingFileSystemForSubmissionLocation(subLoc));
+
+		Collection<Directory> queues = informationManager
+				.getStagingFileSystemForSubmissionLocation(subLoc);
+
+		return DtoStringList.fromStringColletion(Collections2.transform(queues,
+				Functions.toStringFunction()));
+
 	}
 
 	/*
@@ -1230,13 +1274,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String)
 	 */
-	public DtoSubmissionLocations getSubmissionLocationsForApplication(
+	public Queue[] getSubmissionLocationsForApplication(
 			final String application) {
 
-		return DtoSubmissionLocations
-				.createSubmissionLocationsInfo(informationManager
-						.getAllSubmissionLocationsForApplication(application));
+		// return DtoSubmissionLocations
+		// .createSubmissionLocationsInfo(informationManager
+		// .getAllSubmissionLocationsForApplication(application));
+
+		List<Queue> q = informationManager
+				.getAllQueuesForApplication(application);
+		return q.toArray(new Queue[] {});
 	}
+
+	// public UserDAO getUserDao() {
+	// return userdao;
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -1244,74 +1296,83 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * @see grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String, java.lang.String)
 	 */
-	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
+	public Queue[] getSubmissionLocationsForApplicationAndVersion(
 			final String application, final String version) {
 
-		final String[] sls = informationManager.getAllSubmissionLocations(
-				application, version);
+		final Collection<Queue> sls = informationManager
+				.getAllQueues(
+						application, version);
 
-		return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
+		return sls.toArray(new Queue[] {});
+		// return DtoSubmissionLocations.createSubmissionLocationsInfo(sls);
 	}
 
-	// public UserDAO getUserDao() {
-	// return userdao;
-	// }
-
-	public DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
+	public Queue[] getSubmissionLocationsForApplicationAndVersionAndFqan(
 			final String application, final String version, final String fqan) {
 		// TODO implement a method which takes in fqan later on
 
-		return DtoSubmissionLocations
-				.createSubmissionLocationsInfo(informationManager
-						.getAllSubmissionLocations(application, version));
+		Collection<Queue> q = informationManager.getAllQueues(application,
+				version);
+		return q.toArray(new Queue[] {});
+		// return DtoSubmissionLocations
+		// .createSubmissionLocationsInfo(informationManager
+		// .getAllQueues(application, version));
 	}
 
-	public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
-			final String application) {
-		// if (ServerPropertiesManager.getMDSenabled()) {
-		// myLogger.debug("Getting map of submissionlocations per version of application for: "
-		// + application);
-		final Map<String, String> appVersionMap = new HashMap<String, String>();
-		final String[] versions = informationManager
-				.getAllVersionsOfApplicationOnGrid(application);
-		for (int i = 0; (versions != null) && (i < versions.length); i++) {
-			String[] submitLocations = null;
-			try {
-				submitLocations = informationManager.getAllSubmissionLocations(
-						application, versions[i]);
-				if (submitLocations == null) {
-					myLogger.error("Couldn't find submission locations for application: \""
-							+ application
-							+ "\""
-							+ ", version \""
-							+ versions[i]
-									+ "\". Most likely the mds is not published correctly.");
-					continue;
-				}
-			} catch (final Exception e) {
-				myLogger.error("Couldn't find submission locations for application: \""
-						+ application
-						+ "\""
-						+ ", version \""
-						+ versions[i]
-								+ "\". Most likely the mds is not published correctly.");
-				continue;
-			}
-			final StringBuffer submitLoc = new StringBuffer();
-
-			if (submitLocations != null) {
-				for (int j = 0; j < submitLocations.length; j++) {
-					submitLoc.append(submitLocations[j]);
-					if (j < (submitLocations.length - 1)) {
-						submitLoc.append(",");
-					}
-				}
-			}
-			appVersionMap.put(versions[i], submitLoc.toString());
-		}
-		return DtoApplicationInfo.createApplicationInfo(application,
-				appVersionMap);
-	}
+	// public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
+	// final String application) {
+	// // if (ServerPropertiesManager.getMDSenabled()) {
+	// //
+	// myLogger.debug("Getting map of submissionlocations per version of application for: "
+	// // + application);
+	// final Map<String, String> appVersionMap = new HashMap<String, String>();
+	// final List<Version> temp = informationManager
+	// .getAllVersionsOfApplicationOnGrid(application);
+	// Version[] versions;
+	// if (temp == null) {
+	// versions = new Version[] {};
+	// } else {
+	// versions = temp.toArray(new Version[] {});
+	// }
+	// for (int i = 0; (versions != null) && (i < versions.length); i++) {
+	// Collection<Queue> submitLocations = null;
+	// try {
+	// submitLocations = informationManager.getAllQueues(application,
+	// versions[i].getVersion());
+	// if (submitLocations == null) {
+	// myLogger.error("Couldn't find submission locations for application: \""
+	// + application
+	// + "\""
+	// + ", version \""
+	// + versions[i]
+	// + "\". Most likely the mds is not published correctly.");
+	// continue;
+	// }
+	// } catch (final Exception e) {
+	// myLogger.error("Couldn't find submission locations for application: \""
+	// + application
+	// + "\""
+	// + ", version \""
+	// + versions[i]
+	// + "\". Most likely the mds is not published correctly.");
+	// continue;
+	// }
+	// final StringBuffer submitLoc = new StringBuffer();
+	//
+	// if (submitLocations != null) {
+	// List<String> list = new LinkedList<String>(submitLocations);
+	// for (int j = 0; j < list.size(); j++) {
+	// submitLoc.append(list.get(j));
+	// if (j < (list.size() - 1)) {
+	// submitLoc.append(",");
+	// }
+	// }
+	// }
+	// appVersionMap.put(versions[i], submitLoc.toString());
+	// }
+	// return DtoApplicationInfo.createApplicationInfo(application,
+	// appVersionMap);
+	// }
 
 	public DtoStringList getUsedApplications() {
 
@@ -1321,13 +1382,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	}
 
+
 	public DtoStringList getUsedApplicationsBatch() {
 
 		return DtoStringList.fromStringColletion(getBatchJobManager()
 				.getUsedApplicationsBatch());
 
 	}
-
 
 	/**
 	 * Gets the user of the current session. Also connects the default
@@ -1345,6 +1406,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoProperties.createProperties(getUser().getUserProperties());
 	}
 
+	// /*
+	// * (non-Javadoc)
+	// *
+	// * @see grisu.control.ServiceInterface#getVersionsOfApplicationOnSite
+	// * (java.lang.String, java.lang.String)
+	// */
+	// public Collection<Version> getVersionsOfApplicationOnSite(
+	// final String application,
+	// final String site) {
+	//
+	// return informationManager.getVersionsOfApplicationOnSite(application,
+	// site);
+	//
+	// }
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1357,26 +1433,18 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return value;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see grisu.control.ServiceInterface#getVersionsOfApplicationOnSite
-	 * (java.lang.String, java.lang.String)
-	 */
-	public String[] getVersionsOfApplicationOnSite(final String application,
-			final String site) {
-
-		return informationManager.getVersionsOfApplicationOnSite(application,
-				site);
-
-	}
-
-	public DtoStringList getVersionsOfApplicationOnSubmissionLocation(
+	public List<Version> getVersionsOfApplicationOnSubmissionLocation(
 			final String application, final String submissionLocation) {
-		return DtoStringList.fromStringArray(informationManager
+		List<Version> v = informationManager
 				.getVersionsOfApplicationOnSubmissionLocation(application,
-						submissionLocation));
+						submissionLocation);
+
+		return v;
+
 	}
+
+
+
 
 	/*
 	 * (non-Javadoc)
@@ -1388,6 +1456,8 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().getFileManager().isFolder(file);
 
 	}
+
+
 
 
 
@@ -1410,11 +1480,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		}
 
 	}
-
-
-
-
-
 
 	public String kill(String jobname, boolean clean)
 			throws NoSuchJobException, BatchJobException {
@@ -1444,6 +1509,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().ls(directory, recursion_level);
 	}
 
+
+
+
+
+
+
+
+
+
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1455,80 +1530,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return getUser().getFileManager().createFolder(url);
 
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	public MountPoint mount(final String url, final String mountpoint,
-			String fqan, final boolean useHomeDirectory)
-					throws RemoteFileSystemException {
-		// myLogger.debug("Mounting: " + url + " to: " + mountpoint
-		// + " with fqan: " + fqan);
-		if (fqan == null) {
-			fqan = Constants.NON_VO_FQAN;
-		}
-		final MountPoint mp = getUser().mountFileSystem(url, mountpoint, fqan,
-				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
-		getUser().resetMountPoints();
-		return mp;
-	}
-
-	// /*
-	// * (non-Javadoc)
-	// *
-	// * @see
-	// * grisu.control.ServiceInterface#getApplicationDetails(java.lang
-	// * .String, java.lang.String)
-	// */
-	// public DtoApplicationDetails getApplicationDetailsForSubmissionLocation(
-	// final String application, final String site_or_submissionLocation) {
-	//
-	// String site = site_or_submissionLocation;
-	// if (isSubmissionLocation(site_or_submissionLocation)) {
-	// myLogger.debug("Parameter " + site_or_submissionLocation
-	// + "is submission location not site. Calculating site...");
-	// site = getSiteForSubmissionLocation(site_or_submissionLocation);
-	// myLogger.debug("Site is: " + site);
-	// }
-	//
-	// return getApplicationDetailsForVersionAndSite(application,
-	// getDefaultVersionForApplicationAtSite(application, site), site);
-	//
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see grisu.control.ServiceInterface#mount(java.lang.String,
-	 * java.lang.String)
-	 */
-	public MountPoint mountWithoutFqan(final String url,
-			final String mountpoint, final boolean useHomeDirectory)
-					throws RemoteFileSystemException {
-
-		final MountPoint mp = getUser().mountFileSystem(url, mountpoint,
-				useHomeDirectory, informationManager.getSiteForHostOrUrl(url));
-		getUser().resetMountPoints();
-		return mp;
-	}
-
-
 
 	public String redistributeBatchJob(String batchjobname)
 			throws NoSuchJobException, JobPropertiesException {
@@ -1575,6 +1576,23 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 					SUBMIT_PROXY_LIFETIME = -1;
 				}
 			}
+
+		}
+
+	}
+
+	public void setUserProperties(DtoProperties properties) {
+
+		if (properties == null) {
+			return;
+		}
+
+		for (DtoProperty p : properties.getProperties()) {
+
+			String key = p.getKey();
+			String value = p.getValue();
+
+			setUserProperty(key, value);
 
 		}
 

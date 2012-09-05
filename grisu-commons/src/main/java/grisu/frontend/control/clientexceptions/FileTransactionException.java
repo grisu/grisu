@@ -1,5 +1,8 @@
 package grisu.frontend.control.clientexceptions;
 
+import javax.xml.ws.WebFault;
+
+@WebFault(faultBean = "grisu.control.jaxws.exceptions.FileTransactionException")
 public class FileTransactionException extends Exception {
 
 	private final String sourceFileUrl;

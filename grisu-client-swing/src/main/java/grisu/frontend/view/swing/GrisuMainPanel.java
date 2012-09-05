@@ -5,6 +5,7 @@ import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.login.GrisuSwingClient;
 import grisu.frontend.view.swing.login.LoginPanel;
 import grisu.model.dto.GridFile;
+import grisu.settings.ClientPropertiesManager;
 
 import java.awt.BorderLayout;
 import java.util.HashSet;
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.JPanel;
+
+import org.apache.commons.lang.StringUtils;
 
 public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 
@@ -60,10 +63,6 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 				!watchSingleApplication, false, false, applicationsToWatch);
 	}
 
-	public void addDefaultFileNavigationTaskPane() {
-		getGrisuCenterPanel().addDefaultFileManagementPanel();
-		getGrisuNavigationPanel().addDefaultFileManagementPanel();
-	}
 
 	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
 		getGrisuCenterPanel().addGroupFileManagementPanel(left, right);
@@ -87,7 +86,7 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 		return grisuCenterPanel;
 	}
 
-	private GrisuNavigationPanel getGrisuNavigationPanel() {
+	protected GrisuNavigationPanel getGrisuNavigationPanel() {
 		if (grisuNavigationPanel == null) {
 			// grisuNavigationPanel = new GrisuNavigationPanel(this.si,
 			// getGrisuCenterPanel());
@@ -129,6 +128,8 @@ public class GrisuMainPanel extends JPanel implements GrisuSwingClient {
 			getGrisuCenterPanel().addJobCreationPanel(panel);
 			panel.setServiceInterface(si);
 		}
+		
+
 
 	}
 }

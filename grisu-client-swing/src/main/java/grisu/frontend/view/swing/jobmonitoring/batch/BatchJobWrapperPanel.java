@@ -41,8 +41,8 @@ public class BatchJobWrapperPanel extends JPanel {
 	private BatchJobResultPreviewPanel getBatchJobResultPreviewPanel() {
 		if (batchJobResultPreviewPanel == null) {
 			batchJobResultPreviewPanel = new BatchJobResultPreviewPanel();
-			batchJobResultPreviewPanel.setServiceInterface(si);
-			batchJobResultPreviewPanel.initialize(batchJob, patterns);
+			// batchJobResultPreviewPanel.setServiceInterface(si);
+			// batchJobResultPreviewPanel.initialize(batchJob, patterns);
 		}
 		return batchJobResultPreviewPanel;
 	}

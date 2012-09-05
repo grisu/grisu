@@ -6,7 +6,6 @@ import grisu.frontend.model.job.JobObject;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
-import grisu.model.files.GlazedFile;
 import grisu.settings.ClientPropertiesManager;
 
 import java.beans.PropertyChangeEvent;
@@ -146,9 +145,7 @@ public class FileTransactionManager implements PropertyChangeListener {
 
 		final Set<String> temp = new HashSet<String>();
 		for (final Object file : files) {
-			if (file instanceof GlazedFile) {
-				temp.add(((GlazedFile) file).getUrl());
-			} else if (file instanceof GridFile) {
+			if (file instanceof GridFile) {
 				temp.add(((GridFile) file).getUrl());
 			} else if (file instanceof String) {
 				temp.add((String) file);

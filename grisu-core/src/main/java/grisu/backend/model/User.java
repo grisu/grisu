@@ -15,20 +15,20 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
-import grisu.jcommons.interfaces.InfoManager;
-import grisu.jcommons.interfaces.InformationManager;
-import grisu.jcommons.interfaces.MatchMaker;
+import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.VO;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.credential.Credential;
 import grith.jgrith.utils.FqanHelpers;
-import grith.jgrith.voms.VO;
 import grith.jgrith.vomsProxy.VomsException;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,6 +61,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * The User class holds all the relevant data a job could want to know from the
@@ -135,9 +139,9 @@ public class User {
 
 		}
 
+
 		try {
-			user.setAutoMountedMountPoints(user.df_auto_mds(si.getAllSites()
-					.asArray()));
+			user.setAutoMountedMountPoints(user.df_auto_mds());
 			time2 = new Date();
 			myLogger.debug("Login benchmark - mountpoints: "
 					+ new Long((time2.getTime() - time1.getTime())).toString()
@@ -167,7 +171,6 @@ public class User {
 		return dn.replace("=", "_").replace(",", "_").replace(" ", "_");
 	}
 
-	private InfoManager im;
 
 	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
 
@@ -193,7 +196,7 @@ public class User {
 	private Map<String, String> mountPointCache = Collections
 			.synchronizedMap(new HashMap<String, String>());
 
-	private final Map<String, Set<MountPoint>> mountPointsPerFqanCache = new TreeMap<String, Set<MountPoint>>();
+	private final Map<String, ImmutableSet<MountPoint>> mountPointsPerFqanCache = new TreeMap<String, ImmutableSet<MountPoint>>();
 	private Set<MountPoint> mountPointsAutoMounted = new HashSet<MountPoint>();
 
 	private Set<MountPoint> allMountPoints = null;
@@ -213,15 +216,16 @@ public class User {
 	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
 	private UserFileManager fsm;
 
-	private final InformationManager infoManager;
-	private final MatchMaker matchmaker;
+	// private final InformationManager infoManager;
+
+	// private final MatchMaker matchmaker;
 
 	private UserBatchJobManager batchjobmanager = null;
 
 	// for hibernate
 	public User() {
-		this.infoManager = AbstractServiceInterface.informationManager;
-		this.matchmaker = AbstractServiceInterface.matchmaker;
+		// this.infoManager = AbstractServiceInterface.informationManager;
+		// this.matchmaker = AbstractServiceInterface.matchmaker;
 	}
 
 	/**
@@ -235,8 +239,8 @@ public class User {
 	private User(final Credential cred) {
 		this.dn = cred.getDn();
 		this.credential = cred;
-		this.infoManager = AbstractServiceInterface.informationManager;
-		this.matchmaker = AbstractServiceInterface.matchmaker;
+		// this.infoManager = AbstractServiceInterface.informationManager;
+		// this.matchmaker = AbstractServiceInterface.matchmaker;
 
 	}
 
@@ -249,8 +253,8 @@ public class User {
 	 */
 	public User(final String dn) {
 		this.dn = dn;
-		this.infoManager = AbstractServiceInterface.informationManager;
-		this.matchmaker = AbstractServiceInterface.matchmaker;
+		// this.infoManager = AbstractServiceInterface.informationManager;
+		// this.matchmaker = AbstractServiceInterface.matchmaker;
 	}
 
 	public void addArchiveLocation(String alias, String value) {
@@ -301,8 +305,11 @@ public class User {
 		userdao.saveOrUpdate(this);
 	}
 
-	private MountPoint createMountPoint(String server, String path,
-			final String fqan, Executor executor) throws Exception {
+	private MountPoint createMountPoint(final Directory dir, final String fqan,
+			Executor executor) throws Exception {
+
+		final String server = dir.getFilesystem().getUrl();
+		final String path = dir.getPath();
 
 		String url = null;
 
@@ -326,7 +333,7 @@ public class User {
 		}
 
 		final Map<String, String> properties = new HashMap<String, String>();
-		boolean userDnPath = true;
+		boolean userDnPath = dir.isShared();
 		if (StringUtils.isNotBlank(propString)) {
 
 			final String[] parts = propString.split(";");
@@ -388,33 +395,13 @@ public class User {
 			tempPath = path.substring(0, startProperties);
 		}
 
+		boolean isHomeDir = false;
+
 		properties.put(MountPoint.PATH_KEY, tempPath);
 
-		if (tempPath.startsWith(".")) {
-			myLogger.warn("Using '.' is deprecated. Please use /~/ instead for: "
-					+ server + " / " + fqan);
+		if (tempPath.startsWith("/~/")) {
 			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
-						fqan);
-
-				String additionalUrl = null;
-				try {
-					additionalUrl = tempPath
-							.substring(1, tempPath.length() - 1);
-				} catch (final Exception e) {
-					additionalUrl = "";
-				}
-
-				url = url + additionalUrl;
-
-			} catch (final Exception e) {
-				// myLogger.error(e.getLocalizedMessage(), e);
-				throw e;
-			}
-
-		} else if (tempPath.startsWith("/~/")) {
-			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+				url = getFileSystemHomeDirectory(server,
 						fqan);
 
 				String additionalUrl = null;
@@ -427,17 +414,8 @@ public class User {
 
 				url = url + additionalUrl;
 
-			} catch (final Exception e) {
-				// myLogger.error(e.getLocalizedMessage(), e);
-				throw e;
-			}
-		} else if (path.contains("${GLOBUS_USER_HOME}")) {
-			try {
-				myLogger.warn("Using ${GLOBUS_USER_HOME} is deprecated. Please use /~/ instead for: "
-						+ server + " / " + fqan);
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
-						fqan);
-				userDnPath = false;
+				isHomeDir = true;
+
 			} catch (final Exception e) {
 				// myLogger.error(e.getLocalizedMessage(), e);
 				throw e;
@@ -445,7 +423,7 @@ public class User {
 
 		} else if (path.contains("${GLOBUS_SCRATCH_DIR")) {
 			try {
-				url = getFileSystemHomeDirectory(server.replace(":2811", ""),
+				url = getFileSystemHomeDirectory(server,
 						fqan) + "/.globus/scratch";
 				userDnPath = false;
 			} catch (final Exception e) {
@@ -456,7 +434,7 @@ public class User {
 
 			// url = server.replace(":2811", "") + path + "/"
 			// + User.get_vo_dn_path(getCred().getDn());
-			url = server.replace(":2811", "") + tempPath;
+			url = server + tempPath;
 
 		}
 
@@ -543,22 +521,19 @@ public class User {
 
 		}
 
-		final String site = AbstractServiceInterface.informationManager
-				.getSiteForHostOrUrl(url);
-
 		MountPoint mp = null;
 
 		if (StringUtils.isBlank(alias)) {
 			alias = MountPointHelpers.calculateMountPointName(server, fqan);
 		}
-		mp = new MountPoint(getDn(), fqan, url, alias, site, true);
+		mp = new MountPoint(getDn(), fqan, url, alias,
+				dir.getSite().toString(), true, isHomeDir);
 
 		for (final String key : properties.keySet()) {
 			mp.addProperty(key, properties.get(key));
 		}
 
-		final boolean isVolatile = AbstractServiceInterface.informationManager
-				.isVolatileDataLocation(server, tempPath, fqan);
+		final boolean isVolatile = dir.isVolatileDirectory();
 		mp.setVolatileFileSystem(isVolatile);
 
 		return mp;
@@ -598,7 +573,7 @@ public class User {
 	 *            the sites that should be used
 	 * @return all MountPoints
 	 */
-	protected Set<MountPoint> df_auto_mds(final String[] sites) {
+	protected Set<MountPoint> df_auto_mds() {
 
 		final Set<MountPoint> mps = Collections
 				.synchronizedSet(new TreeSet<MountPoint>());
@@ -652,76 +627,77 @@ public class User {
 						myLogger.debug("Getting datalocations for vo " + fqan
 								+ "....");
 						// final Date start = new Date();
-						final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
-								.getDataLocationsForVO(fqan);
+
+						Collection<Directory> dirs = AbstractServiceInterface.informationManager
+								.getDirectoriesForVO(fqan);
+
+						// final Map<String, String[]> mpUrl =
+						// AbstractServiceInterface.informationManager
+						// .getDataLocationsForVO(fqan);
 						myLogger.debug("Getting datalocations for vo " + fqan
 								+ " finished.");
-						// final Date end = new Date();
-						// myLogger.debug("Querying for data locations for all sites and+ "
-						// + fqan + " took: " + (end.getTime() -
-						// start.getTime())
-						// + " ms.");
-						for (final String server : mpUrl.keySet()) {
+
+						for (final Directory dir : dirs) {
 
 							String uniqueString = null;
-							for (final String path : mpUrl.get(server)) {
-								try {
+							try {
 
-									uniqueString = server + " - " + path
-											+ " - " + fqan;
+								String server = dir.getHost();
+								String path = dir.getPath();
 
-									// X.p("\t" + uniqueString
-									// + ": creating....");
+								uniqueString = server + " - " + path
+										+ " - " + fqan;
 
-									successfullMountPoints.put(uniqueString,
-											null);
+								// X.p("\t" + uniqueString
+								// + ": creating....");
 
-									myLogger.debug("Creating mountpoint for: "
-											+ server + " / " + path + " / "
-											+ fqan + "....");
+								successfullMountPoints.put(uniqueString,
+										null);
 
-									final MountPoint mp = createMountPoint(
-											server,
-											path,
-											fqan,
-											(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
-													: null);
+								myLogger.debug("Creating mountpoint for: "
+										+ server + " / " + path + " / "
+										+ fqan + "....");
 
-									myLogger.debug("Creating mountpoint for: "
-											+ server + " / " + path + " / "
-											+ fqan + " finished.");
+								final MountPoint mp = createMountPoint(
+										dir,
+										fqan,
+										(ENABLE_FILESYSTEM_CACHE) ? backgroundExecutorForFilesystemCache
+												: null);
 
-									successfullMountPoints.put(server + "_"
-											+ path + "_" + fqan, mp);
+								myLogger.debug("Creating mountpoint for: "
+										+ server + " / " + path + " / "
+										+ fqan + " finished.");
 
-									// X.p("\t" + server + "/" + path + "/" +
-									// fqan
-									// + ": created");
+								successfullMountPoints.put(server + "_"
+										+ path + "_" + fqan, mp);
 
-									if (mp != null) {
-										mps.add(mp);
-										successfullMountPoints.put(
-												uniqueString, mp);
-									} else {
-										successfullMountPoints
-										.remove(uniqueString);
-										unsuccessfullMountPoints
-										.put(uniqueString,
-												new Exception(
-														"MountPoint not created, unknown reason."));
-									}
-								} catch (final Exception e) {
-									// X.p(server + "/" + "/" + fqan +
-									// ": failed : "
-									// + e.getLocalizedMessage());
-									// e.printStackTrace();
-									successfullMountPoints.remove(uniqueString);
-									unsuccessfullMountPoints.put(uniqueString,
-											e);
-									myLogger.error("Can't use mountpoint "
-											+ server + " / " + fqan + ": "
-											+ e.getLocalizedMessage());
+								// X.p("\t" + server + "/" + path + "/" +
+								// fqan
+								// + ": created");
+
+								if (mp != null) {
+									mps.add(mp);
+									successfullMountPoints.put(
+											uniqueString, mp);
+								} else {
+									successfullMountPoints
+									.remove(uniqueString);
+									unsuccessfullMountPoints
+									.put(uniqueString,
+											new Exception(
+													"MountPoint not created, unknown reason."));
 								}
+							} catch (final Exception e) {
+								// X.p(server + "/" + "/" + fqan +
+								// ": failed : "
+								// + e.getLocalizedMessage());
+								// e.printStackTrace();
+								successfullMountPoints.remove(uniqueString);
+								unsuccessfullMountPoints.put(uniqueString,
+										e);
+								myLogger.error("Can't use mountpoint "
+										+ dir.getHost() + " / " + fqan + ": "
+										+ e.getLocalizedMessage());
 							}
 						}
 					}
@@ -759,63 +735,62 @@ public class User {
 
 				myLogger.debug("Getting datalocations for vo " + fqan + "....");
 				// final Date start = new Date();
-				final Map<String, String[]> mpUrl = AbstractServiceInterface.informationManager
-						.getDataLocationsForVO(fqan);
+				final Collection<Directory> dirs = AbstractServiceInterface.informationManager
+						.getDirectoriesForVO(fqan);
 				myLogger.debug("Getting datalocations for vo " + fqan
 						+ " finished.");
 				// final Date end = new Date();
 				// myLogger.debug("Querying for data locations for all sites and+ "
 				// + fqan + " took: " + (end.getTime() - start.getTime())
 				// + " ms.");
-				for (final String server : mpUrl.keySet()) {
+				for (final Directory dir : dirs) {
 
 					String uniqueString = null;
-					for (final String path : mpUrl.get(server)) {
-						try {
+					try {
 
-							uniqueString = server + " - " + path + " - " + fqan;
+						String server = dir.getHost();
+						String path = dir.getPath();
+						uniqueString = server + " - " + path + " - " + fqan;
 
-							// X.p("\t" + uniqueString
-							// + ": creating....");
+						// X.p("\t" + uniqueString
+						// + ": creating....");
 
-							successfullMountPoints.put(uniqueString, null);
+						successfullMountPoints.put(uniqueString, null);
 
-							myLogger.debug("Creating mountpoint for: " + server
-									+ " / " + path + " / " + fqan + "....");
+						myLogger.debug("Creating mountpoint for: " + server
+								+ " / " + path + " / " + fqan + "....");
 
-							final MountPoint mp = createMountPoint(server,
-									path, fqan, null);
+						final MountPoint mp = createMountPoint(dir, fqan, null);
 
-							myLogger.debug("Creating mountpoint for: " + server
-									+ " / " + path + " / " + fqan
-									+ " finished.");
+						myLogger.debug("Creating mountpoint for: " + server
+								+ " / " + path + " / " + fqan
+								+ " finished.");
 
-							successfullMountPoints.put(server + "_" + path
-									+ "_" + fqan, mp);
+						successfullMountPoints.put(server + "_" + path
+								+ "_" + fqan, mp);
 
-							// X.p("\t" + server + "/" + path + "/" + fqan
-							// + ": created");
+						// X.p("\t" + server + "/" + path + "/" + fqan
+						// + ": created");
 
-							if (mp != null) {
-								mps.add(mp);
-								successfullMountPoints.put(uniqueString, mp);
-							} else {
-								successfullMountPoints.remove(uniqueString);
-								unsuccessfullMountPoints
-								.put(uniqueString,
-										new Exception(
-												"MountPoint not created, unknown reason."));
-							}
-						} catch (final Exception e) {
-							// X.p(server + "/" + "/" + fqan + ": failed : "
-							// + e.getLocalizedMessage());
-							// e.printStackTrace();
+						if (mp != null) {
+							mps.add(mp);
+							successfullMountPoints.put(uniqueString, mp);
+						} else {
 							successfullMountPoints.remove(uniqueString);
-							unsuccessfullMountPoints.put(uniqueString, e);
-							myLogger.error("Can't use mountpoint " + server
-									+ " / " + fqan + ": "
-									+ e.getLocalizedMessage());
+							unsuccessfullMountPoints
+							.put(uniqueString,
+									new Exception(
+											"MountPoint not created, unknown reason."));
 						}
+					} catch (final Exception e) {
+						// X.p(server + "/" + "/" + fqan + ": failed : "
+						// + e.getLocalizedMessage());
+						// e.printStackTrace();
+						successfullMountPoints.remove(uniqueString);
+						unsuccessfullMountPoints.put(uniqueString, e);
+						myLogger.error("Can't use mountpoint " + dir.getHost()
+								+ " / " + fqan + ": "
+								+ e.getLocalizedMessage());
 					}
 				}
 			}
@@ -1219,7 +1194,10 @@ public class User {
 	@Transient
 	public Map<String, VO> getFqans() {
 
-		return credential.getAvailableFqans();
+		Map<String, VO> fqans =  Maps.newTreeMap();
+		fqans.putAll(credential.getAvailableFqans());
+		fqans.put(Constants.NON_VO_FQAN, VO.NON_VO);
+		return fqans;
 	}
 
 	@Transient
@@ -1249,11 +1227,6 @@ public class User {
 	}
 
 	@Transient
-	public InformationManager getInformationManager() {
-		return this.infoManager;
-	}
-
-	@Transient
 	public UserJobManager getJobManager() {
 		if (jobmanager == null) {
 			final Map<String, JobSubmitter> submitters = new HashMap<String, JobSubmitter>();
@@ -1267,11 +1240,6 @@ public class User {
 	@ElementCollection
 	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
 		return jobTemplates;
-	}
-
-	@Transient
-	public MatchMaker getMatchMaker() {
-		return this.matchmaker;
 	}
 
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -1288,7 +1256,7 @@ public class User {
 	}
 
 	@Transient
-	public Set<MountPoint> getMountPoints(String fqan) {
+	public ImmutableSet<MountPoint> getMountPoints(String fqan) {
 		if (fqan == null) {
 			fqan = Constants.NON_VO_FQAN;
 		}
@@ -1315,7 +1283,7 @@ public class User {
 						}
 					}
 				}
-				mountPointsPerFqanCache.put(fqan, mps);
+				mountPointsPerFqanCache.put(fqan, ImmutableSet.copyOf(mps));
 			}
 			return mountPointsPerFqanCache.get(fqan);
 		}
@@ -1340,6 +1308,36 @@ public class User {
 				return mountpoint;
 			}
 		}
+
+		if (file.contains("/~/")) {
+			String host = FileManager.getHost(file);
+			Set<MountPoint> mps = Sets.newTreeSet();
+			for (final MountPoint mp : getAllMountPoints()) {
+				if (mp.isHomeDir()) {
+					String mpHost = FileManager.getHost(mp.getRootUrl());
+					if (mpHost.equals(host)) {
+						mps.add(mp);
+					}
+				}
+			}
+
+			// if unique result, we can return it...
+			if (mps.size() == 1) {
+				return mps.iterator().next();
+			} else if (mps.size() > 1) {
+				// check whether all of those have the same absolute url, if
+				// that is the case, we can return either of those
+				// mountpoints...
+				Set<String> urls = Sets.newTreeSet();
+				for (MountPoint mp : mps) {
+					urls.add(mp.getRootUrl());
+				}
+				if (urls.size() == 1) {
+					return mps.iterator().next();
+				}
+			}
+		}
+
 		return null;
 	}
 
@@ -1359,6 +1357,7 @@ public class User {
 				return mountpoint;
 			}
 		}
+
 		return null;
 	}
 
@@ -1367,23 +1366,25 @@ public class User {
 		return FqanHelpers.getUniqueGroupname(getFqans().keySet(), fqan);
 	}
 
-	/**
-	 * This is needed because of the url home directory/absolute path info that
-	 * is contained in the user object.
-	 * 
-	 * We can't use /~/ dirs directly, since they are not unique. E.g.
-	 * gsiftp://ng2.auckland.ac.nz/~/ could point to 2 different directories for
-	 * two different vos.
-	 * 
-	 * @return the info manager
-	 */
-	@Transient
-	public InfoManager getUserInfoManager() {
-		if ( this.im == null ) {
-			im = new UserInfoManager(this);
-		}
-		return this.im;
-	}
+	// /**
+	// * This is needed because of the url home directory/absolute path info
+	// that
+	// * is contained in the user object.
+	// *
+	// * We can't use /~/ dirs directly, since they are not unique. E.g.
+	// * gsiftp://ng2.auckland.ac.nz/~/ could point to 2 different directories
+	// for
+	// * two different vos.
+	// *
+	// * @return the info manager
+	// */
+	// @Transient
+	// public InfoManager getUserInfoManager() {
+	// if ( this.im == null ) {
+	// im = new UserInfoManager(this);
+	// }
+	// return this.im;
+	// }
 
 	/**
 	 * Gets a map of this users properties. These properties can be used to
@@ -1404,27 +1405,6 @@ public class User {
 	@Override
 	public int hashCode() {
 		return 29 * dn.hashCode();
-	}
-
-	public boolean isValidSubmissionLocation(String subLoc, String fqan) {
-
-		// TODO i'm sure this can be made much more quicker
-		final String[] fs = getInformationManager()
-				.getStagingFileSystemForSubmissionLocation(subLoc);
-
-		for (final MountPoint mp : df(fqan)) {
-
-			for (final String f : fs) {
-				if (mp.getRootUrl().startsWith(f.replace(":2811", ""))) {
-
-					return true;
-				}
-			}
-
-		}
-
-		return false;
-
 	}
 
 
@@ -1458,7 +1438,7 @@ public class User {
 			return rootfolder;
 
 		} catch (final Exception e) {
-			// e.printStackTrace();
+			e.printStackTrace();
 			throw new RemoteFileSystemException("Could not list directory "
 					+ directory + ": " + e.getLocalizedMessage());
 		}
@@ -1534,8 +1514,6 @@ public class User {
 		if ((fqan == null) || Constants.NON_VO_FQAN.equals(fqan)) {
 			return mountFileSystem(root, name, useHomeDirectory, site);
 		} else {
-
-			final Map<String, VO> temp = getFqans();
 
 			final Credential vomsProxyCred = getCredential(fqan);
 

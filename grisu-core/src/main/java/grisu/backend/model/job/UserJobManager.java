@@ -15,18 +15,18 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.interfaces.GridResource;
 import grisu.jcommons.utils.JsdlHelpers;
-import grisu.jcommons.utils.SubmissionLocationHelpers;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.DtoJob;
-import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.DtoStringList;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Version;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.model.status.StatusObject;
-import grisu.model.utils.InformationUtils;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.ServiceInterfaceUtils;
 import grisu.utils.SeveralXMLHelpers;
@@ -36,7 +36,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,6 @@ import javax.persistence.Transient;
 import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.lang.StringUtils;
-import org.globus.exec.utils.ManagedJobFactoryConstants;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
@@ -217,6 +215,7 @@ public class UserJobManager {
 		}
 
 		try {
+			getUser().getBatchJobManager().getBatchJobFromDatabase(jobname);
 			return getUser().getBatchJobManager().archiveBatchJob(jobname, url);
 		} catch (final NoSuchJobException e) {
 			final Job job = getJobFromDatabaseOrFileSystem(jobname);
@@ -283,11 +282,6 @@ public class UserJobManager {
 					rftp = getUser().getFileManager().cpSingleFile(
 							job.getJobProperty(Constants.JOBDIRECTORY_KEY),
 							targetDirUrl, false, true, true);
-					status.addElement("Deleting old jobdirectory: "
-							+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
-					getUser().getFileManager().deleteFile(
-							job.getJobProperty(Constants.JOBDIRECTORY_KEY),
-							true);
 				} catch (final RemoteFileSystemException e1) {
 					if (optionalBatchJobStatus != null) {
 						optionalBatchJobStatus.setFailed(true);
@@ -321,6 +315,61 @@ public class UserJobManager {
 					final String message = rftp.getPossibleExceptionMessage();
 					status.addElement("Transfer failed: " + message);
 					return;
+				} else {
+
+					// maybe double check whether transfer was really
+					// successful?
+					boolean verify = ServerPropertiesManager
+							.getVerifyAfterArchive();
+					boolean success = false;
+					if (verify) {
+						success = rftp.verifyTransferSuccess();
+					} else {
+						success = true;
+					}
+
+					if (success) {
+
+						status.addElement("Deleting old jobdirectory: "
+								+ job.getJobProperty(Constants.JOBDIRECTORY_KEY));
+						try {
+							getUser().getFileManager().deleteFile(
+									job.getJobProperty(Constants.JOBDIRECTORY_KEY),
+									true);
+						} catch (RemoteFileSystemException e) {
+							if (optionalBatchJobStatus != null) {
+								optionalBatchJobStatus.setFailed(true);
+								optionalBatchJobStatus.setErrorCause(e
+										.getLocalizedMessage());
+								optionalBatchJobStatus
+								.addElement("Failed archiving job "
+										+ job.getJobname());
+							}
+							status.setFailed(true);
+							status.setErrorCause(e.getLocalizedMessage());
+							status.setFinished(true);
+							final String message = e.getLocalizedMessage();
+							status.addElement("Transfer failed: " + message);
+							return;
+						}
+					} else {
+						// transfer not successful
+						if (optionalBatchJobStatus != null) {
+							optionalBatchJobStatus.setFailed(true);
+							optionalBatchJobStatus
+							.setErrorCause("Verifying of transfer failed.");
+							optionalBatchJobStatus
+							.addElement("Failed archiving job "
+									+ job.getJobname());
+						}
+						status.setFailed(true);
+						status.setErrorCause("Verifying of transfer failed.");
+						status.setFinished(true);
+						final String message = "Verifying of transfer failed.";
+						status.addElement("Transfer failed: " + message);
+						return;
+
+					}
 				}
 
 				job.setArchived(true);
@@ -382,32 +431,15 @@ public class UserJobManager {
 					fout.close();
 				}
 
+				// check whether all the files are actually there and the same
+				// size (at least for the root folder)
+
 				status.addElement("Killing job.");
 				kill(job, true, false);
-
-				// if (optionalBatchJobStatus == null) {
-				// new Thread() {
-				// @Override
-				// public void run() {
-				// Job job = null;
-				// ;
-				// try {
-				// job = loadJobFromFilesystem(grisuJobFileUrl);
-				// DtoJob j = DtoJob.createJob(job.getStatus(),
-				// job.getJobProperties(),
-				// job.getInputFiles(),
-				// job.getLogMessages(), job.isArchived());
-				//
-				// getArchivedJobs(null).addJob(j);
-				// } catch (NoSuchJobException e) {
-				// e.printStackTrace();
-				// }
-				// }
-				// }.start();
-				// }
-
 				status.setFinished(true);
 				status.addElement("Job archived successfully.");
+
+
 				if (optionalBatchJobStatus != null) {
 					optionalBatchJobStatus
 					.addElement("Successfully archived job: "
@@ -425,27 +457,6 @@ public class UserJobManager {
 	}
 
 
-
-	private boolean checkWhetherGridResourceIsActuallyAvailable(
-			GridResource resource) {
-
-		final String[] filesystems = user.getInformationManager()
-				.getStagingFileSystemForSubmissionLocation(SubmissionLocationHelpers
-						.createSubmissionLocationString(resource));
-
-		for (final MountPoint mp : getUser().getAllMountPoints()) {
-
-			for (final String fs : filesystems) {
-				if (mp.getRootUrl().startsWith(fs.replace(":2811", ""))) {
-					return true;
-				}
-			}
-
-		}
-
-		return false;
-
-	}
 
 	public String createJob(Document jsdl, final String fqan,
 			final String jobnameCreationMethod,
@@ -501,6 +512,7 @@ public class UserJobManager {
 			myLogger.error("Somehow the job was not created although it certainly should have. Must be a bug..");
 			throw new RuntimeException("Job was not created. Internal error.");
 		} catch (final Exception e) {
+			// e.printStackTrace();
 			myLogger.error("Error when processing job description: "
 					+ e.getLocalizedMessage());
 			try {
@@ -1004,7 +1016,7 @@ public class UserJobManager {
 				try {
 
 					myLogger.debug("Killing job " + job.getJobname()
-							+ "through jobsubmitter...");
+							+ " through jobsubmitter...");
 					status.addLogMessage("Killing job through jobmanager...");
 					kill(job);
 					status.addElement("Job killed through jobmanager...");
@@ -1361,8 +1373,8 @@ public class UserJobManager {
 
 			myLogger.debug(debug_token
 					+ "Getting absolute workingdirectoryurl...");
-			final String jobDir = JsdlHelpers
-					.getAbsoluteWorkingDirectoryUrl(job.getJobDescription());
+			final String jobDir = FileManager.removeDoubleSlashes(JsdlHelpers
+					.getAbsoluteWorkingDirectoryUrl(job.getJobDescription()));
 			myLogger.debug(debug_token + "Found absolute workingdirectoryurl: "
 					+ jobDir);
 			// myLogger.debug("Using calculated jobdirectory: " + jobDir);
@@ -1384,24 +1396,680 @@ public class UserJobManager {
 		// into the database
 	}
 
-	/**
-	 * This method tries to auto-fill in missing values like which
-	 * submissionlocation to submit to, which version to use (if not specified)
-	 * and so on.
-	 * 
-	 * @param jobname
-	 * @throws NoSuchJobException
-	 * @throws JobPropertiesException
-	 */
-	void processJobDescription(final Job job, final BatchJob parentJob)
+	// /**
+	// * This method tries to auto-fill in missing values like which
+	// * submissionlocation to submit to, which version to use (if not
+	// specified)
+	// * and so on.
+	// *
+	// * @param jobname
+	// * @throws NoSuchJobException
+	// * @throws JobPropertiesException
+	// */
+	// void processJobDescription(final Job job, final BatchJob parentJob)
+	// throws NoSuchJobException, JobPropertiesException {
+	//
+	// // TODO check whether fqan is set
+	// final String jobFqan = job.getFqan();
+	// final Document jsdl = job.getJobDescription();
+	//
+	// String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+	//
+	// try {
+	// if (StringUtils.isNotBlank(oldJobDir)) {
+	//
+	// if (getUser().getFileManager().fileExists(oldJobDir)) {
+	//
+	// final GridFile fol = getUser().ls(oldJobDir, 1);
+	// if (fol.getChildren().size() > 0) {
+	//
+	// // myLogger.debug("Old jobdir exists.");
+	// } else {
+	// oldJobDir = null;
+	// }
+	// } else {
+	// oldJobDir = null;
+	// }
+	// } else {
+	// oldJobDir = null;
+	// }
+	// } catch (final RemoteFileSystemException e1) {
+	// oldJobDir = null;
+	// }
+	//
+	// boolean applicationCalculated = false;
+	//
+	// final JobSubmissionObjectImpl jobSubmissionObject = new
+	// JobSubmissionObjectImpl(
+	// jsdl);
+	//
+	// if (jobSubmissionObject.getCommandline() == null) {
+	// throw new JobPropertiesException("No commandline specified.");
+	// }
+	//
+	// for (final JobSubmissionProperty key : jobSubmissionObject
+	// .getJobSubmissionPropertyMap().keySet()) {
+	// job.addJobProperty(key.toString(), jobSubmissionObject
+	// .getJobSubmissionPropertyMap().get(key));
+	// }
+	//
+	// final String executable = jobSubmissionObject.extractExecutable();
+	// job.addJobProperty(Constants.EXECUTABLE_KEY, executable);
+	//
+	// Collection<Queue> matchingResources = null;
+	//
+	// String submissionLocation = null;
+	// Set<Directory> stagingFileSystems = null;
+	//
+	// // check whether application is "generic". If that is the case, just
+	// // check
+	// // if all the necessary fields are specified and then continue without
+	// // any
+	// // auto-settings
+	//
+	// if (jobSubmissionObject.getApplication() == null) {
+	//
+	// final String commandline = jobSubmissionObject.getCommandline();
+	//
+	// final Collection<Application> apps = user.getInformationManager()
+	// .getApplicationsThatProvideExecutable(jobSubmissionObject
+	// .extractExecutable());
+	//
+	// if ((apps == null) || (apps.size() == 0)) {
+	// jobSubmissionObject
+	// .setApplication(Constants.GENERIC_APPLICATION_NAME);
+	// } else if (apps.size() > 1) {
+	// throw new JobPropertiesException(
+	// "More than one application names for executable "
+	// + jobSubmissionObject.extractExecutable()
+	// + " found.");
+	// } else {
+	// jobSubmissionObject.setApplication(apps.iterator().next()
+	// .toString());
+	// }
+	//
+	// }
+	//
+	// // System.out.println("Subloc in si: "
+	// // + jobSubmissionObject.getSubmissionLocation());
+	//
+	// // if "generic" app, submission location needs to be specified.
+	// if (Constants.GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
+	// .getApplication())
+	// && (StringUtils.isNotBlank(jobSubmissionObject
+	// .getSubmissionLocation()) &&
+	// !(Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
+	// .equals(jobSubmissionObject.getSubmissionLocation())))) {
+	//
+	// submissionLocation = jobSubmissionObject.getSubmissionLocation();
+	//
+	// stagingFileSystems = user.getInformationManager()
+	// .getStagingFileSystemForSubmissionLocation(submissionLocation);
+	//
+	// if ((stagingFileSystems == null)
+	// || (stagingFileSystems.size() == 0)) {
+	// myLogger.error("No staging filesystem found for submissionlocation: "
+	// + submissionLocation);
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+	// + ": "
+	// + "Could not find staging filesystem for submissionlocation "
+	// + submissionLocation);
+	// }
+	//
+	// // if not "generic" application...
+	// } else {
+	// // ...either try to find a suitable one...
+	// if (StringUtils.isBlank(jobSubmissionObject.getApplication())
+	// || (StringUtils.equals(Constants.GENERIC_APPLICATION_NAME,
+	// jobSubmissionObject.getApplication()) && StringUtils
+	// .isBlank(jobSubmissionObject
+	// .getSubmissionLocation()))
+	//
+	// ) {
+	// myLogger.debug("No application specified. Trying to calculate it...");
+	//
+	// final Collection<Application> calculatedApps = user
+	// .getInformationManager()
+	// .getApplicationsThatProvideExecutable(JsdlHelpers
+	// .getPosixApplicationExecutable(jsdl));
+	// for (final Application app : calculatedApps) {
+	// jobSubmissionObject.setApplication(app.toString());
+	// matchingResources = user
+	// .getInformationManager()
+	// .findQueues(
+	// jobSubmissionObject
+	// .getJobSubmissionPropertyMap(),
+	// job.getFqan());
+	//
+	// if ((matchingResources != null)
+	// && (matchingResources.size() > 0)) {
+	// JsdlHelpers.setApplicationName(jsdl, app.getName());
+	// myLogger.debug("Calculated app: " + app);
+	// break;
+	// }
+	// }
+	//
+	// if ((jobSubmissionObject.getApplication() == null)
+	// || (jobSubmissionObject.getApplication().length() == 0)) {
+	//
+	// final String version = jobSubmissionObject
+	// .getApplicationVersion();
+	// if (StringUtils.isNotBlank(version)
+	// && !Constants.NO_VERSION_INDICATOR_STRING
+	// .equals(version)) {
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.APPLICATIONNAME
+	// .toString()
+	// + ": "
+	// +
+	// "No application specified (but application version) and could not find one in the grid that matches the executable "
+	// + JsdlHelpers
+	// .getPosixApplicationExecutable(jsdl)
+	// + ".");
+	// } else {
+	// jobSubmissionObject
+	// .setApplication(Constants.GENERIC_APPLICATION_NAME);
+	// }
+	// }
+	//
+	// applicationCalculated = true;
+	// JsdlHelpers.setApplicationName(jsdl,
+	// jobSubmissionObject.getApplication());
+	// job.addJobProperty(Constants.APPLICATIONNAME_KEY,
+	// jobSubmissionObject.getApplication());
+	// job.addJobProperty(Constants.APPLICATIONNAME_CALCULATED_KEY,
+	// "true");
+	// // ... or use the one specified.
+	// } else {
+	//
+	// myLogger.debug("Trying to find matching grid resources...");
+	// matchingResources = user.getInformationManager().findQueues(
+	// jobSubmissionObject.getJobSubmissionPropertyMap(),
+	// job.getFqan());
+	//
+	// if ((matchingResources != null)
+	// && (matchingResources.size() > 0)) {
+	// myLogger.debug("Found: " + matchingResources.size()
+	// + " of them: "
+	// + StringUtils.join(matchingResources, " / "));
+	// }
+	// }
+	//
+	// submissionLocation = jobSubmissionObject.getSubmissionLocation();
+	// // GridResource selectedSubmissionResource = null;
+	//
+	// if (StringUtils.isNotBlank(submissionLocation)
+	// && !Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
+	// .equals(submissionLocation)) {
+	// myLogger.debug("Submission location specified in jsdl: "
+	// + submissionLocation
+	// + ". Checking whether this is valid using mds information.");
+	//
+	// stagingFileSystems = user.getInformationManager()
+	// .getStagingFileSystemForSubmissionLocation(submissionLocation);
+	// if ((stagingFileSystems == null)
+	// || (stagingFileSystems.size() == 0)) {
+	// myLogger.error("No staging filesystem found for submissionlocation: "
+	// + submissionLocation);
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+	// + ": "
+	// + "Could not find staging filesystem for submissionlocation "
+	// + submissionLocation + " (using VO: "
+	// + jobFqan + ")");
+	// }
+	//
+	// boolean submissionLocationIsValid = false;
+	//
+	// if (Constants.GENERIC_APPLICATION_NAME
+	// .equals(jobSubmissionObject.getApplication())) {
+	// // let's just assume, shall we? No other option...
+	// submissionLocationIsValid = true;
+	// } else {
+	//
+	//
+	// Package pkg = new Package(jobSubmissionObject.getApplication(),
+	// jobSubmissionObject.getApplicationVersion());
+	//
+	// // check whether submission location is valid
+	// for (final Queue queue : matchingResources) {
+	// if (submissionLocation.equals(queue.toString())) {
+	// myLogger.debug("Found queue for submission location. Now checking whether version is specified and if it is whether it is available on this resource.");
+	// // now check whether a possible selected version is
+	// // available on this resource
+	// if (StringUtils.isNotBlank(jobSubmissionObject
+	// .getApplicationVersion())
+	// && !Constants.NO_VERSION_INDICATOR_STRING
+	// .equals(jobSubmissionObject
+	// .getApplicationVersion())
+	// && !queue.getPackages().contains(pkg)) {
+	//
+	// myLogger.debug("Specified version is not available on this grid resource: "
+	// + submissionLocation);
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.APPLICATIONVERSION
+	// .toString()
+	// + ": "
+	// + "Version: "
+	// + jobSubmissionObject
+	// .getApplicationVersion()
+	// + " not installed on "
+	// + submissionLocation
+	// + " (using VO: "
+	// + jobFqan
+	// + ")");
+	// }
+	// myLogger.debug("Version available or not specified.");
+	// // if no application version is specified, auto-set
+	// // one
+	// if (StringUtils.isBlank(jobSubmissionObject
+	// .getApplicationVersion())
+	// || Constants.NO_VERSION_INDICATOR_STRING
+	// .equals(jobSubmissionObject
+	// .getApplicationVersion())) {
+	// myLogger.debug("version was not specified. Auto setting the first one for the selected resource.");
+	// Collection<Package> pkgs = queue
+	// .filterPackages(pkg.getApplication());
+	// if ((pkgs != null) && (pkgs.size() > 0)) {
+	//
+	// String latest = null;
+	// try {
+	// latest = InformationUtils
+	// .guessLatestVersionOfPackages(pkgs);
+	// } catch (final Exception e) {
+	// myLogger.debug("Could not guess latest version: "
+	// + e.getLocalizedMessage());
+	// // using random version
+	// }
+	//
+	// if (StringUtils.isNotBlank(latest)) {
+	// } else {
+	// latest = pkgs.iterator().next()
+	// .getVersion().toString();
+	// }
+	// JsdlHelpers.setApplicationVersion(jsdl,
+	// latest);
+	//
+	// job.addJobProperty(
+	// Constants.APPLICATIONVERSION_KEY,
+	// latest);
+	// job.addJobProperty(
+	// Constants.APPLICATIONVERSION_CALCULATED_KEY,
+	// "true");
+	// myLogger.debug("Set version to be: {}",
+	// latest);
+	//
+	// } else {
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.APPLICATIONVERSION
+	// .toString()
+	// + ": "
+	// + "Could not find any installed version for application "
+	// + jobSubmissionObject
+	// .getApplication()
+	// + " on "
+	// + submissionLocation
+	// + " (using VO: "
+	// + jobFqan
+	// + ")");
+	// }
+	// }
+	// myLogger.debug("Successfully validated submissionlocation "
+	// + submissionLocation);
+	// submissionLocationIsValid = true;
+	// // selectedSubmissionResource = resource;
+	// break;
+	// }
+	// }
+	// }
+	//
+	// if (!submissionLocationIsValid) {
+	// myLogger.error("Could not find a matching grid resource object for submissionlocation: "
+	// + submissionLocation);
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+	// + ": "
+	// + "Submissionlocation "
+	// + submissionLocation
+	// + " not available for this kind of job (using VO: "
+	// + jobFqan + ")");
+	// }
+	// } else {
+	// myLogger.debug("No submission location specified in jsdl document. Trying to auto-find one...");
+	// if ((matchingResources == null)
+	// || (matchingResources.size() == 0)) {
+	// myLogger.error("No matching grid resources found.");
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+	// + ": "
+	// +
+	// "Could not find any matching resource to run this kind of job on. Using VO: "
+	// + jobFqan);
+	// }
+	// // find the best submissionlocation and set it.
+	//
+	// // check for the version of the application to run
+	// if (StringUtils.isBlank(jobSubmissionObject
+	// .getApplicationVersion())
+	// || Constants.NO_VERSION_INDICATOR_STRING
+	// .equals(jobSubmissionObject
+	// .getApplicationVersion())) {
+	// myLogger.debug("No version specified in jsdl document. Will use the first one for the best grid resource.");
+	// for (final Queue queue : matchingResources) {
+	//
+	// stagingFileSystems = queue
+	// .getDirectories(job.getFqan());
+	//
+	// if ((stagingFileSystems == null)
+	// || (stagingFileSystems.size() == 0)) {
+	// myLogger.debug(
+	// "SubLoc: {} has no staging file system. Trying next one.",
+	// queue.toString());
+	// continue;
+	// }
+	//
+	// Collection<Package> pkgs = queue
+	// .filterPackages(Application
+	// .create(jobSubmissionObject.getApplication()));
+	//
+	// if ((pkgs != null) && (pkgs.size() > 0)) {
+	// String firstVersion = pkgs.iterator().next()
+	// .getVersion().toString();
+	// JsdlHelpers.setApplicationVersion(jsdl,
+	// firstVersion);
+	// job.addJobProperty(
+	// Constants.APPLICATIONVERSION_KEY,
+	// firstVersion);
+	// job.addJobProperty(
+	// Constants.APPLICATIONVERSION_CALCULATED_KEY,
+	// "true");
+	//
+	// //
+	// jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
+	// submissionLocation = queue.toString();
+	// myLogger.debug(
+	// "Using submissionlocation: {} and application version {}.",
+	// submissionLocation, firstVersion);
+	//
+	// break;
+	// }
+	// }
+	// if (submissionLocation == null) {
+	// myLogger.error("Could not find any version of the specified application grid-wide.");
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.APPLICATIONVERSION
+	// .toString()
+	// + ": "
+	// +
+	// "Could not find any version for this application grid-wide. That is probably an error in the mds info (VO used: "
+	// + jobFqan + ".");
+	// }
+	// } else {
+	// myLogger.debug("Version: "
+	// + jobSubmissionObject.getApplicationVersion()
+	// + " specified. Trying to find a matching grid resource...");
+	// Package pkg = Package.create(
+	// jobSubmissionObject.getApplication(),
+	// jobSubmissionObject.getApplicationVersion());
+	//
+	// for (final Queue queue : matchingResources) {
+	//
+	// final String temp = queue.toString();
+	//
+	// stagingFileSystems = queue
+	// .getDirectories(job.getFqan());
+	// if ((stagingFileSystems == null)
+	// || (stagingFileSystems.size() == 0)) {
+	// myLogger.debug("SubLoc: "
+	// + temp
+	// + " has no staging file system. Trying next one.");
+	// continue;
+	// }
+	//
+	// Collection<Package> pkgs = queue.filterPackages(
+	// jobSubmissionObject.getApplication(),
+	// jobSubmissionObject.getApplicationVersion());
+	//
+	// if ((pkgs != null) && (pkgs.size() > 0)) {
+	// submissionLocation = queue.toString();
+	// myLogger.debug(
+	// "Found grid resource with specified application version. Using submissionLocation: {}",
+	// submissionLocation);
+	// break;
+	// }
+	//
+	//
+	// }
+	// if (submissionLocation == null) {
+	// myLogger.error("Could not find a grid resource with the specified version...");
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.APPLICATIONVERSION
+	// .toString()
+	// + ": "
+	// + "Could not find desired version: "
+	// + jobSubmissionObject
+	// .getApplicationVersion()
+	// + " for application "
+	// + jobSubmissionObject.getApplication()
+	// + " grid-wide. VO used: " + jobFqan);
+	// }
+	// }
+	//
+	// // selectedSubmissionResource = matchingResources.get(0);
+	// // jobSubmissionObject.setSubmissionLocation(submissionLocation);
+	// try {
+	// JsdlHelpers.setCandidateHosts(jsdl,
+	// new String[] { submissionLocation });
+	// job.addJobProperty(
+	// Constants.SUBMISSIONLOCATION_CALCULATED_KEY, "true");
+	// } catch (final RuntimeException e) {
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+	// + ": "
+	// + "Jsdl document malformed. No candidate hosts element.",
+	// e);
+	// }
+	// }
+	// }
+	//
+	// myLogger.debug("Trying to find staging filesystem for subissionlocation: "
+	// + submissionLocation);
+	//
+	// if ((stagingFileSystems == null) || (stagingFileSystems.size() == 0)) {
+	// myLogger.error("No staging filesystem found for submissionlocation: "
+	// + submissionLocation);
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+	// + ": "
+	// + "Could not find staging filesystem for submissionlocation "
+	// + submissionLocation + " (using VO: " + jobFqan
+	// + ")");
+	// }
+	//
+	// myLogger.debug("Trying to find mountpoint for stagingfilesystem...");
+	//
+	// MountPoint mountPointToUse = null;
+	// String stagingFilesystemToUse = null;
+	// for (final Directory stagingFs : stagingFileSystems) {
+	//
+	// for (final MountPoint mp : getUser().getAllMountPoints()) {
+	// if (mp.getRootUrl().startsWith(
+	// stagingFs.getUrl().replace(":2811", ""))
+	// && jobFqan.equals(mp.getFqan())
+	// && mp.isVolatileFileSystem()) {
+	// mountPointToUse = mp;
+	// stagingFilesystemToUse = stagingFs.getUrl().replace(
+	// ":2811", "");
+	// myLogger.debug("Found mountpoint " + mp.getAlias()
+	// + " for stagingfilesystem "
+	// + stagingFilesystemToUse);
+	// break;
+	// }
+	// }
+	//
+	// // in case we didn't find a volatile filesystem, we try again
+	// // considering all of them...
+	// if (mountPointToUse == null) {
+	// for (final MountPoint mp : getUser().getAllMountPoints()) {
+	// if (mp.getRootUrl().startsWith(
+	// stagingFs.getUrl().replace(":2811", ""))
+	// && jobFqan.equals(mp.getFqan())) {
+	// mountPointToUse = mp;
+	// stagingFilesystemToUse = stagingFs.getUrl().replace(
+	// ":2811", "");
+	// myLogger.debug("Found mountpoint " + mp.getAlias()
+	// + " for stagingfilesystem "
+	// + stagingFilesystemToUse);
+	// break;
+	// }
+	// }
+	// }
+	//
+	// if (mountPointToUse != null) {
+	// myLogger.debug("Mountpoint set to be: "
+	// + mountPointToUse.getAlias()
+	// + ". Not looking any further...");
+	// break;
+	// }
+	//
+	// }
+	//
+	// if (mountPointToUse == null) {
+	// myLogger.error("Could not find a staging filesystem that is accessible for the user for submissionlocation "
+	// + submissionLocation);
+	// throw new JobPropertiesException(
+	// JobSubmissionProperty.SUBMISSIONLOCATION.toString()
+	// + ": "
+	// + "Could not find stagingfilesystem for submission location: "
+	// + submissionLocation + " (using VO: " + jobFqan
+	// + ")");
+	// }
+	//
+	// JsdlHelpers.addOrRetrieveExistingFileSystemElement(jsdl,
+	// JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM,
+	// stagingFilesystemToUse);
+	//
+	// // now calculate and set the proper paths
+	// String workingDirectory;
+	// if (parentJob == null) {
+	// workingDirectory = mountPointToUse.getRootUrl().substring(
+	// stagingFilesystemToUse.length())
+	// + "/"
+	// + ServerPropertiesManager.getRunningJobsDirectoryName()
+	// + "/" + job.getJobname();
+	// } else {
+	// workingDirectory = mountPointToUse.getRootUrl().substring(
+	// stagingFilesystemToUse.length())
+	// + "/"
+	// + parentJob
+	// .getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY)
+	// + "/" + job.getJobname();
+	// }
+	// myLogger.debug("Calculated workingdirectory: " + workingDirectory);
+	//
+	// JsdlHelpers.setWorkingDirectory(jsdl,
+	// JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
+	// job.addJobProperty(Constants.MOUNTPOINT_KEY,
+	// mountPointToUse.getRootUrl());
+	// job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY,
+	// stagingFilesystemToUse);
+	//
+	//
+	// job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
+	//
+	// // TODO re-add submission site
+	// // final String submissionSite = user.getInformationManager()
+	// // .getSiteForHostOrUrl(SubmissionLocationHelpers
+	// // // .extractHost(submissionLocation));
+	// // myLogger.debug("Calculated submissionSite: " + submissionSite);
+	// // job.addJobProperty(Constants.SUBMISSION_SITE_KEY, submissionSite);
+	// final String queue = SubmissionLocationHelpers
+	// .extractQueue(submissionLocation);
+	// job.addJobProperty(Constants.QUEUE_KEY, queue);
+	// final String newJobdir = stagingFilesystemToUse + workingDirectory;
+	//
+	// try {
+	// getUser().getFileManager().createFolder(newJobdir);
+	// } catch (final RemoteFileSystemException e1) {
+	// throw new JobPropertiesException(
+	// "Could not create new jobdirectory " + newJobdir
+	// + " (using VO: " + jobFqan + "): " + e1);
+	// }
+	//
+	// job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);
+	// myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse
+	// + workingDirectory);
+	//
+	// job.addJobProperty(Constants.SUBMISSIONBACKEND_KEY,
+	// AbstractServiceInterface.getBackendInfo());
+	//
+	// if (StringUtils.isNotBlank(oldJobDir)) {
+	// try {
+	// // if old jobdir exists, try to move it here
+	// getUser().getFileManager().cpSingleFile(oldJobDir,
+	// newJobdir, true, true, true);
+	//
+	// getUser().getFileManager().deleteFile(oldJobDir);
+	// } catch (final Exception e) {
+	// myLogger.error(e.getLocalizedMessage(), e);
+	// }
+	// }
+	//
+	// myLogger.debug("Fixing urls in datastaging elements...");
+	// // fix stage in target filesystems...
+	// final List<Element> stageInElements = JsdlHelpers
+	// .getStageInElements(jsdl);
+	// for (final Element stageInElement : stageInElements) {
+	//
+	// final String filePath = JsdlHelpers
+	// .getStageInSource(stageInElement);
+	// if ("dummyfile".equals(filePath) || filePath.startsWith("file:")) {
+	// continue;
+	// }
+	// final String filename = filePath.substring(filePath
+	// .lastIndexOf("/"));
+	//
+	// final Element el = JsdlHelpers
+	// .getStageInTarget_filesystemPart(stageInElement);
+	//
+	// el.setTextContent(JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM);
+	//
+	// final Element finalNameEl = JsdlHelpers
+	// .getStageInTarget_relativePart(stageInElement);
+	// final String finalName = finalNameEl.getTextContent();
+	//
+	// if (StringUtils.isBlank(finalName)) {
+	// finalNameEl.setTextContent(workingDirectory + filename);
+	// } else {
+	// if (workingDirectory.endsWith("/") || finalName.startsWith("/")) {
+	// finalNameEl.setTextContent(workingDirectory + finalName);
+	// } else {
+	// finalNameEl.setTextContent(workingDirectory + "/"
+	// + finalName);
+	// }
+	// }
+	//
+	// }
+	//
+	// job.setJobDescription(jsdl);
+	//
+	// // jobdao.attachDirty(job);
+	// myLogger.debug("Preparing job done.");
+	// }
+
+	private void processJobDescription(final Job job, final BatchJob parentJob)
 			throws NoSuchJobException, JobPropertiesException {
 
-		// TODO check whether fqan is set
-		final String jobFqan = job.getFqan();
+		Boolean applicationCalculated = false;
+		Boolean submissionLocationCalculated = false;
+
 		final Document jsdl = job.getJobDescription();
 
+		// check whether this job was already submitted. if, then we need to
+		// copy the directory to a possible new jobdirectory so all the input
+		// files are there...
 		String oldJobDir = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
-
 		try {
 			if (StringUtils.isNotBlank(oldJobDir)) {
 
@@ -1424,561 +2092,210 @@ public class UserJobManager {
 			oldJobDir = null;
 		}
 
-		boolean applicationCalculated = false;
-
 		final JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
 				jsdl);
 
+		// at least we need a commandline, otherwise there is no point...
 		if (jobSubmissionObject.getCommandline() == null) {
 			throw new JobPropertiesException("No commandline specified.");
 		}
 
+		// adding all job properties to the submission object
 		for (final JobSubmissionProperty key : jobSubmissionObject
 				.getJobSubmissionPropertyMap().keySet()) {
 			job.addJobProperty(key.toString(), jobSubmissionObject
 					.getJobSubmissionPropertyMap().get(key));
 		}
 
+		String jobFqan = job.getFqan();
+
+		// getting hold of the executable. important also for possibly
+		// calculating the package
 		final String executable = jobSubmissionObject.extractExecutable();
-		job.addJobProperty(Constants.EXECUTABLE_KEY, executable);
-
-		List<GridResource> matchingResources = null;
-
-		String submissionLocation = null;
-		String[] stagingFileSystems = null;
-
-		// check whether application is "generic". If that is the case, just
-		// check
-		// if all the necessary fields are specified and then continue without
-		// any
-		// auto-settings
-
-		if (jobSubmissionObject.getApplication() == null) {
-
-			final String commandline = jobSubmissionObject.getCommandline();
-
-			final String[] apps = user.getInformationManager()
-					.getApplicationsThatProvideExecutable(jobSubmissionObject
-							.extractExecutable());
-
-			if ((apps == null) || (apps.length == 0)) {
-				jobSubmissionObject
-				.setApplication(Constants.GENERIC_APPLICATION_NAME);
-			} else if (apps.length > 1) {
-				throw new JobPropertiesException(
-						"More than one application names for executable "
-								+ jobSubmissionObject.extractExecutable()
-								+ " found.");
-			} else {
-				jobSubmissionObject.setApplication(apps[0]);
-			}
-
+		String applicationName = jobSubmissionObject.getApplication();
+		String applicationVersion = jobSubmissionObject.getApplicationVersion();
+		String subLoc = jobSubmissionObject.getSubmissionLocation();
+		if (StringUtils.isBlank(subLoc)) {
+			subLoc = Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING;
 		}
 
-		// System.out.println("Subloc in si: "
-		// + jobSubmissionObject.getSubmissionLocation());
+		// // preparing all necessary objects
+		// Application app = AbstractServiceInterface.informationManager
+		// .getResource(Application.class, applicationName);
+		//
+		// Executable exe = AbstractServiceInterface.informationManager
+		// .getResource(Executable.class, executable);
+		//
+		// // check whether application is specified as generic. if so, try to
+		// find
+		// // the proper one using the executable
+		// if (Application.GENERIC_APPLICATION.equals(app) && (exe != null)) {
+		//
+		// Collection<Application> apps =
+		// AbstractServiceInterface.informationManager
+		// .getResources(Application.class,
+		// exe);
+		// if (apps.size() != 0) {
+		// applicationName = apps.iterator().next().toString();
+		// jobSubmissionObject.setApplication(applicationName);
+		// myLogger.debug(
+		// "Found {} applications for executable: {}, using: {}",
+		// new Object[] { apps.size(), exe, applicationName });
+		// applicationCalculated = true;
+		// // setting version to ANY_VERSION, just to make sure
+		// applicationVersion = Constants.NO_VERSION_INDICATOR_STRING;
+		// jobSubmissionObject.setApplicationVersion(applicationVersion);
+		//
+		// } else {
+		// myLogger.debug(
+		// "Could not find application for executable: {}. Keep using generic.",
+		// exe);
+		// // setting version to ANY_VERSION, just to make sure
+		// applicationVersion = Constants.NO_VERSION_INDICATOR_STRING;
+		// jobSubmissionObject.setApplicationVersion(applicationVersion);
+		// }
+		// }
 
-		// if "generic" app, submission location needs to be specified.
-		if (Constants.GENERIC_APPLICATION_NAME.equals(jobSubmissionObject
-				.getApplication())
-				&& (StringUtils.isNotBlank(jobSubmissionObject
-						.getSubmissionLocation()) && !(Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
-								.equals(jobSubmissionObject.getSubmissionLocation())))) {
+		Version version = AbstractServiceInterface.informationManager
+				.getResource(Version.class, applicationVersion);
 
-			submissionLocation = jobSubmissionObject.getSubmissionLocation();
+		// check whether version is specified or not. if not, try to find latest
+		// one...
+		if (Version.ANY_VERSION.equals(version)) {
+			// TODO
+			myLogger.debug("Not implemented yet, but usually this would find the latest version on the grid since the user didn't specify it.");
+		}
 
-			stagingFileSystems = user.getInformationManager()
-					.getStagingFileSystemForSubmissionLocation(submissionLocation);
+		Collection<Queue> availableQueues = AbstractServiceInterface.informationManager
+				.findQueues(jobSubmissionObject.getJobSubmissionPropertyMap(),
+						jobFqan);
 
-			if ((stagingFileSystems == null)
-					|| (stagingFileSystems.length == 0)) {
-				myLogger.error("No staging filesystem found for submissionlocation: "
-						+ submissionLocation);
-				throw new JobPropertiesException(
-						JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-						+ ": "
-						+ "Could not find staging filesystem for submissionlocation "
-						+ submissionLocation);
-			}
+		if ( availableQueues.size() == 0 ) {
+			throw new JobPropertiesException("Could not find any queue to submit this job.");
+		}
 
-			// if not "generic" application...
+		Queue queue = null;
+
+		if (Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING.equals(subLoc)) {
+			// this means we pick the best queue here...
+			// TODO implement some sort of matchmaker
+			queue = availableQueues.iterator().next();
+			submissionLocationCalculated = true;
 		} else {
-			// ...either try to find a suitable one...
-			if (StringUtils.isBlank(jobSubmissionObject.getApplication())
-					|| (StringUtils.equals(Constants.GENERIC_APPLICATION_NAME,
-							jobSubmissionObject.getApplication()) && StringUtils
-							.isBlank(jobSubmissionObject
-									.getSubmissionLocation()))
-
-					) {
-				myLogger.debug("No application specified. Trying to calculate it...");
-
-				final String[] calculatedApps = user
-						.getInformationManager()
-						.getApplicationsThatProvideExecutable(JsdlHelpers
-								.getPosixApplicationExecutable(jsdl));
-				for (final String app : calculatedApps) {
-					jobSubmissionObject.setApplication(app);
-					matchingResources = user.getMatchMaker().findAllResources(
-							jobSubmissionObject.getJobSubmissionPropertyMap(),
-							job.getFqan());
-					removeResourcesWithUnaccessableFilesystems(matchingResources);
-					if ((matchingResources != null)
-							&& (matchingResources.size() > 0)) {
-						JsdlHelpers.setApplicationName(jsdl, app);
-						myLogger.debug("Calculated app: " + app);
-						break;
-					}
-				}
-
-				if ((jobSubmissionObject.getApplication() == null)
-						|| (jobSubmissionObject.getApplication().length() == 0)) {
-
-					final String version = jobSubmissionObject
-							.getApplicationVersion();
-					if (StringUtils.isNotBlank(version)
-							&& !Constants.NO_VERSION_INDICATOR_STRING
-							.equals(version)) {
-						throw new JobPropertiesException(
-								JobSubmissionProperty.APPLICATIONNAME
-								.toString()
-								+ ": "
-								+ "No application specified (but application version) and could not find one in the grid that matches the executable "
-								+ JsdlHelpers
-								.getPosixApplicationExecutable(jsdl)
-								+ ".");
-					} else {
-						jobSubmissionObject
-						.setApplication(Constants.GENERIC_APPLICATION_NAME);
-					}
-				}
-
-				applicationCalculated = true;
-				JsdlHelpers.setApplicationName(jsdl,
-						jobSubmissionObject.getApplication());
-				job.addJobProperty(Constants.APPLICATIONNAME_KEY,
-						jobSubmissionObject.getApplication());
-				job.addJobProperty(Constants.APPLICATIONNAME_CALCULATED_KEY,
-						"true");
-				// ... or use the one specified.
-			} else {
-
-				myLogger.debug("Trying to find matching grid resources...");
-				matchingResources = user.getMatchMaker().findAllResources(
-						jobSubmissionObject.getJobSubmissionPropertyMap(),
-						job.getFqan());
-				removeResourcesWithUnaccessableFilesystems(matchingResources);
-				if (matchingResources != null) {
-					myLogger.debug("Found: " + matchingResources.size()
-							+ " of them: "
-							+ StringUtils.join(matchingResources, " / "));
-				}
-			}
-
-			submissionLocation = jobSubmissionObject.getSubmissionLocation();
-			// GridResource selectedSubmissionResource = null;
-
-			if (StringUtils.isNotBlank(submissionLocation)
-					&& !Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING
-					.equals(submissionLocation)) {
-				myLogger.debug("Submission location specified in jsdl: "
-						+ submissionLocation
-						+ ". Checking whether this is valid using mds information.");
-
-				stagingFileSystems = user.getInformationManager()
-						.getStagingFileSystemForSubmissionLocation(submissionLocation);
-				if ((stagingFileSystems == null)
-						|| (stagingFileSystems.length == 0)) {
-					myLogger.error("No staging filesystem found for submissionlocation: "
-							+ submissionLocation);
-					throw new JobPropertiesException(
-							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-							+ ": "
-							+ "Could not find staging filesystem for submissionlocation "
-							+ submissionLocation + " (using VO: "
-							+ jobFqan + ")");
-				}
-
-				boolean submissionLocationIsValid = false;
-
-				if (Constants.GENERIC_APPLICATION_NAME
-						.equals(jobSubmissionObject.getApplication())) {
-					// let's just assume, shall we? No other option...
-					submissionLocationIsValid = true;
-				} else {
-
-					// check whether submission location is specified. If so,
-					// check
-					// whether it is in the list of matching resources
-					for (final GridResource resource : matchingResources) {
-						if (submissionLocation.equals(SubmissionLocationHelpers
-								.createSubmissionLocationString(resource))) {
-							myLogger.debug("Found gridResource object for submission location. Now checking whether version is specified and if it is whether it is available on this resource.");
-							// now check whether a possible selected version is
-							// available on this resource
-							if (StringUtils.isNotBlank(jobSubmissionObject
-									.getApplicationVersion())
-									&& !Constants.NO_VERSION_INDICATOR_STRING
-									.equals(jobSubmissionObject
-											.getApplicationVersion())
-											&& !resource
-											.getAvailableApplicationVersion()
-											.contains(
-													jobSubmissionObject
-													.getApplicationVersion())) {
-								myLogger.debug("Specified version is not available on this grid resource: "
-										+ submissionLocation);
-								throw new JobPropertiesException(
-										JobSubmissionProperty.APPLICATIONVERSION
-										.toString()
-										+ ": "
-										+ "Version: "
-										+ jobSubmissionObject
-										.getApplicationVersion()
-										+ " not installed on "
-										+ submissionLocation
-										+ " (using VO: "
-										+ jobFqan
-										+ ")");
-							}
-							myLogger.debug("Version available or not specified.");
-							// if no application version is specified, auto-set
-							// one
-							if (StringUtils.isBlank(jobSubmissionObject
-									.getApplicationVersion())
-									|| Constants.NO_VERSION_INDICATOR_STRING
-									.equals(jobSubmissionObject
-											.getApplicationVersion())) {
-								myLogger.debug("version was not specified. Auto setting the first one for the selected resource.");
-								if ((resource.getAvailableApplicationVersion() != null)
-										&& (resource
-												.getAvailableApplicationVersion()
-												.size() > 0)) {
-									final List<String> versionsAvail = resource
-											.getAvailableApplicationVersion();
-
-									String latest = null;
-									try {
-										latest = InformationUtils
-												.guessLatestVersion(versionsAvail);
-									} catch (final Exception e) {
-										myLogger.debug("Could not guess latest version: "
-												+ e.getLocalizedMessage());
-										// using random version
-									}
-
-									if (StringUtils.isNotBlank(latest)) {
-										JsdlHelpers.setApplicationVersion(jsdl,
-												latest);
-									} else {
-										JsdlHelpers.setApplicationVersion(jsdl,
-												versionsAvail.get(0));
-									}
-
-									job.addJobProperty(
-											Constants.APPLICATIONVERSION_KEY,
-											versionsAvail.get(0));
-									job.addJobProperty(
-											Constants.APPLICATIONVERSION_CALCULATED_KEY,
-											"true");
-									myLogger.debug("Set version to be: "
-											+ resource
-											.getAvailableApplicationVersion()
-											.get(0));
-									// jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
-								} else {
-									throw new JobPropertiesException(
-											JobSubmissionProperty.APPLICATIONVERSION
-											.toString()
-											+ ": "
-											+ "Could not find any installed version for application "
-											+ jobSubmissionObject
-											.getApplication()
-											+ " on "
-											+ submissionLocation
-											+ " (using VO: "
-											+ jobFqan
-											+ ")");
-								}
-							}
-							myLogger.debug("Successfully validated submissionlocation "
-									+ submissionLocation);
-							submissionLocationIsValid = true;
-							// selectedSubmissionResource = resource;
-							break;
-						}
-					}
-				}
-
-				if (!submissionLocationIsValid) {
-					myLogger.error("Could not find a matching grid resource object for submissionlocation: "
-							+ submissionLocation);
-					throw new JobPropertiesException(
-							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-							+ ": "
-							+ "Submissionlocation "
-							+ submissionLocation
-							+ " not available for this kind of job (using VO: "
-							+ jobFqan + ")");
-				}
-			} else {
-				myLogger.debug("No submission location specified in jsdl document. Trying to auto-find one...");
-				if ((matchingResources == null)
-						|| (matchingResources.size() == 0)) {
-					myLogger.error("No matching grid resources found.");
-					throw new JobPropertiesException(
-							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-							+ ": "
-							+ "Could not find any matching resource to run this kind of job on. Using VO: "
-							+ jobFqan);
-				}
-				// find the best submissionlocation and set it.
-
-				// check for the version of the application to run
-				if (StringUtils.isBlank(jobSubmissionObject
-						.getApplicationVersion())
-						|| Constants.NO_VERSION_INDICATOR_STRING
-						.equals(jobSubmissionObject
-								.getApplicationVersion())) {
-					myLogger.debug("No version specified in jsdl document. Will use the first one for the best grid resource.");
-					for (final GridResource resource : matchingResources) {
-
-						final String temp = SubmissionLocationHelpers
-								.createSubmissionLocationString(resource);
-						stagingFileSystems = user
-								.getInformationManager()
-								.getStagingFileSystemForSubmissionLocation(temp);
-						if ((stagingFileSystems == null)
-								|| (stagingFileSystems.length == 0)) {
-							myLogger.debug("SubLoc: "
-									+ temp
-									+ " has no staging file system. Trying next one.");
-							continue;
-						}
-
-						if ((resource.getAvailableApplicationVersion() != null)
-								&& (resource.getAvailableApplicationVersion()
-										.size() > 0)) {
-							JsdlHelpers.setApplicationVersion(jsdl, resource
-									.getAvailableApplicationVersion().get(0));
-							job.addJobProperty(
-									Constants.APPLICATIONVERSION_KEY, resource
-									.getAvailableApplicationVersion()
-									.get(0));
-							job.addJobProperty(
-									Constants.APPLICATIONVERSION_CALCULATED_KEY,
-									"true");
-
-							// jobSubmissionObject.setApplicationVersion(resource.getAvailableApplicationVersion().get(0));
-							submissionLocation = SubmissionLocationHelpers
-									.createSubmissionLocationString(resource);
-							myLogger.debug("Using submissionlocation: "
-									+ submissionLocation
-									+ " and application version: "
-									+ resource.getAvailableApplicationVersion()
-									.get(0));
-							break;
-						}
-					}
-					if (submissionLocation == null) {
-						myLogger.error("Could not find any version of the specified application grid-wide.");
-						throw new JobPropertiesException(
-								JobSubmissionProperty.APPLICATIONVERSION
-								.toString()
-								+ ": "
-								+ "Could not find any version for this application grid-wide. That is probably an error in the mds info (VO used: "
-								+ jobFqan + ".");
-					}
-				} else {
-					myLogger.debug("Version: "
-							+ jobSubmissionObject.getApplicationVersion()
-							+ " specified. Trying to find a matching grid resource...");
-					for (final GridResource resource : matchingResources) {
-
-						final String temp = SubmissionLocationHelpers
-								.createSubmissionLocationString(resource);
-						stagingFileSystems = user
-								.getInformationManager()
-								.getStagingFileSystemForSubmissionLocation(temp);
-						if ((stagingFileSystems == null)
-								|| (stagingFileSystems.length == 0)) {
-							myLogger.debug("SubLoc: "
-									+ temp
-									+ " has no staging file system. Trying next one.");
-							continue;
-						}
-
-						if (resource.getAvailableApplicationVersion().contains(
-								jobSubmissionObject.getApplicationVersion())) {
-							submissionLocation = SubmissionLocationHelpers
-									.createSubmissionLocationString(resource);
-							myLogger.debug("Found grid resource with specified application version. Using submissionLocation: "
-									+ submissionLocation);
-							break;
-						}
-					}
-					if (submissionLocation == null) {
-						myLogger.error("Could not find a grid resource with the specified version...");
-						throw new JobPropertiesException(
-								JobSubmissionProperty.APPLICATIONVERSION
-								.toString()
-								+ ": "
-								+ "Could not find desired version: "
-								+ jobSubmissionObject
-								.getApplicationVersion()
-								+ " for application "
-								+ jobSubmissionObject.getApplication()
-								+ " grid-wide. VO used: " + jobFqan);
-					}
-				}
-
-				// selectedSubmissionResource = matchingResources.get(0);
-				// jobSubmissionObject.setSubmissionLocation(submissionLocation);
-				try {
-					JsdlHelpers.setCandidateHosts(jsdl,
-							new String[] { submissionLocation });
-					job.addJobProperty(
-							Constants.SUBMISSIONLOCATION_CALCULATED_KEY, "true");
-				} catch (final RuntimeException e) {
-					throw new JobPropertiesException(
-							JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-							+ ": "
-							+ "Jsdl document malformed. No candidate hosts element.",
-							e);
-				}
-			}
-		}
-
-		myLogger.debug("Trying to find staging filesystem for subissionlocation: "
-				+ submissionLocation);
-
-		if ((stagingFileSystems == null) || (stagingFileSystems.length == 0)) {
-			myLogger.error("No staging filesystem found for submissionlocation: "
-					+ submissionLocation);
-			throw new JobPropertiesException(
-					JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-					+ ": "
-					+ "Could not find staging filesystem for submissionlocation "
-					+ submissionLocation + " (using VO: " + jobFqan
-					+ ")");
-		}
-
-		myLogger.debug("Trying to find mountpoint for stagingfilesystem...");
-
-		MountPoint mountPointToUse = null;
-		String stagingFilesystemToUse = null;
-		for (final String stagingFs : stagingFileSystems) {
-
-			for (final MountPoint mp : getUser().getAllMountPoints()) {
-				if (mp.getRootUrl().startsWith(stagingFs.replace(":2811", ""))
-						&& jobFqan.equals(mp.getFqan())
-						&& mp.isVolatileFileSystem()) {
-					mountPointToUse = mp;
-					stagingFilesystemToUse = stagingFs.replace(":2811", "");
-					myLogger.debug("Found mountpoint " + mp.getAlias()
-							+ " for stagingfilesystem "
-							+ stagingFilesystemToUse);
+			// check whether the specified queue is actually available for
+			// this...
+			for (Queue q : availableQueues) {
+				if (q.toString().equals(subLoc)) {
+					queue = q;
 					break;
 				}
 			}
+			if (queue == null) {
+				throw new JobPropertiesException("Specified queue '" + subLoc
+						+ "' not available for this job.");
+			}
+		}
 
-			// in case we didn't find a volatile filesystem, we try again
-			// considering all of them...
-			if (mountPointToUse == null) {
-				for (final MountPoint mp : getUser().getAllMountPoints()) {
-					if (mp.getRootUrl().startsWith(
-							stagingFs.replace(":2811", ""))
-							&& jobFqan.equals(mp.getFqan())) {
-						mountPointToUse = mp;
-						stagingFilesystemToUse = stagingFs.replace(":2811", "");
-						myLogger.debug("Found mountpoint " + mp.getAlias()
-								+ " for stagingfilesystem "
-								+ stagingFilesystemToUse);
-						break;
+		JsdlHelpers.setCandidateHosts(jsdl, new String[] { queue.toString() });
+
+		// figuring out which filesystem to use
+		Set<Directory> stagingFileSystems = queue
+				.findDirectories(job.getFqan());
+
+		MountPoint mountPointToUse = null;
+		MountPoint mountPointToUseNonVolatile = null;
+		Directory fsToUse = null;
+		Directory fsToUseNonVolatile = null;
+
+		for (final Directory d : stagingFileSystems) {
+
+			for (MountPoint mp : getUser().getMountPoints(job.getFqan())) {
+
+				String mpRoot = mp.getRootUrl();
+				String dirFsUrl = d.getFilesystem().getUrl();
+
+				if (mpRoot.startsWith(dirFsUrl)) {
+
+					if (!mp.isVolatileFileSystem()) {
+						mountPointToUseNonVolatile = mp;
+						fsToUseNonVolatile = d;
+						continue;
 					}
+
+					mountPointToUse = mp;
+					fsToUse = d;
+					myLogger.debug("Found mountpoint {}"
+							+ " for stagingfilesystem {}", mp.getAlias(),
+							fsToUse);
+					break;
 				}
 			}
-
-			if (mountPointToUse != null) {
-				myLogger.debug("Mountpoint set to be: "
-						+ mountPointToUse.getAlias()
-						+ ". Not looking any further...");
-				break;
-			}
-
 		}
 
+		// if we didn't find a volatile mountpoint, we use a non-volatile one,
+		// if possible
 		if (mountPointToUse == null) {
-			myLogger.error("Could not find a staging filesystem that is accessible for the user for submissionlocation "
-					+ submissionLocation);
-			throw new JobPropertiesException(
-					JobSubmissionProperty.SUBMISSIONLOCATION.toString()
-					+ ": "
-					+ "Could not find stagingfilesystem for submission location: "
-					+ submissionLocation + " (using VO: " + jobFqan
-					+ ")");
+			if (mountPointToUseNonVolatile != null) {
+				mountPointToUse = mountPointToUseNonVolatile;
+				fsToUse = fsToUseNonVolatile;
+				myLogger.debug("Found non-volatile mountpoint {}"
+						+ " for stagingfilesystem {}",
+						mountPointToUse.getAlias(), fsToUse);
+			} else {
+				throw new JobPropertiesException(
+						"Could not find staging filesystem for jobsubmission with queue / group: "
+								+ queue.toString() + " / " + job.getFqan());
+			}
 		}
 
-		JsdlHelpers.addOrRetrieveExistingFileSystemElement(jsdl,
-				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM,
-				stagingFilesystemToUse);
 
-		// now calculate and set the proper paths
-		String workingDirectory;
+		// now calculate local paths
+		String workingDirectory = null;
+		String stagingFileSystem = FileManager.ensureTrailingSlash(fsToUse
+				.getFilesystem()
+				.getUrl());
+
 		if (parentJob == null) {
-			workingDirectory = mountPointToUse.getRootUrl().substring(
-					stagingFilesystemToUse.length())
-					+ "/"
-					+ ServerPropertiesManager.getRunningJobsDirectoryName()
-					+ "/" + job.getJobname();
+			workingDirectory = "/"
+					+ mountPointToUse.getRootUrl().substring(
+							stagingFileSystem.length())
+							+ "/"
+							+ ServerPropertiesManager.getRunningJobsDirectoryName()
+							+ "/" + job.getJobname();
 		} else {
-			workingDirectory = mountPointToUse.getRootUrl().substring(
-					stagingFilesystemToUse.length())
-					+ "/"
-					+ parentJob
-					.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY)
-					+ "/" + job.getJobname();
+			workingDirectory = "/"
+					+ mountPointToUse.getRootUrl().substring(
+							stagingFileSystem.length())
+							+ "/"
+							+ parentJob
+							.getJobProperty(Constants.RELATIVE_BATCHJOB_DIRECTORY_KEY)
+							+ "/" + job.getJobname();
+
 		}
-		myLogger.debug("Calculated workingdirectory: " + workingDirectory);
+		workingDirectory = FileManager.ensurePrependingSlash(workingDirectory);
+		myLogger.debug("Calculated workingdirectory: {}", workingDirectory);
 
-		JsdlHelpers.setWorkingDirectory(jsdl,
-				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, workingDirectory);
-		job.addJobProperty(Constants.MOUNTPOINT_KEY,
-				mountPointToUse.getRootUrl());
-		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY,
-				stagingFilesystemToUse);
-
-		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
-		final String submissionSite = user.getInformationManager()
-				.getSiteForHostOrUrl(SubmissionLocationHelpers
-						.extractHost(submissionLocation));
-		myLogger.debug("Calculated submissionSite: " + submissionSite);
-		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, submissionSite);
-		final String queue = SubmissionLocationHelpers
-				.extractQueue(submissionLocation);
-		job.addJobProperty(Constants.QUEUE_KEY, queue);
-		final String newJobdir = stagingFilesystemToUse + workingDirectory;
-
+		final String newJobdir = FileManager
+				.removeDoubleSlashes(stagingFileSystem + workingDirectory);
+		// trying to create/access new jobdirectory.
+		// if that fails, not good...
 		try {
 			getUser().getFileManager().createFolder(newJobdir);
 		} catch (final RemoteFileSystemException e1) {
 			throw new JobPropertiesException(
 					"Could not create new jobdirectory " + newJobdir
-					+ " (using VO: " + jobFqan + "): " + e1);
+					+ " (using Group: " + jobFqan + "): " + e1);
 		}
 
-		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);
-		myLogger.debug("Calculated jobdirectory: " + stagingFilesystemToUse
-				+ workingDirectory);
+		myLogger.debug("Calculated jobdirectory: {}", newJobdir);
 
-		job.addJobProperty(Constants.SUBMISSIONBACKEND_KEY,
-				AbstractServiceInterface.getBackendInfo());
-
+		// if this is a job restart, we need to copy all previous input files
+		// into the new location
 		if (StringUtils.isNotBlank(oldJobDir)) {
 			try {
 				// if old jobdir exists, try to move it here
-				getUser().getFileManager().cpSingleFile(oldJobDir,
-						newJobdir, true, true, true);
+				getUser().getFileManager().cpSingleFile(oldJobDir, newJobdir,
+						true, true, true);
 
 				getUser().getFileManager().deleteFile(oldJobDir);
 			} catch (final Exception e) {
@@ -2013,7 +2330,8 @@ public class UserJobManager {
 				finalNameEl.setTextContent(workingDirectory + filename);
 			} else {
 				if (workingDirectory.endsWith("/") || finalName.startsWith("/")) {
-					finalNameEl.setTextContent(workingDirectory + finalName);
+					finalNameEl.setTextContent(workingDirectory
+							+ finalName);
 				} else {
 					finalNameEl.setTextContent(workingDirectory + "/"
 							+ finalName);
@@ -2022,9 +2340,43 @@ public class UserJobManager {
 
 		}
 
+		// updating jsdl so its stored in the db
+		JsdlHelpers.addOrRetrieveExistingFileSystemElement(jsdl,
+				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, fsToUse
+				.getFilesystem().getUrl());
+		JsdlHelpers.setWorkingDirectory(jsdl,
+				JsdlHelpers.LOCAL_EXECUTION_HOST_FILESYSTEM, "/"
+						+ workingDirectory);
+
 		job.setJobDescription(jsdl);
 
-		// jobdao.attachDirty(job);
+		// adding job properties...
+		job.addJobProperty(Constants.APPLICATIONNAME_KEY, applicationName);
+		job.addJobProperty(Constants.APPLICATIONVERSION_KEY,
+				applicationVersion);
+		job.addJobProperty(Constants.EXECUTABLE_KEY, executable);
+		job.addJobProperty(Constants.SUBMISSION_HOST_KEY, queue.getGateway()
+				.getHost());
+		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, queue.getGateway()
+				.getSite()
+				.toString());
+		job.addJobProperty(Constants.SUBMISSIONLOCATION_KEY, queue.toString());
+		job.addJobProperty(Constants.SUBMISSIONLOCATION_CALCULATED_KEY,
+				submissionLocationCalculated.toString());
+		job.addJobProperty(Constants.APPLICATIONNAME_CALCULATED_KEY,
+				applicationCalculated.toString());
+		job.addJobProperty(Constants.MOUNTPOINT_KEY,
+				mountPointToUse.getRootUrl());
+		job.addJobProperty(Constants.STAGING_FILE_SYSTEM_KEY, stagingFileSystem);
+		job.addJobProperty(Constants.WORKINGDIRECTORY_KEY, workingDirectory);
+		job.addJobProperty(Constants.SUBMISSION_SITE_KEY, queue.getGateway()
+				.getSite()
+				.getName());
+		job.addJobProperty(Constants.QUEUE_KEY, queue.getName());
+		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);
+		job.addJobProperty(Constants.SUBMISSIONBACKEND_KEY,
+				AbstractServiceInterface.getBackendInfo());
+
 		myLogger.debug("Preparing job done.");
 	}
 
@@ -2044,19 +2396,6 @@ public class UserJobManager {
 		}
 	}
 
-
-
-	private void removeResourcesWithUnaccessableFilesystems(
-			List<GridResource> resources) {
-
-		final Iterator<GridResource> i = resources.iterator();
-		while (i.hasNext()) {
-			if (!checkWhetherGridResourceIsActuallyAvailable(i.next())) {
-				i.remove();
-			}
-		}
-
-	}
 
 
 	public void restartJob(final Job job, String changedJsdl)
@@ -2252,7 +2591,14 @@ public class UserJobManager {
 						+ sourceUrl + " to: " + targetUrl);
 				job.addInputFile(sourceUrl);
 				jobdao.saveOrUpdate(job);
-				getUser().getFileManager().cpSingleFile(sourceUrl, targetUrl, true, true, true);
+				RemoteFileTransferObject rfto = getUser().getFileManager()
+						.cpSingleFile(sourceUrl, targetUrl, true, true, true);
+
+				if (rfto.isFailed()) {
+					throw new RemoteFileSystemException(
+							rfto.getPossibleException());
+				}
+
 				myLogger.debug(debugToken + "Finished staging of file: "
 						+ sourceUrl + " to: " + targetUrl);
 				// job.addInputFile(targetUrl);
@@ -2287,35 +2633,30 @@ public class UserJobManager {
 		// String translatedJobDescription =
 		// submitter.convertJobDescription(job);
 
-		String host = JsdlHelpers.getCandidateHosts(jsdl)[0];
-		// TODO change that once I know how to handle queues properly
+		String tmp = JsdlHelpers.getCandidateHosts(jsdl)[0];
 
-		// String queue = null;
-		if (host.indexOf(":") != -1) {
-			// queue = host.substring(0, host.indexOf(":"));
-			host = host.substring(host.indexOf(":") + 1);
+		Queue queue = AbstractServiceInterface.informationManager.getResource(
+				Queue.class, tmp);
+
+		if (queue == null) {
+			throw new ServerJobSubmissionException("Can't find queue for: "
+					+ tmp);
 		}
-		myLogger.debug("Submission host is: " + host);
+
+		String host = queue.getGateway().getHost();
+		myLogger.debug("Submission host is: " + queue.getGateway().getHost());
 
 		// don't know whether factory type should be in here or in the
 		// GT4Submitter (more likely the latter)
-		String factoryType = null;
-		if (host.indexOf("#") != -1) {
-			factoryType = host.substring(host.indexOf("#") + 1);
-			if ((factoryType == null) || (factoryType.length() == 0)) {
-				factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
-			}
-			host = host.substring(0, host.indexOf("#"));
-		} else {
-			factoryType = ManagedJobFactoryConstants.FACTORY_TYPE.PBS;
-		}
+		String factoryType = queue.getFactoryType();
+
 		job.addJobProperty(Constants.FACTORY_TYPE_KEY, factoryType);
 
 		myLogger.debug("FactoryType is: " + factoryType);
 		final String submitHostEndpoint = submitter.getServerEndpoint(host);
 
 		String handle = null;
-		handle = submitter.submit(user.getInformationManager(), submitHostEndpoint,
+		handle = submitter.submit(submitHostEndpoint,
 				factoryType, job);
 
 		job.setJobhandle(handle);
@@ -2361,9 +2702,9 @@ public class UserJobManager {
 
 			addLogMessageToPossibleMultiPartJobParent(job,
 					"Starting job submission for job: " + job.getJobname());
-			myLogger.debug(debug_token + "preparing job environment...");
+			myLogger.debug(debug_token + " preparing job environment...");
 			prepareJobEnvironment(job);
-			myLogger.debug(debug_token + "preparing job environment finished.");
+			myLogger.debug(debug_token + " preparing job environment finished.");
 			if (stageFiles) {
 				myLogger.debug(debug_token + "staging in files started...");
 				status.addLogMessage("Starting file stage-in.");
@@ -2404,10 +2745,10 @@ public class UserJobManager {
 			job.addLogMessage("Setting non-vo credential: " + job.getFqan());
 			job.setCredential(getUser().getCredential());
 		}
-		myLogger.debug(debug_token + "setting credential finished.");
+		myLogger.debug(debug_token + " setting credential finished.");
 
 		myLogger.debug(debug_token
-				+ "adding job properties as env variables to jsdl..");
+				+ " adding job properties as env variables to jsdl..");
 		Document oldJsdl = job.getJobDescription();
 		for (String key : job.getJobProperties().keySet()) {
 			String value = job.getJobProperty(key);
@@ -2423,16 +2764,22 @@ public class UserJobManager {
 		job.setJobDescription(oldJsdl);
 
 		String handle = null;
-		myLogger.debug(debug_token + "submitting job to endpoint...");
+		myLogger.debug(debug_token + " submitting job to endpoint...");
 
 		try {
 			status.addElement("Starting job submission using GT4...");
 			job.addLogMessage("Submitting job to endpoint...");
 			final String candidate = JsdlHelpers.getCandidateHosts(job
 					.getJobDescription())[0];
-			final GridResource resource = getUser().getInformationManager()
-					.getGridResource(candidate);
-			String version = resource.getGRAMVersion();
+			final Queue resource = AbstractServiceInterface.informationManager
+					.getResource(Queue.class, candidate);
+
+			if (resource == null) {
+				throw new JobSubmissionException(
+						"Can't find queue for string: " + candidate);
+			}
+
+			String version = resource.getGateway().getMiddleware().getVersion();
 
 			if (version == null) {
 				// TODO is that good enough?
@@ -2447,12 +2794,12 @@ public class UserJobManager {
 
 			}
 			try {
-				myLogger.debug(debug_token + "submitting...");
+				myLogger.debug(debug_token + " submitting...");
 				handle = getUser().getJobManager().submit(
 						submissionType, job);
-				myLogger.debug(debug_token + "submission finished...");
+				myLogger.debug(debug_token + " submission finished...");
 			} catch (final ServerJobSubmissionException e) {
-				myLogger.debug(debug_token + "submittission failed: "
+				myLogger.debug(debug_token + " submittission failed: "
 						+ e.getLocalizedMessage());
 				status.addLogMessage("Job submission failed on server.");
 				status.setFailed(true);
@@ -2471,7 +2818,7 @@ public class UserJobManager {
 
 			job.addLogMessage("Submission finished.");
 		} catch (final Throwable e) {
-			myLogger.debug(debug_token + "something failed: "
+			myLogger.debug(debug_token + " something failed: "
 					+ e.getLocalizedMessage());
 
 			// e.printStackTrace();
@@ -2492,7 +2839,7 @@ public class UserJobManager {
 
 		if (handle == null) {
 			myLogger.debug(debug_token
-					+ "submission finished but no jobhandle.");
+					+ " submission finished but no jobhandle.");
 			status.addLogMessage("Submission finished but no jobhandle...");
 			status.setFailed(true);
 			status.setErrorCause("No jobhandle");
@@ -2509,7 +2856,7 @@ public class UserJobManager {
 
 		try {
 
-			myLogger.debug(debug_token + "wrapping up started");
+			myLogger.debug(debug_token + " wrapping up started");
 			job.addJobProperty(Constants.SUBMISSION_TIME_KEY,
 					Long.toString(new Date().getTime()));
 
@@ -2524,7 +2871,7 @@ public class UserJobManager {
 					"Job submission for job: " + job.getJobname()
 					+ " finished successful.");
 			jobdao.saveOrUpdate(job);
-			myLogger.debug(debug_token + "wrapping up finished");
+			myLogger.debug(debug_token + " wrapping up finished");
 			myLogger.info("Jobsubmission for job " + job.getJobname()
 					+ " and user " + getUser().getDn() + " successful.");
 
@@ -2537,7 +2884,7 @@ public class UserJobManager {
 							getUser().getDn() });
 
 		} catch (final Throwable e) {
-			myLogger.debug(debug_token + "wrapping up failed: "
+			myLogger.debug(debug_token + " wrapping up failed: "
 					+ e.getLocalizedMessage());
 			status.addLogMessage("Submission finished, error in wrap-up...");
 			status.setFailed(true);

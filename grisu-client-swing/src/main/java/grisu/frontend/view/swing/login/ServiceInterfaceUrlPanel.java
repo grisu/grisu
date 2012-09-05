@@ -30,8 +30,9 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 		for (final String url : ClientPropertiesManager
 				.getServiceInterfaceUrls()) {
 
-			final String posAlias = LoginManager.SERVICEALIASES.inverse().get(
-					url);
+			final String posAlias = LoginManager.SERVICEALIASES.inverse()
+					.get(
+							url);
 			if (StringUtils.isNotBlank(posAlias)) {
 
 				if (urlModel.getIndexOf(posAlias) < 0) {
@@ -63,7 +64,8 @@ public class ServiceInterfaceUrlPanel extends JPanel {
 
 			String defaultUrl = ClientPropertiesManager
 					.getDefaultServiceInterfaceUrl();
-			final String posAlias = LoginManager.SERVICEALIASES.inverse().get(
+			final String posAlias = LoginManager.SERVICEALIASES.inverse()
+					.get(
 					defaultUrl);
 			if (StringUtils.isNotBlank(posAlias)) {
 				defaultUrl = posAlias;

@@ -3,15 +3,13 @@ package grisu.frontend.view.swing.jobcreation.widgets;
 import grisu.control.ServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.interfaces.GridResource;
-import grisu.jcommons.utils.SubmissionLocationHelpers;
 import grisu.model.FqanEvent;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.info.UserApplicationInformation;
+import grisu.model.info.dto.Queue;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -84,20 +82,22 @@ EventSubscriber<FqanEvent> {
 				final Map<JobSubmissionProperty, String> additional = new HashMap<JobSubmissionProperty, String>();
 				additional.put(JobSubmissionProperty.APPLICATIONVERSION,
 						version);
-				final Set<GridResource> subLocs = appInfo
-						.getAllSubmissionLocationsAsGridResources(additional,
-								currentVO);
 
-				subLocModel.removeAllElements();
+				// TODO re-enable that one
+				// final Set<Queue> subLocs = appInfo
+				// .getAllSubmissionLocationsAsGridResources(additional,
+				// currentVO);
 
-				for (final GridResource gr : subLocs) {
-					subLocModel.addElement(gr);
-				}
-
-				if ((oldValue instanceof GridResource)
-						&& subLocs.contains(oldValue)) {
-					subLocModel.setSelectedItem(oldValue);
-				}
+				// subLocModel.removeAllElements();
+				//
+				// for (final GridResource gr : subLocs) {
+				// subLocModel.addElement(gr);
+				// }
+				//
+				// if ((oldValue instanceof GridResource)
+				// && subLocs.contains(oldValue)) {
+				// subLocModel.setSelectedItem(oldValue);
+				// }
 
 				subLocsFilled = true;
 			}
@@ -113,15 +113,14 @@ EventSubscriber<FqanEvent> {
 		return comboBox;
 	}
 
-	public GridResource getSelectedResource() {
-		return (GridResource) subLocModel.getSelectedItem();
+	public Queue getSelectedResource() {
+		return (Queue) subLocModel.getSelectedItem();
 	}
 
 	@Override
 	public String getValue() {
 
-		return SubmissionLocationHelpers
-				.createSubmissionLocationString(getSelectedResource());
+		return getSelectedResource().toString();
 	}
 
 	public void onEvent(FqanEvent event) {

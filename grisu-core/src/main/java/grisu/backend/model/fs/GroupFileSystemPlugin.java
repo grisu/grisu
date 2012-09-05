@@ -6,8 +6,8 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.VO;
 import grisu.settings.ServerPropertiesManager;
-import grith.jgrith.voms.VO;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,27 +27,29 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
+
 /**
  * A plugin that lists (non-volatile) filesystems in a tree-like group
  * structure.
- * 
+ *
  * The base url for this plugin is grid://groups . The next token will be the
  * name of the VO and beneath that this plugin will populate folders with both
  * sub-vos and files (provided the VO/Sub-VO inquestion is associated with a
  * filesystem).
- * 
+ *
  * Groups and "real" files will be merged in the child files of a url.
- * 
+ *
  * Since the way the filelisting is done can be a bit slow at times, if you only
  * want to know the child files for a certain VO, seperate the VO-part of the
  * url and the path-part using //, e.g. grid://groups/nz/NeSI//folder1/folder2 .
  * This will make sure to only query all mountpoints associated with the
  * /nz/NeSI VO, but it will not list filesystems possibly associated to the /nz
  * VO for a (real) folder called /NeSI.
- * 
- * 
+ *
+ *
  * @author Markus Binsteiner
- * 
+ *
  */
 public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
@@ -205,6 +207,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			// means is root of VO so we need to list potential files on all
 			// sites that support this vo
 			// and also all child vos
+
 			final String parentfqan = "/" + tokens[0];
 			final Set<String> urls = resolveUrls(path, parentfqan, true);
 
@@ -230,7 +233,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 
 			for (final String fqan : childFqans) {
 
-				final Set<MountPoint> mps = user.getMountPoints(fqan);
+				final Set<MountPoint> mps = Sets.newTreeSet(user
+						.getMountPoints(fqan));
 
 				// we need to remove volatile mountpoints
 				final Iterator<MountPoint> it = mps.iterator();
@@ -478,7 +482,8 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 							.equals(tokens[tokens.length - 1])) {
 
 				final Set<String> sites = new TreeSet<String>();
-				final Set<MountPoint> mps = user.getMountPoints(fqan);
+				final Set<MountPoint> mps = Sets.newTreeSet(user
+						.getMountPoints(fqan));
 				// removing volatile mountpoints
 				final Iterator<MountPoint> it = mps.iterator();
 				while (it.hasNext()) {
@@ -516,7 +521,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 			final boolean includeFailedChilds)
 					throws RemoteFileSystemException {
 
-		final Set<MountPoint> mps = user.getMountPoints(fqan);
+		final Set<MountPoint> mps = Sets.newTreeSet(user.getMountPoints(fqan));
 
 		// removing volatile mountpoints
 		final Iterator<MountPoint> it = mps.iterator();
@@ -619,7 +624,7 @@ public class GroupFileSystemPlugin implements VirtualFileSystemPlugin {
 	private Set<String> resolveUrls(String path, String fqan,
 			boolean excludeVolatileFilesystems) {
 
-		final Set<MountPoint> mps = user.getMountPoints(fqan);
+		final Set<MountPoint> mps = Sets.newTreeSet(user.getMountPoints(fqan));
 
 		// remove volatile mountpoints
 		final Iterator<MountPoint> it = mps.iterator();

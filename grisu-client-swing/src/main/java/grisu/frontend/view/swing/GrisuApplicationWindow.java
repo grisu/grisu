@@ -1,6 +1,5 @@
 package grisu.frontend.view.swing;
 
-import grisu.GrisuVersion;
 import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
@@ -11,9 +10,13 @@ import grisu.frontend.view.swing.login.ServiceInterfaceHolder;
 import grisu.frontend.view.swing.utils.AdvancedSettingsPanel;
 import grisu.jcommons.utils.HttpProxyPanel;
 import grisu.model.dto.GridFile;
+import grisu.settings.ClientPropertiesManager;
+import grith.gridsession.GridClient;
+import grith.jgrith.cred.GridLoginParameters;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -32,12 +35,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.jgoodies.common.base.SystemUtils;
+import com.jgoodies.looks.Options;
 
-public abstract class GrisuApplicationWindow implements WindowListener,
-		ServiceInterfaceHolder {
+public abstract class GrisuApplicationWindow extends GridClient implements
+WindowListener, ServiceInterfaceHolder {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuApplicationWindow.class.getName());
+	
+	public static String PANEL_TO_PRELOAD = null;
 
 	private ServiceInterface si;
 
@@ -52,12 +59,12 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 	private final Set<ServiceInterfacePanel> configPanels;
 
-	public GrisuApplicationWindow() {
+	public GrisuApplicationWindow() throws Exception {
 		this((ServiceInterfacePanel) null);
 	}
 
-	public GrisuApplicationWindow(ServiceInterfacePanel panel) {
-
+	public GrisuApplicationWindow(ServiceInterfacePanel panel) throws Exception {
+		super(new GridLoginParameters());
 		initialize();
 
 		menu = new GrisuMenu(this);
@@ -80,9 +87,12 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 	/**
 	 * Launch the application.
+	 * 
+	 * @throws Exception
 	 */
-	public GrisuApplicationWindow(Set<ServiceInterfacePanel> configpanels) {
-
+	public GrisuApplicationWindow(Set<ServiceInterfacePanel> configpanels)
+			throws Exception {
+		super(new GridLoginParameters());
 		initialize();
 
 		menu = new GrisuMenu(this);
@@ -103,9 +113,6 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 	}
 
-	public void addDefaultFileNavigationTaskPane() {
-		mainPanel.addDefaultFileNavigationTaskPane();
-	}
 
 	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
 		mainPanel.addGroupFileListPanel(left, right);
@@ -170,14 +177,33 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 				AWTEvent.WINDOW_EVENT_MASK);
 
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			myLogger.debug("Setting look and feel.");
+
+			UIManager.put(Options.USE_SYSTEM_FONTS_APP_KEY, Boolean.TRUE);
+			Options.setDefaultIconSize(new Dimension(18, 18));
+
+			String lafName = null;
+			if (SystemUtils.IS_OS_WINDOWS) {
+				lafName = Options.JGOODIES_WINDOWS_NAME;
+			} else {
+				lafName = UIManager.getSystemLookAndFeelClassName();
+			}
+
+			try {
+				myLogger.debug("Look and feel name:" + lafName);
+				UIManager.setLookAndFeel(lafName);
+			} catch (Exception e) {
+				System.err.println("Can't set look & feel:" + e);
+			}
+
+			// UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (final Exception e) {
 			myLogger.error(e.getLocalizedMessage(), e);
 		}
 
 		frame = new JXFrame();
 		String title = null;
-		final String clientVersion = GrisuVersion.get("this-client");
+		final String clientVersion = LoginManager.getClientVersion();
 		if (StringUtils.containsIgnoreCase(clientVersion, "snapshot")) {
 			title = getName() + "  (DEVELOPMENT VERSION)";
 		} else {
@@ -207,7 +233,9 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 		final List<ServiceInterfaceHolder> siHolders = ImmutableList
 				.of((ServiceInterfaceHolder) this);
+
 		final LoginPanel lp = new LoginPanel(mainPanel, siHolders);
+		lp.setSessionClient(this);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
 	}
 
@@ -226,11 +254,22 @@ public abstract class GrisuApplicationWindow implements WindowListener,
 
 		this.si = si;
 		this.menu.setServiceInterface(si);
+		this.mainPanel.setServiceInterface(si);
 		initOptionalStuff(si);
 		refreshJobCreationPanels();
 
 		for (final ServiceInterfacePanel panel : configPanels) {
 			panel.setServiceInterface(si);
+		}
+		
+		String lastPanel = PANEL_TO_PRELOAD;
+
+		if ( StringUtils.isBlank(lastPanel)) {
+			lastPanel = ClientPropertiesManager.getProperty("lastCreatePanel"); 
+		}
+		if ( StringUtils.isNotBlank(lastPanel)) {
+			String[] command = lastPanel.split(",");
+			this.mainPanel.getGrisuNavigationPanel().setNavigationCommand(command);
 		}
 
 	}

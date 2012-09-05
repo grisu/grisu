@@ -1,9 +1,8 @@
 package grisu.backend.model;
 
-import grisu.jcommons.interfaces.InfoManager;
-import grisu.jcommons.model.info.Directory;
-import grisu.jcommons.model.info.FileSystem;
 import grisu.model.MountPoint;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.FileSystem;
 
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +10,7 @@ import java.util.Set;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class UserInfoManager implements InfoManager {
+public class UserInfoManager {
 
 	private final User user;
 
@@ -22,41 +21,41 @@ public class UserInfoManager implements InfoManager {
 		this.user = user;
 	}
 
-	public Set<Directory> getDirectoriesForVO(String vo) {
-
-		if (dirs.get(vo) == null) {
-			synchronized (vo) {
-
-				Set<MountPoint> mps = user.getMountPoints(vo);
-				Set<Directory> directories = Sets.newHashSet();
-				dirs.put(vo, directories);
-
-				for ( MountPoint mp : mps ) {
-					Set<FileSystem> temp = getFileSystemsForVO(vo);
-					FileSystem fs = null;
-					for (FileSystem fsTemp : temp) {
-						String fsUrl = fsTemp.getUrl();
-						String mpUrl = mp.getRootUrl();
-						if (mpUrl.startsWith(fsUrl)) {
-							fs = fsTemp;
-							break;
-						}
-					}
-
-					if (fs == null) {
-						throw new RuntimeException(
-								"No filesystem found for mountpoint "
-										+ mp.getAlias());
-					}
-
-					Directory d = new Directory(fs, mp.getPath(), vo, null);
-					directories.add(d);
-				}
-
-			}
-		}
-		return dirs.get(vo);
-	}
+	// public Set<Directory> getDirectoriesForVO(String vo) {
+	//
+	// if (dirs.get(vo) == null) {
+	// synchronized (vo) {
+	//
+	// Set<MountPoint> mps = user.getMountPoints(vo);
+	// Set<Directory> directories = Sets.newHashSet();
+	// dirs.put(vo, directories);
+	//
+	// for ( MountPoint mp : mps ) {
+	// Set<FileSystem> temp = getFileSystemsForVO(vo);
+	// FileSystem fs = null;
+	// for (FileSystem fsTemp : temp) {
+	// String fsUrl = fsTemp.getUrl();
+	// String mpUrl = mp.getRootUrl();
+	// if (mpUrl.startsWith(fsUrl)) {
+	// fs = fsTemp;
+	// break;
+	// }
+	// }
+	//
+	// if (fs == null) {
+	// throw new RuntimeException(
+	// "No filesystem found for mountpoint "
+	// + mp.getAlias());
+	// }
+	//
+	// Directory d = new Directory(fs, mp.getPath(), vo, null);
+	// directories.add(d);
+	// }
+	//
+	// }
+	// }
+	// return dirs.get(vo);
+	// }
 
 	private Map<String, Set<FileSystem>> getFileSystems() {
 		if (filesystems == null) {

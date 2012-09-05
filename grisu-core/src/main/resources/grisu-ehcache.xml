@@ -14,12 +14,12 @@
             diskExpiryThreadIntervalSeconds="14400"
             memoryStoreEvictionPolicy="LRU"
             />
-            
-    <cache name="userCache" maxElementsInMemory="10000" eternal="false"
+             
+     <cache name="userCache" maxElementsInMemory="10000" eternal="false"
 		timeToIdleSeconds="1800" timeToLiveSeconds="3600" overflowToDisk="false"
 		diskSpoolBufferSizeMB="0" maxElementsOnDisk="0" diskPersistent="false"
 		diskExpiryThreadIntervalSeconds="0" memoryStoreEvictionPolicy="LRU"
-            />       
+            />                 
 
 	<cache name="short" maxElementsInMemory="10000" eternal="false"
 		timeToIdleSeconds="30" timeToLiveSeconds="120" overflowToDisk="false"

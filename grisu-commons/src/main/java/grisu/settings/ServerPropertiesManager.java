@@ -1,6 +1,7 @@
 package grisu.settings;
 
 import grisu.control.ServiceInterface;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.utils.tid.SecureRandomTid;
 import grisu.jcommons.utils.tid.TidGenerator;
 
@@ -33,7 +34,7 @@ public final class ServerPropertiesManager {
 	/**
 	 * Default minimum myproxy lifetime before it gets refreshed: 1800 seconds.
 	 */
-	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 1800;
+	public static final int DEFAULT_MIN_PROXY_LIFETIME_BEFORE_REFRESH = 600;
 	/**
 	 * Default concurrent threads to query job status per user: 2
 	 */
@@ -92,7 +93,7 @@ public final class ServerPropertiesManager {
 
 	private static final int DEFAULT_JOB_CLEAN_THRESHOLD_IN_SECONDS = 1800;
 
-	private static final String DEFAULT_VOS_TO_SUPPORT = "nz";
+	private static final String DEFAULT_VOS_TO_SUPPORT = "test";
 
 	private static final long DEFAULT_PROXY_RETRIEVAL_WAIT_TIME = 300;
 
@@ -559,10 +560,6 @@ public final class ServerPropertiesManager {
 			result.put(key.toString(), value);
 		}
 
-		if (result.size() == 0) {
-			return null;
-		}
-
 		return result;
 	}
 
@@ -646,6 +643,29 @@ public final class ServerPropertiesManager {
 	}
 
 	/**
+	 * Returns the default myproxy server that is used (if no custom myproxy
+	 * host is specified in login/authentication process of a backend).
+	 * 
+	 * @return the host
+	 */
+	public static String getMyProxyHost() {
+
+		String host = null;
+		try {
+			host = getServerConfiguration().getString("General.myProxyHost");
+
+		} catch (final Exception e) {
+			host = null;
+		}
+
+		if (host == null) {
+			host = GridEnvironment.getDefaultMyProxyServer();
+		}
+
+		return host;
+	}
+
+	/**
 	 * Returns the lifetime of a delegated proxy that is retrieved from myproxy.
 	 * 
 	 * @return the lifetime in seconds
@@ -664,6 +684,27 @@ public final class ServerPropertiesManager {
 			return DEFAULT_MYPROXY_LIFETIME_IN_SECONDS;
 		}
 		return lifetime_in_seconds;
+	}
+
+	/**
+	 * The MyProxy port to use.
+	 * 
+	 * @return the port
+	 */
+	public static int getMyProxyPort() {
+		int port = -1;
+		try {
+			port = Integer.parseInt(getServerConfiguration()
+					.getString("General.myProxyPort"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return GridEnvironment.getDefaultMyProxyPort();
+		}
+		if (port == -1) {
+			return GridEnvironment.getDefaultMyProxyPort();
+		}
+		return port;
 	}
 
 	/**
@@ -713,30 +754,50 @@ public final class ServerPropertiesManager {
 		return config;
 	}
 
+	public static boolean getShortenJobname() {
+		boolean shorten = false;
+
+		try {
+			try {
+				shorten = getServerConfiguration().getBoolean(
+						"General.shortenJobname");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				// myLogger.debug(e.getLocalizedMessage(), e);
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e.getLocalizedMessage());
+		}
+		return shorten;
+	}
+
+
 	public static TidGenerator getTidGenerator() {
 
 		return new SecureRandomTid();
 
 	}
 
-	/**
-	 * The vos to use (in addition to manually added ones).
-	 * 
-	 * @return the vos
-	 */
-	public static String[] getVOsToUse() {
-		String vos;
-		try {
-			vos = getServerConfiguration().getString(
-					"General.supportedVOs");
+	public static boolean getVerifyAfterArchive() {
+		boolean verify = false;
 
-			if ( StringUtils.isBlank(vos)) {
-				vos = DEFAULT_VOS_TO_SUPPORT;
+		try {
+			try {
+				verify = getServerConfiguration().getBoolean(
+						"General.verifyBeforeDeleteJobdir");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				// myLogger.debug(e.getLocalizedMessage(), e);
 			}
-			return vos.split(",");
-		} catch (final Exception e) {
-			return null;
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e.getLocalizedMessage());
 		}
+		return verify;
+
 	}
 
 	public static int getWaitTimeBetweenFailedFileTransferAndNextTryInSeconds() {

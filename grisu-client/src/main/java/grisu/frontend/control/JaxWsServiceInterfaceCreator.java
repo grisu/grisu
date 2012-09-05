@@ -5,6 +5,7 @@ import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.jaxws.CommandLogHandler;
 import grisu.frontend.control.login.LoginManager;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.settings.Environment;
 
 import java.io.File;
@@ -27,10 +28,10 @@ import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.python.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Maps;
 import com.sun.xml.ws.developer.JAXWSProperties;
 
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
@@ -130,8 +131,18 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
 					new Integer(4096));
 
-			bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
-					username);
+			if (StringUtils.isNotBlank(myProxyServer)) {
+				String myproxycontact = username + "@" + myProxyServer;
+				int p = Integer.parseInt(myProxyPort);
+				if ((p > 0) && (p != GridEnvironment.getDefaultMyProxyPort())) {
+					myproxycontact = myproxycontact + ":" + myProxyPort;
+				}
+				bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
+						myproxycontact);
+			} else {
+				bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
+						username);
+			}
 			bp.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY,
 					new String(password));
 
@@ -151,6 +162,10 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 					.get("grisu-client");
 
 			Map map = Maps.newHashMap();
+
+			map.put("X-login-host", Collections.singletonList(myProxyServer));
+			map.put("X-login-port", Collections.singletonList(myProxyPort));
+
 			map.put("X-grisu-client", Collections.singletonList(clientstring));
 
 			String session_id = LoginManager.USER_SESSION;
@@ -172,8 +187,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			return service;
 
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			e.printStackTrace();
 			throw new ServiceInterfaceException(
 					"Could not create JaxwsServiceInterface: "
 							+ e.getLocalizedMessage(), e);

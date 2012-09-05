@@ -5,6 +5,7 @@ import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.backend.utils.FileContentDataSourceConnector;
 import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
@@ -101,6 +102,18 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			FileSystem root = null;
 
 			// root = this.createFilesystem(mp.getRootUrl(), mp.getFqan());
+
+			if (url.contains("~")) {
+				myLogger.debug("Replacing ~ with actual path...");
+				MountPoint mp = user
+						.getResponsibleMountpointForAbsoluteFile(url);
+				// replacing with absolute path
+				if (mp != null) {
+					url = url.replaceFirst("~", mp.getPath());
+					url = FileManager.removeDoubleSlashes(url);
+				}
+			}
+
 			root = fsCache.getFileSystem(url, fqan);
 
 			final String fileUri = root.getRootName().getURI();
@@ -413,6 +426,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 			final MountPoint mp = user
 					.getResponsibleMountpointForAbsoluteFile(url);
+
+			if (url.contains("~")) {
+				url = fo.getURL().toString();
+			}
 
 			final GridFile folder = new GridFile(url, lastModified);
 

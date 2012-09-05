@@ -10,19 +10,21 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.jcommons.constants.Constants;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoApplicationDetails;
-import grisu.model.dto.DtoApplicationInfo;
 import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoGridResources;
-import grisu.model.dto.DtoHostsInfo;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
 import grisu.model.dto.DtoMountPoints;
-import grisu.model.dto.DtoProperties;
-import grisu.model.dto.DtoStringList;
-import grisu.model.dto.DtoSubmissionLocations;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.DtoProperties;
+import grisu.model.info.dto.DtoStringList;
+import grisu.model.info.dto.JobQueueMatch;
+import grisu.model.info.dto.Package;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Site;
+import grisu.model.info.dto.Version;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataHandler;
@@ -53,7 +55,7 @@ import javax.xml.bind.annotation.XmlMimeType;
 @WebService(targetNamespace = "http://api.grisu", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	public static final int API_VERSION = 15;
+	public static final int API_VERSION = 16;
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
@@ -377,32 +379,28 @@ public interface ServiceInterface {
 	boolean fileExists(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
-	/**
-	 * Takes a jsdl template and returns a list of submission locations that
-	 * match the requirements. The order of the list is determined by the
-	 * underlying ranking algorithm.
-	 * 
-	 * @param jsdl
-	 *            the jdsl file
-	 * @param fqan
-	 *            the fqan to use to submit the job
-	 * @param exclude
-	 *            whether to exclude locations that don't have free job slots
-	 *            available at the moment in the result list
-	 * 
-	 * @return a list of matching submissionLoctations
-	 */
-	@GET
-	@Path("/info/queues/matching/jsdl")
-	@PermitAll
-	DtoGridResources findMatchingSubmissionLocationsUsingJsdl(
-			@QueryParam("jsdl") String jsdl, @QueryParam("fqan") String fqan,
-			@DefaultValue("false") @QueryParam("exclude") boolean exclude);
+
 
 	/**
-	 * Takes a jsdl template and returns a list of submission locations that
-	 * match the requirements. The order of the list is determined by the
-	 * underlying ranking algorithm.
+	 * Takes job properties and returns a list of queues along with information
+	 * how well (or if at all) the specified job would run on each queue.
+	 * 
+	 * @param jobProperties
+	 *            the job
+	 * @param fqan
+	 *            the group
+	 * @return the list of queues
+	 */
+	@GET
+	@Path("/info/matches/properties")
+	@PermitAll
+	List<JobQueueMatch> findMatches(
+			@QueryParam("jobProperties") DtoProperties jobProperties,
+			@QueryParam("fqan") String fqan);
+
+	/**
+	 * Takes a job properties and returns a list of submission locations that
+	 * match the requirements.
 	 * 
 	 * @param jobProperties
 	 *            the job Properties (have alook at the
@@ -410,15 +408,18 @@ public interface ServiceInterface {
 	 *            keys)
 	 * @param fqan
 	 *            the fqan to use to submit the job
+	 * @param include
+	 *            whether to include Queues for that fqan but don't fit one or
+	 *            more of the job properties
+	 * 
 	 * @return a list of matching submissionLoctations
 	 */
 	@GET
 	@Path("/info/queues/matching/properties")
 	@PermitAll
-	DtoGridResources findMatchingSubmissionLocationsUsingMap(
-			@QueryParam("jobProperties") DtoJob jobProperties,
-			@QueryParam("fqan") String fqan,
-			@DefaultValue("false") @QueryParam("exclude") boolean exclude);
+	List<Queue> findQueues(
+			@QueryParam("jobProperties") DtoProperties jobProperties,
+			@QueryParam("fqan") String fqan);
 
 	/**
 	 * Returns the current status of an ongoing action.
@@ -468,7 +469,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/applications")
 	@PermitAll
-	DtoStringList getAllAvailableApplications(
+	Application[] getAllAvailableApplications(
 			@DefaultValue("") @QueryParam("groups") DtoStringList fqans);
 
 	/**
@@ -483,19 +484,7 @@ public interface ServiceInterface {
 	DtoStringList getAllBatchJobnames(
 			@DefaultValue(Constants.ALLJOBS_KEY) @QueryParam("application") String application);
 
-	/**
-	 * This returns a map of all hosts that the information provider has listed
-	 * and the site that they belong to as value. This method is mainly there
-	 * because of performance reasons so clients can calculate possible
-	 * submission locations easier.
-	 * 
-	 * @return a map with all possible hostnames and the respective sites they
-	 *         belong to
-	 */
-	@GET
-	@Path("/info/hosts")
-	@PermitAll
-	DtoHostsInfo getAllHosts();
+
 
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
@@ -526,7 +515,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/sites")
 	@PermitAll
-	DtoStringList getAllSites();
+	Site[] getAllSites();
 
 	/**
 	 * Queries for all submission locations on the grid. Returns an array of
@@ -538,7 +527,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/queues")
 	@PermitAll
-	DtoSubmissionLocations getAllSubmissionLocations();
+	Queue[] getAllSubmissionLocations();
 
 	/**
 	 * Returns all submission locations for this VO. Needed for better
@@ -551,7 +540,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/queues/{group}")
 	@PermitAll
-	DtoSubmissionLocations getAllSubmissionLocationsForFqan(
+	Queue[] getAllSubmissionLocationsForFqan(
 			@PathParam("group") String fqan);
 
 	/**
@@ -570,24 +559,11 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/application/{application}/{version}/{queue}")
 	@PermitAll
-	DtoApplicationDetails getApplicationDetailsForVersionAndSubmissionLocation(
+	Package getApplicationDetailsForVersionAndSubmissionLocation(
 			@PathParam("application") String application,
 			@DefaultValue(Constants.NO_VERSION_INDICATOR_STRING) @PathParam("version") String version,
 			@DefaultValue("") @PathParam("queue") String subloc);
 
-	/**
-	 * Returns a list of all application packages that provide the specified
-	 * executable.
-	 * 
-	 * @param executable
-	 *            the executable
-	 * @return the application package(s)
-	 */
-	@GET
-	@Path("/info/applications/{executable}")
-	@PermitAll
-	String[] getApplicationPackagesForExecutable(
-			@PathParam("executable") String executable);
 
 	/**
 	 * Returns a xml document that contains all the jobs of the user with
@@ -847,7 +823,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/application/{application}/queues")
 	@PermitAll
-	DtoSubmissionLocations getSubmissionLocationsForApplication(
+	Queue[] getSubmissionLocationsForApplication(
 			@PathParam("application") String application);
 
 	/**
@@ -866,7 +842,7 @@ public interface ServiceInterface {
 	@GET
 	@Path("info/application/{application}/{version}/queues")
 	@PermitAll
-	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersion(
+	Queue[] getSubmissionLocationsForApplicationAndVersion(
 			@PathParam("application") String application,
 			@PathParam("version") String version);
 
@@ -889,27 +865,27 @@ public interface ServiceInterface {
 	@GET
 	@Path("/info/application/{application}/{version}/{group}/queues")
 	@PermitAll
-	DtoSubmissionLocations getSubmissionLocationsForApplicationAndVersionAndFqan(
+	Queue[] getSubmissionLocationsForApplicationAndVersionAndFqan(
 			@PathParam("application") String application,
 			@PathParam("version") String version,
 			@PathParam("group") String fqan);
 
-	/**
-	 * Returns a map of all versions and all submission locations of this
-	 * application. The key of the map is the version, and the
-	 * submissionlocations are the values. If there is more than one
-	 * submissionLocation for a version, then they are seperated via commas.
-	 * 
-	 * @param application
-	 *            the name of the application
-	 * @return a map with all versions of the application as key and the
-	 *         submissionLocations as comma
-	 */
-	@GET
-	@Path("/info/application/{application}/queues")
-	@PermitAll
-	DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
-			@PathParam("application") String application);
+	// /**
+	// * Returns a map of all versions and all submission locations of this
+	// * application. The key of the map is the version, and the
+	// * submissionlocations are the values. If there is more than one
+	// * submissionLocation for a version, then they are seperated via commas.
+	// *
+	// * @param application
+	// * the name of the application
+	// * @return a map with all versions of the application as key and the
+	// * submissionLocations as comma
+	// */
+	// @GET
+	// @Path("/info/application/{application}/queues")
+	// @PermitAll
+	// DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
+	// @PathParam("application") String application);
 
 	/**
 	 * Gets the template Document for this application.
@@ -991,7 +967,7 @@ public interface ServiceInterface {
 	 */
 	@GET
 	@Path("/info/application/{application}/{queue}/versions")
-	DtoStringList getVersionsOfApplicationOnSubmissionLocation(
+	List<Version> getVersionsOfApplicationOnSubmissionLocation(
 			@PathParam("application") String application,
 			@PathParam("queue") String submissionLocation);
 
@@ -1097,7 +1073,8 @@ public interface ServiceInterface {
 	@POST
 	@Path("/user/login")
 	void login(@QueryParam("username") String username,
-			@QueryParam("password") String password);
+			@QueryParam("password") String password,
+			@QueryParam("host") String host, @QueryParam("port") int port);
 
 	/**
 	 * Logout of the service. Performs housekeeping tasks and usually deletes
@@ -1152,59 +1129,6 @@ public interface ServiceInterface {
 	@Path("/files/{url}/mkdir")
 	boolean mkdir(@QueryParam("url") String url)
 			throws RemoteFileSystemException;
-
-	/**
-	 * Mounts a filesystem so a user can easily move stuff around on the
-	 * ServiceInterface.
-	 * 
-	 * @param url
-	 *            the url of the filesystem to mount (e.g.
-	 *            gsiftp://ngdata.vpac.org/home/san04/markus)
-	 * @param mountpoint
-	 *            the mountpoint (has to be in the root directory: /ngdata.vpac
-	 *            is ok, /vpac/ngdata is not
-	 * @param fqan
-	 *            use a vomsproxy with this fqan to connect to the mounted
-	 *            filesystem
-	 * @param useHomeDirectoryOnThisFileSystemIfPossible
-	 *            use the users' home directory on this file system if possible
-	 * @return the new MountPoint
-	 * @throws RemoteFileSystemException
-	 *             if the remote filesystem could not be mounted/connected to
-	 */
-	@POST
-	@Path("/user/mountpoint/{alias}/mount")
-	@RolesAllowed("User")
-	MountPoint mount(
-			@QueryParam("url") String url,
-			@PathParam("alias") String alias,
-			@QueryParam("group") String fqan,
-			@DefaultValue("true") @QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
-					throws RemoteFileSystemException;
-
-	/**
-	 * Mounts a filesystem so a user can easily move stuff around on the
-	 * ServiceInterface.
-	 * 
-	 * @param url
-	 *            the url of the filesystem to mount (e.g.
-	 *            gsiftp://ngdata.vpac.org/home/san04/markus)
-	 * @param mountpoint
-	 *            the mountpoint (has to be in the root directory: /ngdata.vpac
-	 *            is ok, /vpac/ngdata is not
-	 * @param useHomeDirectoryOnThisFileSystemIfPossible
-	 *            use the users' home directory on this file system if possible
-	 * @return the new mountpoint
-	 * @throws RemoteFileSystemException
-	 *             if the remote filesystem could not be mounted/connected to
-	 */
-	@POST
-	@Path("/user/mountpoint/{alias}/mount_without_group")
-	MountPoint mountWithoutFqan(
-			@QueryParam("url") String url,
-			@PathParam("alias") String alias,
-			@DefaultValue("true") @QueryParam("useHomeDir") boolean useHomeDirectoryOnThisFileSystemIfPossible)
-					throws RemoteFileSystemException;
 
 	/**
 	 * Tries to figure out the best submission locations for all the jobs that
@@ -1318,8 +1242,16 @@ public interface ServiceInterface {
 					throws JobSubmissionException, NoSuchJobException;
 
 	/**
-	 * Sets a user property.
+	 * Sets a batch of user properties.
 	 * 
+	 * @param properties
+	 *            the properties
+	 */
+	void setUserProperties(DtoProperties properties);
+
+	/**
+	 * Sets a user property.
+	 *
 	 * <p>
 	 * There are special user properties that can be set by using one of the
 	 * following strings as key:
@@ -1332,7 +1264,7 @@ public interface ServiceInterface {
 	 * </p>
 	 * <p>
 	 * {@link Constants#JOB_ARCHIVE_LOCATION}(archiveLocation): as described in {@link #archiveJob(String, String), this allows to tell Grisu about locations where archived Grisu jobs are located. Use this string as key and a ;-separated alias;url string as value to add such a location.
-	 * 
+	 *
 	 * @param key
 	 *            the key
 	 * @param value

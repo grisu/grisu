@@ -6,9 +6,12 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
-import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.Directory;
+import grisu.model.info.dto.DtoProperty;
+import grisu.model.info.dto.Site;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -207,10 +210,22 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 			}
 
 			for (final String child : childs.keySet()) {
-				final GridFile childFile = new GridFile(gridPath + "/" + child);
+				String rootUrl = FileManager.ensureTrailingSlash(childs
+						.get(child).iterator().next()
+						.getRootUrl());
+				String vpath = FileManager.ensureTrailingSlash(gridPath)
+						+ child;
+				final GridFile childFile;
+				if (rootUrl.endsWith(child + "/")) {
+					childFile = new GridFile(rootUrl);
+				} else {
+					childFile = new GridFile(vpath);
+				}
+				childFile.setPath(vpath);
 				childFile.setVirtual(true);
-				childFile.setPath(gridPath + "/" + child);
+
 				for (final MountPoint mp : childs.get(child)) {
+					// System.out.println(mp.getRootUrl());
 					childFile.addFqan(mp.getFqan());
 					childFile.addSite(mp.getSite());
 					result.addFqan(mp.getFqan());
@@ -293,17 +308,17 @@ public class SiteFileSystemPlugin implements VirtualFileSystemPlugin {
 
 		final Map<String, Set<String>> sites = new TreeMap<String, Set<String>>();
 		for (final String vo : user.getFqans().keySet()) {
-			final Map<String, String[]> dataLocations = AbstractServiceInterface.informationManager
-					.getDataLocationsForVO(vo);
-			for (final String host : dataLocations.keySet()) {
-				final String site = AbstractServiceInterface.informationManager
-						.getSiteForHostOrUrl(host);
-				if (!sites.keySet().contains(site)) {
+			final List<Directory> dataLocations = AbstractServiceInterface.informationManager
+					.getDirectoriesForVO(vo);
+
+			for (final Directory dir : dataLocations) {
+				final Site site = dir.getSite();
+				if (!sites.keySet().contains(site.getName())) {
 					final Set<String> tempVOs = new TreeSet<String>();
 					tempVOs.add(vo);
-					sites.put(site, tempVOs);
+					sites.put(site.getName(), tempVOs);
 				} else {
-					final Set<String> tempVos = sites.get(site);
+					final Set<String> tempVos = sites.get(site.getName());
 					tempVos.add(vo);
 				}
 

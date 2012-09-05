@@ -3,6 +3,7 @@ package grisu.frontend.view.swing;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
+import grisu.settings.ClientPropertiesManager;
 
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -18,6 +19,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.slf4j.Logger;
@@ -47,6 +49,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 
 	/**
 	 * Create the panel.
+	 * @wbp.parser.constructor
 	 */
 	public GrisuNavigationPanel(ServiceInterface si,
 			GrisuCenterPanel centerPanel) {
@@ -244,6 +247,7 @@ public class GrisuNavigationPanel extends JXTaskPaneContainer implements
 				lockUI(true);
 
 				centerPanel.setNavigationCommand(command);
+
 
 				lockUI(false);
 			}

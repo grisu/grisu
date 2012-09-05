@@ -1,5 +1,9 @@
 package grisu.model.dto;
 
+import grisu.jcommons.constants.Constants;
+import grisu.model.info.dto.Package;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +13,11 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.google.common.base.Functions;
+import com.google.common.collect.Collections2;
+
 /**
  * A wrapper that contains a list of {@link DtoApplicationDetail} objects.
  * 
@@ -17,6 +26,27 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "applicationdetails")
 public class DtoApplicationDetails {
+
+	public static DtoApplicationDetails createDetails(Package pkg) {
+
+		final DtoApplicationDetails result = new DtoApplicationDetails();
+
+		result.setApplicationName(pkg.getApplication().getName());
+
+		final List<DtoApplicationDetail> list = new LinkedList<DtoApplicationDetail>();
+
+		Collection<String> exes = Collections2.transform(pkg.getExecutables(),
+				Functions.toStringFunction());
+
+		final DtoApplicationDetail temp = new DtoApplicationDetail();
+		temp.setKey(Constants.EXECUTABLE_KEY);
+		temp.setValue(StringUtils.join(exes, ","));
+		list.add(temp);
+
+		result.setDetails(list);
+
+		return result;
+	}
 
 	public static DtoApplicationDetails createDetails(String appName,
 			Map<String, String> details) {

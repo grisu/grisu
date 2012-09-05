@@ -1,6 +1,9 @@
 package grisu.model.info;
 
 import grisu.model.UserEnvironmentManager;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Site;
+import grisu.model.info.dto.Version;
 
 import java.util.Set;
 
@@ -23,7 +26,7 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 * 
 	 * @return all sites
 	 */
-	Set<String> getAllAvailableSitesForUser();
+	Set<Site> getAllAvailableSitesForUser();
 
 	/**
 	 * Calculates all the submissionlocations for this applications that are
@@ -32,7 +35,7 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 * 
 	 * @return all submissionlocations
 	 */
-	Set<String> getAllAvailableSubmissionLocationsForUser();
+	Set<Queue> getAllAvailableSubmissionLocationsForUser();
 
 	/**
 	 * Calculates all versions for this application that are availabe for the
@@ -40,6 +43,6 @@ public interface UserApplicationInformation extends ApplicationInformation {
 	 * 
 	 * @return all available versions
 	 */
-	Set<String> getAllAvailableVersionsForUser();
+	Set<Version> getAllAvailableVersionsForUser();
 
 }

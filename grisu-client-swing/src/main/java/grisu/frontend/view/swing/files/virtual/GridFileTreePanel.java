@@ -3,6 +3,7 @@ package grisu.frontend.view.swing.files.virtual;
 import grisu.control.ServiceInterface;
 import grisu.control.events.FileDeletedEvent;
 import grisu.control.events.FolderCreatedEvent;
+import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.fileTransfers.FileTransferEvent;
 import grisu.frontend.view.swing.files.GridFileListListener;
 import grisu.frontend.view.swing.files.GridFileListPanel;
@@ -10,18 +11,21 @@ import grisu.frontend.view.swing.files.GridFileTransferHandler;
 import grisu.frontend.view.swing.files.contextMenu.DefaultGridFileContextMenu;
 import grisu.frontend.view.swing.files.contextMenu.GridFileListPanelContextMenu;
 import grisu.frontend.view.swing.files.virtual.utils.LazyLoadingTreeController;
+import grisu.model.FileCache;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
-import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.DtoProperty;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,25 +41,78 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
 import org.netbeans.swing.outline.OutlineModel;
+import org.python.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class GridFileTreePanel extends JPanel implements GridFileListPanel,
-		EventSubscriber {
+EventSubscriber {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GridFileTreePanel.class.getName());
+
+	public final static String LOCAL_ALIAS = "Local files";
+	public final static String REMOTE_ALIAS = "Remote files";
+
+	private static List<GridFile> defaultFileRoots = null;
+
+	public static final LinkedHashMap<String, String> defaultRoots = Maps
+			.newLinkedHashMap();
+
+	public static synchronized final List<GridFile> getDefaultRoots(
+			ServiceInterface si) {
+
+		if (defaultFileRoots == null) {
+			defaultFileRoots = new LinkedList<GridFile>();
+
+			for (String alias : defaultRoots.keySet()) {
+				if (LOCAL_ALIAS.equals(alias) && (defaultRoots.get(alias) == null)) {
+					final GridFile localRoot = GrisuRegistryManager.getDefault(si)
+							.getFileManager().getLocalRoot();
+					defaultFileRoots.add(localRoot);
+				} else if (REMOTE_ALIAS.equals(alias)
+						&& (defaultRoots.get(alias) == null)) {
+					final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
+							.getFileManager().getGridRoot();
+					defaultFileRoots.add(gridRoot);
+				} else {
+					GridFile file = null;
+					try {
+						file = GrisuRegistryManager.getDefault(si).getFileManager()
+								.createGridFile(defaultRoots.get(alias));
+						file.setName(alias);
+						defaultFileRoots.add(file);
+
+					} catch (final RemoteFileSystemException e) {
+						myLogger.error(e.getLocalizedMessage(), e);
+					}
+				}
+			}
+		}
+
+		return defaultFileRoots;
+
+	}
+
+	{
+		defaultRoots.put(REMOTE_ALIAS, null);
+		defaultRoots.put(LOCAL_ALIAS, null);
+	}
 
 	public static final String EXTENSIONS_KEY = "extensions";
 	public static final String FOLDERS_SELECTABLE_KEY = "folders_selectable";
@@ -82,27 +139,47 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		});
 	}
 
+	public static TreePath getPath(TreeNode treeNode) {
+		List<Object> nodes = new ArrayList<Object>();
+		if (treeNode != null) {
+			nodes.add(treeNode);
+			treeNode = treeNode.getParent();
+			while (treeNode != null) {
+				nodes.add(0, treeNode);
+				treeNode = treeNode.getParent();
+			}
+		}
+
+		return nodes.isEmpty() ? null : new TreePath(nodes.toArray());
+	}
+
 	private final ServiceInterface si;
 	private final UserEnvironmentManager uem;
 	private final FileManager fm;
 	private JScrollPane scrollPane;
+
 	private Outline outline;
 
 	private GridFile oldDir;
 
 	private boolean useAsDropTarget = true;
-
 	private Vector<GridFileListListener> listeners;
-	private GridFileListPanelContextMenu popupMenu;
 
-	private boolean displayHiddenFiles;
+	private GridFileListPanelContextMenu popupMenu;
+	private boolean displayHiddenFiles = false;
+	private boolean displayFiles = true;
+
 	private String[] extensionsToDisplay;
 
 	private DefaultTreeModel model;
 
-	private final List<GridFile> roots;
+	private List<GridFile> roots;
+
+	private GridFile root;
 
 	private LazyLoadingTreeController controller;
+
+	private volatile boolean isInitializing = false;
 
 	/**
 	 * @wbp.parser.constructor
@@ -117,39 +194,26 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 	public GridFileTreePanel(ServiceInterface si, List<GridFile> root,
 			boolean useAsDropTarget) {
-		this(si, root, useAsDropTarget, false, null);
+		this(si, root, useAsDropTarget, true, false, null);
 	}
 
 	/**
 	 * Create the panel.
 	 */
 	public GridFileTreePanel(ServiceInterface si, List<GridFile> roots,
-			boolean useAsDropTarget, boolean displayHiddenFiles,
-			String[] extensionsToDisplay) {
+			boolean useAsDropTarget, boolean displayFiles,
+			boolean displayHiddenFiles, String[] extensionsToDisplay) {
 		this.si = si;
+		this.displayFiles = displayFiles;
 		this.displayHiddenFiles = displayHiddenFiles;
 		this.extensionsToDisplay = extensionsToDisplay;
-		if (roots == null) {
-			// GridFile p = new GridFile(
-			// "grid://groups/ARCS/BeSTGRID/Drug_discovery/Local//");
-			// p.setIsVirtual(false);
-			// p.setName("Personal files");
-			// p.setPath("grid://groups/ARCS/BeSTGRID/Drug_discovery/Local//");
-			final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
-					.getFileManager().getGridRoot();
-			final GridFile localRoot = GrisuRegistryManager.getDefault(si)
-					.getFileManager().getLocalRoot();
-			this.roots = new LinkedList<GridFile>();
-			this.roots.add(gridRoot);
-			this.roots.add(localRoot);
 
-		} else {
-			this.roots = roots;
-		}
 		this.useAsDropTarget = useAsDropTarget;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();
 		this.uem = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
+		setRoots(roots);
+
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -166,8 +230,14 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		EventBus.subscribe(FolderCreatedEvent.class, this);
 		EventBus.subscribe(FileDeletedEvent.class, this);
 
-		initialize(this.roots);
+		initialize();
 	}
+
+	// private void fileClickOccured() {
+	//
+	// fireFilesSelected(getSelectedFiles());
+	//
+	// }
 
 	synchronized public void addGridFileListListener(GridFileListListener l) {
 		if (listeners == null) {
@@ -176,11 +246,42 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		listeners.addElement(l);
 	}
 
-	// private void fileClickOccured() {
-	//
-	// fireFilesSelected(getSelectedFiles());
-	//
-	// }
+	private void expandNodes(List<GridFile> files) {
+
+		if (controller == null) {
+			myLogger.debug("Controller not initialized, not checking nodes");
+			return;
+		}
+
+
+
+		try {
+			final OutlineModel m = (OutlineModel) getOutline().getModel();
+			for (int i = 0; i < m.getRowCount(); i++) {
+
+				final Object n = m.getValueAt(i, 0);
+
+				if (n instanceof GridFileTreeNode) {
+
+					final GridFileTreeNode node = (GridFileTreeNode) n;
+					final GridFile f = (GridFile) node.getUserObject();
+
+					if (files.contains(f)) {
+						myLogger.debug("Expanding: " + f.getUrl());
+						TreePath p = getPath(node);
+						m.getTreePathSupport().expandPath(p);
+					}
+
+				}
+			}
+		} catch (ClassCastException e) {
+			myLogger.debug("No outline model yet.");
+			return;
+		}
+
+
+		return;
+	}
 
 	private void fileDoubleClickOccured() {
 
@@ -334,7 +435,36 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		return null;
 	}
 
-	private Outline getOutline() {
+	private List<GridFile> getCurrentlyExpandedNodes() {
+
+		if (controller == null) {
+			myLogger.debug("Controller not initialized, not checking nodes");
+			return Lists.newArrayList();
+		}
+
+		final OutlineModel m = (OutlineModel) getOutline().getModel();
+
+		List<GridFile> expanded = Lists.newArrayList();
+		for (int i = 0; i < m.getRowCount(); i++) {
+
+			final Object n = m.getValueAt(i, 0);
+
+			if (n instanceof GridFileTreeNode) {
+
+				final GridFileTreeNode node = (GridFileTreeNode) n;
+				if (node.isExpanded()) {
+					final GridFile f = (GridFile) node.getUserObject();
+					expanded.add(f);
+					myLogger.debug("node expanded: " + f.getUrl());
+				}
+
+			}
+		}
+		return expanded;
+
+	}
+
+	private synchronized Outline getOutline() {
 		if (outline == null) {
 			outline = new Outline();
 			outline.setRootVisible(false);
@@ -376,6 +506,7 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 				}
 
 			});
+			myLogger.debug("Outline created");
 		}
 		return outline;
 	}
@@ -384,11 +515,40 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		return this;
 	}
 
+	private synchronized List<GridFile> getRoots() {
+		if (this.root != null) {
+			if (this.roots == null) {
+				Set<GridFile> childs = root.getChildren();
+				if ((childs == null) || (childs.size() == 0)) {
+					try {
+						childs = fm.ls(root).getChildren();
+					} catch (RemoteFileSystemException e) {
+						childs = Sets.newHashSet((new GridFile(root.getUrl(),
+								false, e)));
+					}
+					this.roots = Lists.newArrayList(childs);
+				}
+			}
+		} else {
+			if (this.roots == null) {
+				final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
+						.getFileManager().getGridRoot();
+				final GridFile localRoot = GrisuRegistryManager.getDefault(si)
+						.getFileManager().getLocalRoot();
+				this.roots = new LinkedList<GridFile>();
+				this.roots.add(gridRoot);
+				this.roots.add(localRoot);
+			}
+
+		}
+		return this.roots;
+	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
 			scrollPane
-					.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+			.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			scrollPane.setViewportView(getOutline());
 
 		}
@@ -415,24 +575,55 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 		return si;
 	}
 
-	private void initialize(List<GridFile> roots) {
+	private void initialize() {
 
-		final GridFileTreeNode rootNode = new GridFileTreeNode(fm, "virtual");
-
-		model = new DefaultTreeModel(rootNode);
-		rootNode.setModel(model);
-		controller = new LazyLoadingTreeController(model);
-
-		for (final GridFile f : roots) {
-			rootNode.add(new GridFileTreeNode(fm, f, controller,
-					displayHiddenFiles, extensionsToDisplay));
+		if (isInitializing) {
+			return;
 		}
 
-		final OutlineModel m = DefaultOutlineModel.createOutlineModel(model,
-				new GridFileTreeTableRowModel(), false, "File");
+		SwingUtilities.invokeLater(new Thread() {
+			@Override
+			public void run() {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				// setEnabled(false);
+				getOutline().setEnabled(false);
+			}
+		});
 
-		m.getTreePathSupport().addTreeWillExpandListener(controller);
-		getOutline().setModel(m);
+		try {
+
+
+			isInitializing = true;
+			final GridFileTreeNode rootNode = new GridFileTreeNode(fm,
+					"virtual");
+
+			model = new DefaultTreeModel(rootNode);
+
+			rootNode.setModel(model);
+			controller = new LazyLoadingTreeController(model);
+
+			for (final GridFile f : getRoots()) {
+				rootNode.add(new GridFileTreeNode(fm, f, controller,
+						displayFiles, displayHiddenFiles, extensionsToDisplay));
+			}
+
+			final OutlineModel m = DefaultOutlineModel.createOutlineModel(
+					model, new GridFileTreeTableRowModel(), false, "File");
+
+			m.getTreePathSupport().addTreeWillExpandListener(controller);
+			getOutline().setModel(m);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			isInitializing = false;
+			SwingUtilities.invokeLater(new Thread() {
+				@Override
+				public void run() {
+					getOutline().setEnabled(true);
+					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				}
+			});
+		}
 
 	}
 
@@ -470,7 +661,27 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 	}
 
 	public void refresh() {
-		// TODO Auto-generated method stub
+		refresh(false);
+	}
+
+	public synchronized void refresh(boolean forceRefresh) {
+
+		if (this.root != null) {
+			FileCache.remove(this.root);
+			this.roots = null;
+		}
+
+		final List<GridFile> exp = getCurrentlyExpandedNodes();
+
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				initialize();
+				expandNodes(exp);
+			}
+		};
+		t.setName("filepanelupdate");
+		t.start();
 
 	}
 
@@ -532,15 +743,21 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 	}
 
+	public void setDisplayFiles(boolean displayFiles) {
+		this.displayFiles = displayFiles;
+		refresh();
+	}
+
 	public void setDisplayHiddenFiles(boolean display) {
 
 		this.displayHiddenFiles = display;
-
+		refresh();
 	}
 
 	public void setExtensionsToDisplay(String[] extensions) {
 
 		this.extensionsToDisplay = extensions;
+		refresh();
 	}
 
 	private void setLoading(final boolean loading) {
@@ -571,8 +788,28 @@ public class GridFileTreePanel extends JPanel implements GridFileListPanel,
 
 	}
 
-	public void setRootUrl(String url) {
-		// TODO Auto-generated method stub
+	public void setRoots(List<GridFile> rootsNew) {
+		this.root = null;
+		this.roots = null;
+		if ((rootsNew != null) && (rootsNew.size() > 0)) {
+
+			if (rootsNew.size() == 1) {
+				setRootUrl(rootsNew.get(0));
+			} else {
+				this.roots = rootsNew;
+				refresh();
+			}
+		} else {
+			refresh();
+		}
+	}
+
+	public void setRootUrl(GridFile root) {
+
+		this.root = root;
+		this.roots = null;
+
+		refresh();
 
 	}
 

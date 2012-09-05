@@ -6,7 +6,7 @@
 Nullsoft Scriptable Installation System mode by Ryan Grove 2003
 Updated by Uwe Stöhr (donovaly@users.sourceforge.net) 2007
 Updated for 4.3pre9 by Alan Ezust 2007
-$Id: nsis2.xml 11164 2007-11-28 23:30:31Z blueyed $
+$Id: nsis2.xml 18011 2010-06-08 04:25:19Z ezust $
 
 This file should be accurate as of the version of NSIS 2.30. If I've left something out, please let me know.
 -->
@@ -460,6 +460,7 @@ This file should be accurate as of the version of NSIS 2.30. If I've left someth
 			<KEYWORD1>quit</KEYWORD1>
 			<KEYWORD1>seterrors</KEYWORD1>
 			<KEYWORD1>strcmp</KEYWORD1>
+			<KEYWORD1>strcmps</KEYWORD1>
 
 			<!-- Callback functions -->
 			<KEYWORD3>.onguiinit</KEYWORD3>

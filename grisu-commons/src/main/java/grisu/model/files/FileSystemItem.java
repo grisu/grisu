@@ -1,5 +1,7 @@
 package grisu.model.files;
 
+import grisu.model.dto.GridFile;
+
 import org.apache.commons.lang.StringUtils;
 
 public class FileSystemItem {
@@ -13,10 +15,10 @@ public class FileSystemItem {
 
 	private String alias;
 	private Type type;
-	private GlazedFile rootFile;
+	private GridFile rootFile;
 	private boolean isDummy = false;
 
-	public FileSystemItem(String alias, Type type, GlazedFile file) {
+	public FileSystemItem(String alias, Type type, GridFile file) {
 		setAlias(alias);
 		this.type = type;
 		this.rootFile = file;
@@ -49,7 +51,7 @@ public class FileSystemItem {
 		return alias;
 	}
 
-	public GlazedFile getRootFile() {
+	public GridFile getRootFile() {
 		return rootFile;
 	}
 
@@ -59,7 +61,7 @@ public class FileSystemItem {
 
 	@Override
 	public int hashCode() {
-		return 53 * getType().hashCode() + getAlias().hashCode() * 21;
+		return (53 * getType().hashCode()) + (getAlias().hashCode() * 21);
 	}
 
 	public boolean isDummy() {
@@ -74,7 +76,7 @@ public class FileSystemItem {
 		}
 	}
 
-	public void setRootFile(GlazedFile rootFile) {
+	public void setRootFile(GridFile rootFile) {
 		this.rootFile = rootFile;
 	}
 

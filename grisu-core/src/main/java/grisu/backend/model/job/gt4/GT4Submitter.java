@@ -1,13 +1,11 @@
 package grisu.backend.model.job.gt4;
 
-import grisu.backend.info.InformationManagerManager;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.jcommons.constants.Constants;
-import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
@@ -19,7 +17,6 @@ import java.io.FileWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.Date;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -62,14 +59,14 @@ public class GT4Submitter extends JobSubmitter {
 	static final Logger myLogger = LoggerFactory.getLogger(GT4Submitter.class
 			.getName());
 
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see grisu.js.control.job.JobSubmitter#createJobSubmissionDescription
 	 * (org.w3c.dom.Document)
 	 */
-	public static String createJobSubmissionDescription(
-			final InformationManager infoManager, final Document jsdl,
+	public static String createJobSubmissionDescription(final Document jsdl,
 			final String fqan) {
 
 		DebugUtils.jsdlDebugOutput("Before translating into rsl: ", jsdl);
@@ -105,21 +102,23 @@ public class GT4Submitter extends JobSubmitter {
 			}
 		}
 
-		final Map<String, String> envVariables = JsdlHelpers
-				.getPosixApplicationEnvironment(jsdl);
-		if (envVariables != null) {
-			for (final String key : envVariables.keySet()) {
-				final Element environment = output.createElement("environment");
-				final Element keyElement = output.createElement("name");
-				keyElement.setTextContent(key);
-				final Element valueElement = output.createElement("value");
-				valueElement.setTextContent(envVariables.get(key));
+		// seems to be an error in derby, disabling for now...
 
-				environment.appendChild(keyElement);
-				environment.appendChild(valueElement);
-				job.appendChild(environment);
-			}
-		}
+		// final Map<String, String> envVariables = JsdlHelpers
+		// .getPosixApplicationEnvironment(jsdl);
+		// if (envVariables != null) {
+		// for (final String key : envVariables.keySet()) {
+		// final Element environment = output.createElement("environment");
+		// final Element keyElement = output.createElement("name");
+		// keyElement.setTextContent(key);
+		// final Element valueElement = output.createElement("value");
+		// valueElement.setTextContent(envVariables.get(key));
+		//
+		// environment.appendChild(keyElement);
+		// environment.appendChild(valueElement);
+		// job.appendChild(environment);
+		// }
+		// }
 
 		// Add "directory"
 		final Element directory = output.createElement("directory");
@@ -207,6 +206,8 @@ public class GT4Submitter extends JobSubmitter {
 			final Element totalMemory = output.createElement("maxMemory");
 			// convert from bytes to mb
 			memory = memory / (1024 * 1024);
+			// for mpi we need the memory for every core
+			memory = memory + processorCount;
 			totalMemory.setTextContent(memory.toString());
 			job.appendChild(totalMemory);
 		}
@@ -248,11 +249,15 @@ public class GT4Submitter extends JobSubmitter {
 		// jobname
 		final Element jobname = output.createElement("jobname");
 		final String jobname_string = JsdlHelpers.getJobname(jsdl);
-		// because of some pbs restrictions we have to keep the jobname to 6
-		// chars
-		if (jobname_string.length() > 6) {
-			jobname.setTextContent(jobname_string.substring(jobname_string
-					.length() - 6));
+		if (ServerPropertiesManager.getShortenJobname()) {
+			// because of some pbs restrictions we have to keep the jobname to 6
+			// chars
+			if (jobname_string.length() > 6) {
+				jobname.setTextContent(jobname_string.substring(jobname_string
+						.length() - 6));
+			} else {
+				jobname.setTextContent(jobname_string);
+			}
 		} else {
 			jobname.setTextContent(jobname_string);
 		}
@@ -287,63 +292,67 @@ public class GT4Submitter extends JobSubmitter {
 			if ((subLocs != null) && (subLocs.length > 0)) {
 				final String subLoc = subLocs[0];
 
-				if (StringUtils.isBlank(application)
-						|| Constants.GENERIC_APPLICATION_NAME
-						.equals(application)) {
-					myLogger.debug("\"generic\" application. Not trying to calculate modules...");
-
-				} else if (StringUtils.isNotBlank(application)
-						&& StringUtils.isNotBlank(version)
-						&& StringUtils.isNotBlank(subLoc)) {
-
-					// if we know application, version and submissionLocation
-					final Map<String, String> appDetails = infoManager
-							.getApplicationDetails(application, version, subLoc);
-
-					try {
-						modules_string = appDetails.get(
-								Constants.MDS_MODULES_KEY).split(",");
-
-						if ((modules_string == null)
-								|| "".equals(modules_string)) {
-							myLogger.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
-						}
-
-					} catch (final Exception e) {
-						myLogger.warn("Could not get module for this application/version/submissionLocation: "
-								+ e.getLocalizedMessage()
-								+ ". Submitting nonetheless...");
-					}
-
-					// if we know application and submissionlocation but version
-					// doesn't matter
-				} else if ((application != null) && (version == null)
-						&& (subLoc != null)) {
-
-					final Map<String, String> appDetails = infoManager
-							.getApplicationDetails(application,
-									Constants.NO_VERSION_INDICATOR_STRING,
-									subLoc);
-
-					try {
-						modules_string = appDetails.get(
-								Constants.MDS_MODULES_KEY).split(",");
-
-						if ((modules_string == null)
-								|| "".equals(modules_string)) {
-							myLogger.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
-						}
-
-					} catch (final Exception e) {
-						myLogger.warn("Could not get module for this application/submissionLocation: "
-								+ e.getLocalizedMessage()
-								+ ". Submitting nonetheless...");
-					}
-
-				} else {
-					throw new RuntimeException(
-							"Can't determine module because either/or application, version submissionLocation are missing.");
-				}
+				// if (StringUtils.isBlank(application)
+				// || Constants.GENERIC_APPLICATION_NAME
+				// .equals(application)) {
+				// myLogger.debug("\"generic\" application. Not trying to calculate modules...");
+				//
+				// } else if (StringUtils.isNotBlank(application)
+				// && StringUtils.isNotBlank(version)
+				// && StringUtils.isNotBlank(subLoc)) {
+				//
+				// if we know application, version and submissionLocation
+				// TODO re-implement modules
+				// final Package pkg = infoManager
+				// .getApplicationDetails(application, version, subLoc);
+				//
+				// try {
+				// Module m = pkg.getModule();
+				// if (m != null) {
+				// modules_string = new String[] { m.getModule() };
+				// }
+				//
+				// if ((modules_string == null)
+				// || "".equals(modules_string)) {
+				// myLogger.warn("No module for this application/version/submissionLocation found. Submitting nonetheless...");
+				// }
+				//
+				// } catch (final Exception e) {
+				// myLogger.warn("Could not get module for this application/version/submissionLocation: "
+				// + e.getLocalizedMessage()
+				// + ". Submitting nonetheless...");
+				// }
+				//
+				// if we know application and submissionlocation but version
+				// doesn't matter
+				// } else if ((application != null) && (version == null)
+				// && (subLoc != null)) {
+				//
+				// final Package pkg = infoManager.getApplicationDetails(
+				// application, Constants.NO_VERSION_INDICATOR_STRING,
+				// subLoc);
+				//
+				// try {
+				// Module m = pkg.getModule();
+				// if (m != null) {
+				// modules_string = new String[] { m.getModule() };
+				// }
+				//
+				// if ((modules_string == null)
+				// || "".equals(modules_string)) {
+				// myLogger.warn("No module for this application/submissionLocation found. Submitting nonetheless...");
+				// }
+				//
+				// } catch (final Exception e) {
+				// myLogger.warn("Could not get module for this application/submissionLocation: "
+				// + e.getLocalizedMessage()
+				// + ". Submitting nonetheless...");
+				// }
+				//
+				// } else {
+				// throw new RuntimeException(
+				// "Can't determine module because either/or application, version submissionLocation are missing.");
+				// }
 			} else {
 				myLogger.info("No submission location specified. If this happens when trying to submit a job, it's probably a bug...");
 			}
@@ -532,9 +541,10 @@ public class GT4Submitter extends JobSubmitter {
 	// return handle;
 	// }
 
-	private final InformationManager informationManager = InformationManagerManager
-			.getInformationManager(ServerPropertiesManager
-					.getInformationManagerConf());
+	// private final InformationManager informationManager =
+	// InformationManagerManager
+	// .getInformationManager(ServerPropertiesManager
+	// .getInformationManagerConf());
 
 	/*
 	 * (non-Javadoc)
@@ -598,7 +608,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * grisu.js.model.Job)
 	 */
 	@Override
-	protected final String submit(final InformationManager infoManager,
+	protected final String submit(
 			final String host, final String factoryType, final Job job)
 					throws ServerJobSubmissionException {
 
@@ -616,7 +626,7 @@ public class GT4Submitter extends JobSubmitter {
 			JobDescriptionType jobDesc = null;
 			try {
 				// String site = informationManager.getSiteForHostOrUrl(host);
-				submittedJobDesc = createJobSubmissionDescription(infoManager,
+				submittedJobDesc = createJobSubmissionDescription(
 						job.getJobDescription(), job.getFqan());
 				jobDesc = RSLHelper.readRSL(submittedJobDesc);
 

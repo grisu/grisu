@@ -617,7 +617,13 @@ TODO:
 
 		<!-- Readins/Heredoc -->
 		<SPAN_REGEXP HASH_CHAR="&lt;&lt;&lt;" TYPE="LITERAL4" DELEGATE="PHP_LITERAL4">
-			<BEGIN><![CDATA[<<<[\p{Space}'"]*([\p{Alnum}_]+)[\p{Space}'"]*]]></BEGIN>
+			<BEGIN><![CDATA[<<<[\p{Space}]*("?)([\p{Alnum}_]+)\1[\p{Space}]*$]]></BEGIN>
+			<END AT_LINE_START="TRUE">$2</END>
+		</SPAN_REGEXP>
+
+		<!-- Nowdoc (http://php.net/manual/en/language.types.string.php#language.types.string.syntax.nowdoc) -->
+		<SPAN_REGEXP HASH_CHAR="&lt;&lt;&lt;" TYPE="LITERAL1">
+			<BEGIN><![CDATA[<<<[\p{Space}]*'([\p{Alnum}_]+)'[\p{Space}]*$]]></BEGIN>
 			<END AT_LINE_START="TRUE">$1</END>
 		</SPAN_REGEXP>
 
@@ -2519,6 +2525,7 @@ TODO:
 			<KEYWORD2>mdecrypt_generic</KEYWORD2>
 			<KEYWORD2>memcache_debug</KEYWORD2>
 			<KEYWORD2>memory_get_usage</KEYWORD2>
+			<KEYWORD2>memory_get_peak_usage</KEYWORD2>
 			<KEYWORD2>metaphone</KEYWORD2>
 			<KEYWORD2>method_exists</KEYWORD2>
 			<KEYWORD2>mhash</KEYWORD2>

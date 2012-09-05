@@ -100,9 +100,9 @@ public class JobSubmissionObjectImpl {
 
 	protected String jobname;
 
-	private String application;
+	private String application = Constants.GENERIC_APPLICATION_NAME;
 
-	private String applicationVersion;
+	private String applicationVersion = Constants.NO_VERSION_INDICATOR_STRING;
 
 	private String email_address;
 
@@ -669,11 +669,15 @@ public class JobSubmissionObjectImpl {
 		final String jobTypeString = JsdlHelpers.getArcsJobType(jsdl);
 		if (jobTypeString != null) {
 			if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
+					JobSubmissionProperty
+					.getPrettyName(JobSubmissionProperty.FORCE_SINGLE
+							.toString()))) {
 				force_single = true;
 				force_mpi = false;
 			} else if (jobTypeString.toLowerCase().equals(
-					JobSubmissionProperty.FORCE_SINGLE.defaultValue())) {
+					JobSubmissionProperty
+					.getPrettyName(JobSubmissionProperty.FORCE_MPI
+							.toString()))) {
 				force_single = false;
 				force_mpi = true;
 			} else {

@@ -2,7 +2,7 @@ package grisu.frontend.view.swing.jobcreation.widgets;
 
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
-import grisu.frontend.view.swing.files.virtual.GridFileTreeDialog;
+import grisu.frontend.view.swing.files.GridFileSelectionDialog;
 import grisu.model.GrisuRegistry;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
@@ -27,9 +27,10 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 	public static final String EXTENSIONS_TO_DISPLAY = "extensions_to_display";
 	public static final String DISPLAY_HIDDEN_FILES = "display_hidden_files";
 
-	private GridFileTreeDialog fileDialog = null;
+	private GridFileSelectionDialog fileDialog = null;
 
 	// public final String selString = "Please select a file";
+	private boolean displayFiles = true;
 	private boolean displayHiddenFiles = false;
 	private String[] extensions = null;
 
@@ -43,7 +44,6 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 	protected final DefaultComboBoxModel fileModel = new DefaultComboBoxModel();
 	private int selectionMode = ListSelectionModel.SINGLE_SELECTION;
 	private boolean foldersSelectable = true;
-	private final boolean displayLocalFilesystems = true;
 
 	private static final Map<ServiceInterface, GridFileComboboxRenderer> RENDERERS = new HashMap<ServiceInterface, GridFileComboboxRenderer>();
 	/**
@@ -81,14 +81,13 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 		}
 	}
 
-	protected GridFileTreeDialog getFileDialog() {
+	protected GridFileSelectionDialog getFileDialog() {
 
 		if (fileDialog == null) {
 
 			fileDialog = createGridFileDialog(getServiceInterface(), roots,
-					getHistoryKey() + "_last_dir", extensions,
-					displayHiddenFiles, foldersSelectable,
-					displayLocalFilesystems,
+					getHistoryKey() + "_last_dir", extensions, displayFiles,
+					displayHiddenFiles, foldersSelectable, selectionMode,
 					SwingUtilities.getWindowAncestor(this));
 		}
 
@@ -262,10 +261,17 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 		}
 	}
 
+	public void setDisplayFiles(boolean display) {
+		this.displayFiles = display;
+		if (fileDialog != null) {
+			fileDialog.setDisplayFiles(display);
+		}
+	}
+
 	public void setDisplayHiddenFiles(boolean display) {
 		this.displayHiddenFiles = display;
 		if (fileDialog != null) {
-			fileDialog.displayHiddenFiles(display);
+			fileDialog.setDisplayHiddenFiles(display);
 		}
 	}
 
@@ -282,6 +288,7 @@ abstract public class AbstractInputGridFile extends AbstractWidget {
 			fileDialog.setFoldersSelectable(foldersSelectable);
 		}
 	}
+
 
 	public void setInputFile(GridFile file) {
 

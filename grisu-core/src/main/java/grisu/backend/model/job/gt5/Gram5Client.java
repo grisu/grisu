@@ -31,7 +31,12 @@ public class Gram5Client {
 		}
 	}
 
-	public int[] getJobStatus(String handle, GSSCredential cred) {
+
+       public int[] getJobStatus(String handle, GSSCredential cred){
+	   return getJobStatus(handle,cred,false);
+       }
+
+        private int[] getJobStatus(String handle, GSSCredential cred, boolean restart) {
 
 		final int[] results = new int[2];
 		final Gram5JobListener l = Gram5JobListener.getJobListener();
@@ -99,7 +104,7 @@ public class Gram5Client {
 				}
 
 				// nope, not done yet.
-				return getJobStatus(handle, cred);
+				return getJobStatus(handle, cred,false);
 			} else {
 				myLogger.error("something else is wrong. error code is "
 						+ ex.getErrorCode());

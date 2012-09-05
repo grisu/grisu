@@ -20,6 +20,7 @@ public interface GridFileListPanel {
 
 	public ServiceInterface getServiceInterface();
 
+
 	public void refresh();
 
 	public void refreshFolder(String url);
@@ -40,5 +41,10 @@ public interface GridFileListPanel {
 	 */
 	public void setExtensionsToDisplay(String[] extensions);
 
-	public void setRootUrl(String url);
+	/**
+	 * Removes all other roots and only lists the specified directory
+	 * 
+	 * @param url
+	 */
+	public void setRootUrl(GridFile url);
 }

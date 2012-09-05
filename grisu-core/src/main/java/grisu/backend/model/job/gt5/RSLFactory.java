@@ -1,10 +1,11 @@
 package grisu.backend.model.job.gt5;
 
-import grisu.backend.info.InformationManagerManager;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.model.FileManager;
+import grisu.model.info.dto.Module;
+import grisu.model.info.dto.Package;
 import grisu.settings.ServerPropertiesManager;
 
 import java.util.Map;
@@ -15,11 +16,15 @@ import org.globus.rsl.Binding;
 import org.globus.rsl.Bindings;
 import org.globus.rsl.NameOpValue;
 import org.globus.rsl.RslNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 public class RSLFactory {
 
 	private static RSLFactory singleton = null;
+
+	public static final Logger myLogger = LoggerFactory.getLogger(RSLFactory.class);
 
 	public static RSLFactory getRSLFactory() {
 		if (singleton == null) {
@@ -28,11 +33,14 @@ public class RSLFactory {
 		return singleton;
 	}
 
+	private InformationManager infoManager = null;
+
 	private int commitTimeout = 5;
 
-	private final InformationManager informationManager = InformationManagerManager
-			.getInformationManager(ServerPropertiesManager
-					.getInformationManagerConf());
+	// private final InformationManager informationManager =
+	// InformationManagerManager
+	// .getInformationManager(ServerPropertiesManager
+	// .getInformationManagerConf());
 
 	private void addWhenNotBlank(RslNode rsl, String attribute, String value) {
 		if (StringUtils.isNotBlank(value)) {
@@ -76,11 +84,15 @@ public class RSLFactory {
 
 		// job name
 		String jobname = JsdlHelpers.getJobname(jsdl);
-		jobname = (jobname == null) ? "" : jobname.substring(Math.max(0,
-				jobname.length() - 6));
+		if (ServerPropertiesManager.getShortenJobname()) {
+			jobname = (jobname == null) ? "" : jobname.substring(Math.max(0,
+					jobname.length() - 6));
+		}
+
 		addWhenNotBlank(result, "jobname", jobname);
 
 		String workingDirectory = JsdlHelpers.getWorkingDirectory(jsdl);
+
 		if (StringUtils.isBlank(workingDirectory)) {
 			throw new RSLCreationException("No working directory specified.");
 		}
@@ -93,8 +105,11 @@ public class RSLFactory {
 				workingDirectory + JsdlHelpers.getPosixStandardOutput(jsdl));
 		addWhenNotBlank(result, "stderr",
 				workingDirectory + JsdlHelpers.getPosixStandardError(jsdl));
-		addWhenNotBlank(result, "stdin",
-				workingDirectory + JsdlHelpers.getPosixStandardInput(jsdl));
+
+		String stdin = JsdlHelpers.getPosixStandardInput(jsdl);
+		if (StringUtils.isNotBlank(stdin)) {
+			addWhenNotBlank(result, "stdin", workingDirectory + stdin);
+		}
 
 
 		addWhenNotBlank(result, "email_address", JsdlHelpers.getEmail(jsdl));
@@ -137,13 +152,15 @@ public class RSLFactory {
 		}
 		result.add(new NameOpValue("count", NameOpValue.EQ, "" + pcount));
 		result.add(new NameOpValue("jobtype", NameOpValue.EQ, jobtype));
-		if (hcount >= 0) {
+		if (hcount > 0) {
 			result.add(new NameOpValue("hostCount", NameOpValue.EQ, "" + hcount));
 		}
 
 		// total memory
-		final Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
+		Long memory = JsdlHelpers.getTotalMemoryRequirement(jsdl);
 		if ((memory != null) && (memory >= 0)) {
+			// for mpi, we need the specified memory per cpu
+			memory = memory * pcount;
 			result.add(new NameOpValue("max_memory", NameOpValue.EQ, ""
 					+ (memory / (1024 * 1024))));
 		}
@@ -176,9 +193,16 @@ public class RSLFactory {
 	}
 
 	private String[] getModulesFromMDS(final Document jsdl) {
+
+
 		String[] modules_string = JsdlHelpers.getModules(jsdl);
 		if (modules_string != null) {
 			return modules_string;
+		}
+
+		if ( this.infoManager == null ) {
+			myLogger.debug("No infomanager set, not looking up modules...");
+			return new String[]{};
 		}
 		// mds based
 		final String application = JsdlHelpers.getApplicationName(jsdl);
@@ -202,13 +226,13 @@ public class RSLFactory {
 			version = Constants.NO_VERSION_INDICATOR_STRING;
 		}
 
-		final Map<String, String> appDetails = this.informationManager
-				.getApplicationDetails(application, version, subLoc);
-		final String m = appDetails.get(Constants.MDS_MODULES_KEY);
-		if (StringUtils.isBlank(m)) {
+		final Package pkg = this.infoManager.getPackage(application, version, subLoc);
+
+		final Module m = pkg.getModule();
+		if (m == null) {
 			return new String[] {};
 		}
-		modules_string = appDetails.get(Constants.MDS_MODULES_KEY).split(",");
+		modules_string = new String[] { m.getModule() };
 		if (modules_string != null) {
 			return modules_string;
 		} else {
@@ -219,5 +243,9 @@ public class RSLFactory {
 
 	public void setCommitTimeout(int commitTimeout) {
 		this.commitTimeout = commitTimeout;
+	}
+
+	public void setInformationManager(InformationManager im) {
+		this.infoManager = im;
 	}
 }

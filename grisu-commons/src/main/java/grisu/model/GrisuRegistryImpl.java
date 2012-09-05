@@ -2,6 +2,7 @@ package grisu.model;
 
 import grisu.control.ServiceInterface;
 import grisu.control.TemplateManager;
+import grisu.jcommons.constants.Constants;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ApplicationInformationImpl;
 import grisu.model.info.ResourceInformation;
@@ -9,13 +10,14 @@ import grisu.model.info.ResourceInformationImpl;
 import grisu.model.info.UserApplicationInformation;
 import grisu.model.info.UserApplicationInformationImpl;
 import grisu.settings.Environment;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.Cred;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vpac.historyRepeater.DummyHistoryManager;
@@ -67,10 +69,10 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	private ResourceInformation cachedResourceInformation;
 	private FileManager cachedFileHelper;
 	private TemplateManager templateManager;
-	private final Credential credential;
+	private final Cred credential;
 
 	public GrisuRegistryImpl(final ServiceInterface serviceInterface,
-			final Credential credential) {
+			final Cred credential) {
 		this.serviceInterface = serviceInterface;
 		this.credential = credential;
 	}
@@ -86,7 +88,11 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 	 * (java.lang.String)
 	 */
 	public final ApplicationInformation getApplicationInformation(
-			final String applicationName) {
+			String applicationName) {
+
+		if (StringUtils.isBlank(applicationName)) {
+			applicationName = Constants.GENERIC_APPLICATION_NAME;
+		}
 
 		synchronized (applicationName) {
 
@@ -99,7 +105,7 @@ public class GrisuRegistryImpl implements GrisuRegistry {
 		return cachedApplicationInformationObjects.get(applicationName);
 	}
 
-	public Credential getCredential() {
+	public Cred getCredential() {
 		return this.credential;
 	}
 

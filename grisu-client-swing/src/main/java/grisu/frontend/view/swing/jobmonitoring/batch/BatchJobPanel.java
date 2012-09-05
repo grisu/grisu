@@ -4,7 +4,6 @@ import grisu.control.ServiceInterface;
 import grisu.frontend.model.job.BatchJobObject;
 import grisu.frontend.model.job.JobObject;
 import grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanel;
-import grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanelSmall;
 import grisu.frontend.view.swing.jobmonitoring.single.SingleJobSelectionListener;
 
 import javax.swing.JPanel;
@@ -62,7 +61,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 
 	private JobDetailPanel getJobDetailPanel() {
 		if (jobDetailPanel == null) {
-			jobDetailPanel = new JobDetailPanelSmall(si);
+			// jobDetailPanel = new JobDetailPanelSmall();
 		}
 		return jobDetailPanel;
 	}

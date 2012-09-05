@@ -8,7 +8,7 @@ import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
 import grisu.model.dto.DtoLogMessages;
-import grisu.model.dto.DtoProperty;
+import grisu.model.info.dto.DtoProperty;
 import grisu.settings.ServerPropertiesManager;
 
 import java.util.Collections;

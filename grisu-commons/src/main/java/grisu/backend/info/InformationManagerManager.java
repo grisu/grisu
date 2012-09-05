@@ -1,8 +1,6 @@
 package grisu.backend.info;
 
 import grisu.jcommons.interfaces.InformationManager;
-import grisu.jcommons.interfaces.MatchMaker;
-import grisu.settings.Environment;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -21,7 +19,6 @@ public class InformationManagerManager {
 	public static final String IM_CLASS = "type";
 
 	private static Map<String, InformationManager> infoManagers = new HashMap<String, InformationManager>();
-	private static Map<String, MatchMaker> matchMakers = new HashMap<String, MatchMaker>();
 
 	public static InformationManager createInfoManager(
 			Map<String, String> parameters) {
@@ -30,14 +27,14 @@ public class InformationManagerManager {
 		String imClassName = parameters.get("type");
 
 		if (StringUtils.isBlank(imClassName)) {
-			parameters.put("type", "CachedMdsInformationManager");
-			imClassName = "CachedMdsInformationManager";
+			parameters.put("type", "GrinformationManager");
+			imClassName = "grisu.jcommons.interfaces.GrinformationManager";
 
-			final String dir = parameters.get("mdsFileDir");
-			if (StringUtils.isBlank(dir)) {
-				parameters.put("mdsFileDir", Environment.getVarGrisuDirectory()
-						.toString());
-			}
+			// final String dir = parameters.get("mdsFileDir");
+			// if (StringUtils.isBlank(dir)) {
+			// parameters.put("mdsFileDir", Environment.getVarGrisuDirectory()
+			// .toString());
+			// }
 		}
 
 		if (!imClassName.contains(".")) {
@@ -75,40 +72,7 @@ public class InformationManagerManager {
 		return type;
 	}
 
-	public static MatchMaker createMatchMaker(Map<String, String> parameters) {
 
-		try {
-			String imClassName = parameters.get("type");
-
-			if (StringUtils.isBlank(imClassName)) {
-				parameters.put("type", "MatchMakerImpl");
-				imClassName = "MatchMakerImpl";
-
-				final String dir = parameters.get("mdsFileDir");
-				if (StringUtils.isBlank(dir)) {
-					parameters.put("mdsFileDir", Environment
-							.getVarGrisuDirectory().toString());
-				}
-			}
-
-			if (!imClassName.contains(".")) {
-				imClassName = "grisu.control.info." + imClassName;
-			}
-
-			final Class imClass = Class.forName(imClassName);
-			final Constructor<MatchMaker> constructor = imClass
-					.getConstructor(Map.class);
-
-			final MatchMaker im = constructor.newInstance(parameters);
-
-			return im;
-
-		} catch (final Exception e) {
-			myLogger.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-
-	}
 
 	public static InformationManager getInformationManager(
 			Map<String, String> parameters) {
@@ -126,18 +90,6 @@ public class InformationManagerManager {
 		return im;
 	}
 
-	public static MatchMaker getMatchMaker(Map<String, String> parameters) {
-		if (parameters == null) {
-			parameters = new HashMap<String, String>();
-		}
-		final String key = createKey(parameters);
-		MatchMaker mm = matchMakers.get(key);
 
-		if (mm == null) {
-			mm = createMatchMaker(parameters);
-			matchMakers.put(key, mm);
-		}
-		return mm;
-	}
 
 }

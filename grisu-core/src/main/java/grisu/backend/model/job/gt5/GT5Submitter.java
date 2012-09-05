@@ -5,7 +5,6 @@ import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
-import grisu.jcommons.interfaces.InformationManager;
 import grith.jgrith.credential.Credential;
 
 import java.net.MalformedURLException;
@@ -56,26 +55,25 @@ public class GT5Submitter extends JobSubmitter {
 		GramJob restartJob = new GramJob(null);
 		final GSSCredential cred = credential.getCredential();
 
-        // try to get the state from the notification listener cache
-        Integer jobStatus = l.getStatus(handle);
-        Integer error = l.getError(handle);
-        if (jobStatus != null &&
-              (jobStatus == GRAMConstants.STATUS_DONE ||
-               jobStatus == GRAMConstants.STATUS_FAILED)) {
-              return translateToGrisuStatus(jobStatus, error, error);			
-        }
-		
+		// try to get the state from the notification listener cache
+		Integer jobStatus = l.getStatus(handle);
+		Integer error = l.getError(handle);
+		if ((jobStatus != null) &&
+				((jobStatus == GRAMConstants.STATUS_DONE) ||
+						(jobStatus == GRAMConstants.STATUS_FAILED))) {
+			return translateToGrisuStatus(jobStatus, error, error);
+		}
+
 		try {
 			// lets try to see if gateway is working first...
 			Gram.ping(cred, contact);
 		} catch (final GramException ex) {
-			myLogger.info(ex.getLocalizedMessage(), ex);
+			myLogger.info("pinging " + contact + " failed. Returning status 'Unsubmitted'.", ex);
 			// have no idea what the status is, gateway is down:
 			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED,
 					ex.getErrorCode(), 0);
-
 		} catch (final GSSException ex) {
-			myLogger.error(ex.getLocalizedMessage(), ex);
+			myLogger.info("pinging " + contact + " failed. Returning status 'Unsubmitted'.", ex);
 			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0,
 					0);
 		}
@@ -105,6 +103,15 @@ public class GT5Submitter extends JobSubmitter {
 				restartJob.setCredentials(cred);
 				try {
 					restartJob.request(contact, false);
+				} catch (final WaitingForCommitException cex) {
+					try {
+						myLogger.debug("Signaling gram after restart request failed.");
+						restartJob.signal(GRAMConstants.SIGNAL_COMMIT_REQUEST);
+					} catch (Exception e) {
+						myLogger.error("Restart of job '{}' failed: {}",
+								handle, e.getLocalizedMessage());
+						return JobConstants.UNDEFINED;
+					}
 				} catch (final GramException ex1) {
 					if (ex1.getErrorCode() == 131) {
 						// job is still running but proxy expired
@@ -112,10 +119,11 @@ public class GT5Submitter extends JobSubmitter {
 								GRAMConstants.STATUS_ACTIVE, 131, 0);
 					}
 					// something is really wrong
+					myLogger.error("restarting job " + handle + " failed. returning status 'Failed'.", ex1);
 					return translateToGrisuStatus(GRAMConstants.STATUS_FAILED,
 							restartJob.getError(), 0);
 				} catch (final GSSException ex1) {
-					myLogger.error(ex1.getLocalizedMessage(), ex1);
+					myLogger.error("restarting job " + handle + " failed. returning status 'Unsubmitted'.", ex1);
 					return translateToGrisuStatus(
 							GRAMConstants.STATUS_UNSUBMITTED, 0, 0);
 				}
@@ -159,6 +167,7 @@ public class GT5Submitter extends JobSubmitter {
 	@Override
 	public int killJob(Job grisuJob, Credential cred) {
 
+		getJobStatus(grisuJob, cred);
 		final GramJob job = new GramJob(null);
 		try {
 			job.setID(grisuJob.getJobhandle());
@@ -180,7 +189,7 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	protected String submit(InformationManager infoManager, String host,
+	protected String submit(String host,
 			String factoryType, Job job) throws ServerJobSubmissionException {
 
 		final RSLFactory f = RSLFactory.getRSLFactory();

@@ -27,22 +27,27 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 	private final FileManager fm;
 
 	private final boolean displayHiddenFiles;
+	private final boolean displayFiles;
 	private final String[] extensionsToDisplay;
 	private final LazyLoadingTreeController controller;
 
+	private boolean forceRefresh = false;
+
 	public GridFileTreeNode(FileManager fm, GridFile userObject) {
-		this(fm, userObject, null, true, null);
+		this(fm, userObject, null, true, true, null);
 	}
 
 	public GridFileTreeNode(FileManager fm, GridFile userObject,
 			LazyLoadingTreeController controller) {
-		this(fm, userObject, controller, true, null);
+		this(fm, userObject, controller, true, true, null);
 	}
 
 	public GridFileTreeNode(FileManager fm, GridFile userObject,
-			LazyLoadingTreeController controller, boolean displayHiddenFiles,
+			LazyLoadingTreeController controller, boolean displayFiles,
+			boolean displayHiddenFiles,
 			String[] extensionsToDisplay) {
 		super(userObject, (controller == null) ? null : controller.getModel());
+		this.displayFiles = displayFiles;
 		this.displayHiddenFiles = displayHiddenFiles;
 		this.extensionsToDisplay = extensionsToDisplay;
 		this.fm = fm;
@@ -51,7 +56,7 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 	}
 
 	public GridFileTreeNode(FileManager fm, String name) {
-		this(fm, new GridFile(name, -1L), null, true, null);
+		this(fm, new GridFile(name, -1L), null, true, true, null);
 	}
 
 	@Override
@@ -83,6 +88,10 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 
 	}
 
+	public boolean isExpanded() {
+		return areChildrenLoaded();
+	}
+
 	@Override
 	public MutableTreeNode[] loadChildren(DefaultTreeModel model) {
 
@@ -93,8 +102,10 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 		final GridFile temp = ((GridFile) getUserObject());
 		temp.setChildren(null);
 		try {
-			final Set<GridFile> dfo = fm.ls((GridFile) getUserObject())
+			final Set<GridFile> dfo = fm.ls((GridFile) getUserObject(),
+					forceRefresh)
 					.getChildren();
+			forceRefresh = false;
 			if (dfo == null) {
 				return new MutableTreeNode[0];
 			}
@@ -103,6 +114,10 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 				if (names.contains(f.getName())) {
 					final String oldName = f.getName();
 					duplicateNames.add(oldName);
+				}
+
+				if (!displayFiles && GridFile.FILETYPE_FILE.equals(f.getType())) {
+					continue;
 				}
 
 				if (!displayHiddenFiles && f.getName().startsWith(".")) {
@@ -124,7 +139,8 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 				}
 
 				final GridFileTreeNode gftn = new GridFileTreeNode(fm, f,
-						controller, displayHiddenFiles, extensionsToDisplay);
+						controller, displayFiles, displayHiddenFiles,
+						extensionsToDisplay);
 
 				list.add(gftn);
 				names.add(f.getName());
@@ -154,6 +170,8 @@ public class GridFileTreeNode extends LazyLoadingTreeNode {
 		if (isLeaf()) {
 			return;
 		}
+
+		forceRefresh = true;
 
 		SwingUtilities.invokeLater(new Thread() {
 			@Override

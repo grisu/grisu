@@ -2,6 +2,7 @@ package grisu.settings;
 
 import grisu.control.events.ClientPropertiesEvent;
 import grisu.jcommons.constants.Enums.LoginType;
+import grith.gsindl.SLCS;
 
 import java.io.File;
 
@@ -58,7 +59,6 @@ public final class ClientPropertiesManager {
 	static final Logger myLogger = LoggerFactory
 			.getLogger(ClientPropertiesManager.class);
 	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
-	private static final String DEFAULT_SHIBBOLETH_URL = "https://slcs1.arcs.org.au/SLCS/login";
 
 	public static final String AUTO_LOGIN_KEY = "autoLogin";
 
@@ -643,7 +643,7 @@ public final class ClientPropertiesManager {
 		}
 
 		if (StringUtils.isBlank(url)) {
-			return DEFAULT_SHIBBOLETH_URL;
+			return SLCS.DEFAULT_SLCS_URL;
 		}
 		return url;
 	}

@@ -2,8 +2,8 @@ package grisu.frontend.view.swing.files.contextMenu;
 
 import grisu.jcommons.utils.FileAndUrlHelpers;
 import grisu.model.FileManager;
-import grisu.model.dto.DtoProperty;
 import grisu.model.dto.GridFile;
+import grisu.model.info.dto.DtoProperty;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;

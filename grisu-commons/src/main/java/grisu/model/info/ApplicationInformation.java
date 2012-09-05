@@ -1,11 +1,15 @@
 package grisu.model.info;
 
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.interfaces.GridResource;
+import grisu.model.info.dto.Executable;
+import grisu.model.info.dto.JobQueueMatch;
+import grisu.model.info.dto.Package;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Version;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 /**
  * Interface which describes the stuff that needs to be known from an
@@ -25,28 +29,28 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return all available versions
 	 */
-	Set<String> getAllAvailableVersionsForFqan(String fqan);
+	Set<Version> getAllAvailableVersionsForFqan(String fqan);
 
-	/**
-	 * Calculates all submissionlocations for this kind of job.
-	 * 
-	 * Basically, this returns the same info as
-	 * {@link #getAllAvailableVersionsForFqan(String)}, but it returns fully
-	 * populated GridResources as a SortedList. It also takes into account
-	 * jobproperties. As a result, it might take a bit longer to get a result
-	 * from this method.
-	 * 
-	 * If the current thread is interrupted this will return null
-	 * 
-	 * @param additionalJobProperties
-	 *            the jobProperties
-	 * @param fqan
-	 *            the fqan to submit the job
-	 * @return a sorted list of the best resources to submit this job to.
-	 */
-	SortedSet<GridResource> getAllSubmissionLocationsAsGridResources(
-			Map<JobSubmissionProperty, String> additionalJobProperties,
-			String fqan);
+	// /**
+	// * Calculates all submissionlocations for this kind of job.
+	// *
+	// * Basically, this returns the same info as
+	// * {@link #getAllAvailableVersionsForFqan(String)}, but it returns fully
+	// * populated GridResources as a SortedList. It also takes into account
+	// * jobproperties. As a result, it might take a bit longer to get a result
+	// * from this method.
+	// *
+	// * If the current thread is interrupted this will return null
+	// *
+	// * @param additionalJobProperties
+	// * the jobProperties
+	// * @param fqan
+	// * the fqan to submit the job
+	// * @return a sorted list of the best resources to submit this job to.
+	// */
+	// List<Queue> getAllSubmissionLocations(
+	// Map<JobSubmissionProperty, String> additionalJobProperties,
+	// String fqan);
 
 	/**
 	 * Retrieves a map of all available details (executables, modules, ...)
@@ -59,7 +63,7 @@ public interface ApplicationInformation {
 	 *            the version
 	 * @return the details
 	 */
-	Map<String, String> getApplicationDetails(String subLoc, String version);
+	Package getApplicationDetails(String subLoc, String version);
 
 	/**
 	 * The name of the application this object is all about.
@@ -74,15 +78,7 @@ public interface ApplicationInformation {
 	 * 
 	 * @return the submissionLocations
 	 */
-	Set<String> getAvailableAllSubmissionLocations();
-
-	// /**
-	// * Returns a set of all executable names that are associated with this
-	// * application on the grid.
-	// *
-	// * @return the executables
-	// */
-	// Set<String> getAvailableExecutables();
+	Queue[] getAvailableAllSubmissionLocations();
 
 	/**
 	 * Calculates all the submissionlocations that are available to the user for
@@ -93,7 +89,15 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return the submissionlocations
 	 */
-	Set<String> getAvailableSubmissionLocationsForFqan(String fqan);
+	Set<Queue> getAvailableSubmissionLocationsForFqan(String fqan);
+
+	// /**
+	// * Returns a set of all executable names that are associated with this
+	// * application on the grid.
+	// *
+	// * @return the executables
+	// */
+	// Set<String> getAvailableExecutables();
 
 	/**
 	 * Returns a set of all available submissionLocations for one version of
@@ -103,7 +107,7 @@ public interface ApplicationInformation {
 	 *            the version in question
 	 * @return the submissionLocations
 	 */
-	Set<String> getAvailableSubmissionLocationsForVersion(String version);
+	Queue[] getAvailableSubmissionLocationsForVersion(String version);
 
 	/**
 	 * This calculates all the submissionlocations that are available to the
@@ -115,7 +119,7 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return the submissionLocations
 	 */
-	Set<String> getAvailableSubmissionLocationsForVersionAndFqan(
+	Set<Queue> getAvailableSubmissionLocationsForVersionAndFqan(
 			String version, String fqan);
 
 	/**
@@ -126,21 +130,7 @@ public interface ApplicationInformation {
 	 *            the submissionLocation
 	 * @return a set of all available versions
 	 */
-	Set<String> getAvailableVersions(String subLoc);
-
-	/**
-	 * Calculates the best {@link GridResource}s to submit this job to.
-	 * 
-	 * @param additionalJobProperties
-	 *            additional job properties (e.g. walltime). Have a look at the
-	 *            MatchMaker interface for supported keys.
-	 * @param fqan
-	 *            the fqan to submit the job with
-	 * @return a sorted list of the best resources to submit this job to.
-	 */
-	SortedSet<GridResource> getBestSubmissionLocations(
-			Map<JobSubmissionProperty, String> additionalJobProperties,
-			String fqan);
+	Set<Version> getAvailableVersions(String subLoc);
 
 	/**
 	 * The available executables for this application on this
@@ -152,7 +142,21 @@ public interface ApplicationInformation {
 	 *            the version of the application
 	 * @return a list of all executables
 	 */
-	String[] getExecutables(String subLoc, String version);
+	Set<Executable> getExecutables(String subLoc, String version);
+
+	// /**
+	// * Calculates the best {@link GridResource}s to submit this job to.
+	// *
+	// * @param additionalJobProperties
+	// * additional job properties (e.g. walltime). Have a look at the
+	// * MatchMaker interface for supported keys.
+	// * @param fqan
+	// * the fqan to submit the job with
+	// * @return a sorted list of the best resources to submit this job to.
+	// */
+	// SortedSet<GridResource> getBestSubmissionLocations(
+	// Map<JobSubmissionProperty, String> additionalJobProperties,
+	// String fqan);
 
 	/**
 	 * All available executables for the application and the provided VO.
@@ -164,7 +168,7 @@ public interface ApplicationInformation {
 	 *            the fqan
 	 * @return the executables
 	 */
-	Set<String> getExecutablesForVo(final String fqan);
+	Set<Executable> getExecutablesForVo(final String fqan);
 
 	/**
 	 * All available executables for the application and the provided VO for a
@@ -179,6 +183,34 @@ public interface ApplicationInformation {
 	 *            the version
 	 * @return the executables
 	 */
-	Set<String> getExecutablesForVo(final String fqan, String version);
+	Set<Executable> getExecutablesForVo(final String fqan, String version);
+
+	/**
+	 * Finds all queues for the specified group and returns a list of
+	 * {@link JobQueueMatch}es which contain information about whether and how
+	 * well a job will run on each {@link Queue}.
+	 * 
+	 * @param additionalJobProperties
+	 *            job properties
+	 * @param fqan
+	 *            the group
+	 * @return a list of JobQueueMatches
+	 */
+	public List<JobQueueMatch> getMatches(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan);
+
+	/**
+	 * Finds all queues that match the specified job properties.
+	 * 
+	 * @param additionalJobProperties
+	 *            job properties like cpus, memory,...
+	 * @param fqan
+	 *            the group to use to submit the job
+	 * @return all queues that run the specified job
+	 */
+	public List<Queue> getQueues(
+			Map<JobSubmissionProperty, String> additionalJobProperties,
+			String fqan);
 
 }

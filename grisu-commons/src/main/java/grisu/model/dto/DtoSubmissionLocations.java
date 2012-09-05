@@ -1,10 +1,8 @@
 package grisu.model.dto;
 
-import grisu.jcommons.interfaces.InformationManager;
-import grisu.model.MountPoint;
+import grisu.model.info.dto.Queue;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,24 +18,41 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "submissionlocations")
 public class DtoSubmissionLocations {
 
-	private static boolean checkWhetherSubLocIsActuallyAvailable(
-			InformationManager im, Collection<MountPoint> mps, String subLoc) {
+	// private static boolean checkWhetherSubLocIsActuallyAvailable(
+	// InformationManager im, Collection<MountPoint> mps, String subLoc) {
+	//
+	// final Set<Directory> filesystems = im
+	// .getStagingFileSystemForSubmissionLocation(subLoc);
+	//
+	// for (final MountPoint mp : mps) {
+	//
+	// for (final Directory fs : filesystems) {
+	// if (mp.getRootUrl().startsWith(fs.toUrl().replace(":2811", ""))) {
+	// return true;
+	// }
+	// }
+	//
+	// }
+	//
+	// return false;
+	//
+	// }
 
-		final String[] filesystems = im
-				.getStagingFileSystemForSubmissionLocation(subLoc);
+	public static DtoSubmissionLocations createSubmissionLocationsInfo(
+			Collection<String> submissionLocations) {
 
-		for (final MountPoint mp : mps) {
+		final DtoSubmissionLocations result = new DtoSubmissionLocations();
 
-			for (final String fs : filesystems) {
-				if (mp.getRootUrl().startsWith(fs.replace(":2811", ""))) {
-					return true;
-				}
-			}
-
+		final List<DtoSubmissionLocationInfo> subLocs = new LinkedList<DtoSubmissionLocationInfo>();
+		for (final String subLoc : submissionLocations) {
+			final DtoSubmissionLocationInfo temp = new DtoSubmissionLocationInfo();
+			temp.setSubmissionLocation(subLoc);
+			subLocs.add(temp);
 		}
 
-		return false;
+		result.setAllSubmissionLocations(subLocs);
 
+		return result;
 	}
 
 	public static DtoSubmissionLocations createSubmissionLocationsInfo(
@@ -56,6 +71,23 @@ public class DtoSubmissionLocations {
 
 		return result;
 
+	}
+
+	public static DtoSubmissionLocations createSubmissionLocationsInfoFromQueues(
+			Collection<Queue> queues) {
+
+		final DtoSubmissionLocations result = new DtoSubmissionLocations();
+
+		final List<DtoSubmissionLocationInfo> subLocs = new LinkedList<DtoSubmissionLocationInfo>();
+		for (final Queue q : queues) {
+			final DtoSubmissionLocationInfo temp = new DtoSubmissionLocationInfo();
+			temp.setSubmissionLocation(q.toString());
+			subLocs.add(temp);
+		}
+
+		result.setAllSubmissionLocations(subLocs);
+
+		return result;
 	}
 
 	/**
@@ -79,19 +111,19 @@ public class DtoSubmissionLocations {
 		return allSubmissionLocations;
 	}
 
-	public void removeUnuseableSubmissionLocations(InformationManager im,
-			Collection<MountPoint> mps) {
-
-		final Iterator<DtoSubmissionLocationInfo> i = allSubmissionLocations
-				.iterator();
-		while (i.hasNext()) {
-			if (!checkWhetherSubLocIsActuallyAvailable(im, mps, i.next()
-					.getSubmissionLocation())) {
-				i.remove();
-			}
-		}
-
-	}
+	// public void removeUnuseableSubmissionLocations(InformationManager im,
+	// Collection<MountPoint> mps) {
+	//
+	// final Iterator<DtoSubmissionLocationInfo> i = allSubmissionLocations
+	// .iterator();
+	// while (i.hasNext()) {
+	// if (!checkWhetherSubLocIsActuallyAvailable(im, mps, i.next()
+	// .getSubmissionLocation())) {
+	// i.remove();
+	// }
+	// }
+	//
+	// }
 
 	public void setAllSubmissionLocations(
 			List<DtoSubmissionLocationInfo> allSubmissionLocations) {

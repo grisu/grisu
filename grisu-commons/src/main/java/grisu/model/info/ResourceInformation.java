@@ -1,5 +1,9 @@
 package grisu.model.info;
 
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.Queue;
+import grisu.model.info.dto.Site;
+
 import java.util.List;
 import java.util.Set;
 
@@ -41,7 +45,7 @@ public interface ResourceInformation {
 	 * 
 	 * @return all application packages
 	 */
-	Set<String> getAllApplications();
+	Application[] getAllApplications();
 
 	/**
 	 * A list of all applications that are available for a particular vo.
@@ -50,7 +54,7 @@ public interface ResourceInformation {
 	 *            the vo
 	 * @return the applications
 	 */
-	Set<String> getAllApplicationsForFqans(Set<String> fqan);
+	Application[] getAllApplicationsForFqans(Set<String> fqan);
 
 	/**
 	 * Returns a list of all sites a user that is member of the specified fqan
@@ -60,7 +64,7 @@ public interface ResourceInformation {
 	 *            the fqan
 	 * @return the list of sites
 	 */
-	Set<String> getAllAvailableSites(String fqan);
+	Set<Site> getAllAvailableSites(String fqan);
 
 	/**
 	 * All the submissionLocations the user has got access to with this fqan.
@@ -69,23 +73,15 @@ public interface ResourceInformation {
 	 *            the fqan
 	 * @return all submissionLocations
 	 */
-	String[] getAllAvailableSubmissionLocations(String fqan);
+	Queue[] getAllAvailableSubmissionLocations(String fqan);
 
 	/**
 	 * Returns a list of all available submission locations, regardless of VO.
 	 * 
 	 * @return all submission locations
 	 */
-	String[] getAllSubmissionLocations();
+	Queue[] getAllSubmissionLocations();
 
-	/**
-	 * Checks which application packages provide the provided executable.
-	 * 
-	 * @param executable
-	 *            the executable
-	 * @return the application package(s) or null if no package could be found
-	 */
-	String[] getApplicationPackageForExecutable(String executable);
 
 	/**
 	 * Calculates the best staging filesystem for this submissionLocation.

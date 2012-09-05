@@ -33,7 +33,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class VirtualFileSystemTreePanel extends JPanel implements
-		GridFileListPanel {
+GridFileListPanel {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(VirtualFileSystemTreePanel.class.getName());
@@ -69,6 +69,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 	private Vector<GridFileListListener> listeners;
 	private GridFileListPanelContextMenu popupMenu;
 
+	private final boolean displayFiles = true;
 	private final boolean displayHiddenFiles = false;
 	private final String[] extensionsToDisplay = null;
 
@@ -197,6 +198,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 		try {
 			for (final GridFile f : fm.ls(root).getChildren()) {
 				rootNode.add(new GridFileTreeNode(fm, f, controller,
+						displayFiles,
 						displayHiddenFiles, extensionsToDisplay));
 			}
 		} catch (final RemoteFileSystemException e) {
@@ -251,7 +253,7 @@ public class VirtualFileSystemTreePanel extends JPanel implements
 
 	}
 
-	public void setRootUrl(String url) {
+	public void setRootUrl(GridFile url) {
 		// TODO Auto-generated method stub
 
 	}

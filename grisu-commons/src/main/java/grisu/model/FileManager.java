@@ -5,9 +5,8 @@ import grisu.control.events.FolderCreatedEvent;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoStringList;
 import grisu.model.dto.GridFile;
-import grisu.model.files.GlazedFile;
+import grisu.model.info.dto.DtoStringList;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
@@ -22,7 +21,6 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -48,6 +46,7 @@ import net.sf.ehcache.util.NamedThreadFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
+import org.python.modules.synchronize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +102,18 @@ public class FileManager {
 
 		return createDataHandler(getFileFromUriOrPath(pathOrUri));
 
+	}
+
+	public static String ensurePrependingSlash(String path) {
+		if (StringUtils.isBlank(path)) {
+			return "/";
+		}
+
+		if (path.startsWith("/")) {
+			return path;
+		} else {
+			return "/" + path;
+		}
 	}
 
 	public static String ensureTrailingSlash(String url) {
@@ -601,17 +612,6 @@ public class FileManager {
 
 	}
 
-	/**
-	 * @param source
-	 * @param target
-	 * @param overwrite
-	 * @throws FileTransactionException
-	 * @Deprecated don't use {@link GlazedFiles} anymore (if you can help it)
-	 */
-	public void cp(GlazedFile source, GlazedFile target, boolean overwrite)
-			throws FileTransactionException {
-		cp(source.getUrl(), target.getUrl(), overwrite);
-	}
 
 	/**
 	 * Copies {@link GridFile} grid files (remote or local).
@@ -632,29 +632,6 @@ public class FileManager {
 		cp(source.getUrl(), targetDir.getUrl(), overwrite);
 	}
 
-	/**
-	 * Copies a set of {@link GridFile}s to a target directory.
-	 * 
-	 * @param sources
-	 *            the source files
-	 * @param targetDirectory
-	 *            the target directory
-	 * @param overwrite
-	 *            whether to overwrite the target file if it exists
-	 * @throws FileTransactionException
-	 *             if the copying fails (for example because overwrite is false
-	 *             and target exists
-	 * @deprecated don't use {@link GlazedFile anymore}
-	 */
-	@Deprecated
-	public void cp(Set<GlazedFile> sources, GlazedFile targetDirectory,
-			boolean overwrite) throws FileTransactionException {
-
-		for (final GlazedFile source : sources) {
-			cp(source, targetDirectory, overwrite);
-		}
-
-	}
 
 	/**
 	 * Copies a set of {@link GridFile}s to a target directory.
@@ -793,51 +770,6 @@ public class FileManager {
 
 	}
 
-	/**
-	 * @param currentDirectory
-	 * @param s
-	 * @return
-	 * @deprecated don't use {@link GlazedFile} anymore
-	 */
-	@Deprecated
-	public boolean createFolder(GlazedFile currentDirectory, String s) {
-
-		if (!GlazedFile.Type.FILETYPE_FOLDER.equals(currentDirectory.getType())) {
-			return false;
-		}
-
-		String url = null;
-		if (isLocal(currentDirectory.getUrl())) {
-
-			url = currentDirectory.getUrl() + File.separator + s;
-			final File newFolder = getFileFromUriOrPath(url);
-
-			if (newFolder.exists()) {
-				myLogger.debug("Folder " + newFolder.toString()
-						+ " already exists. Not creating it.");
-				return false;
-			} else {
-				final boolean result = newFolder.mkdirs();
-				if (result) {
-					EventBus.publish(new FolderCreatedEvent(url));
-				}
-				return result;
-			}
-		} else {
-			url = currentDirectory.getUrl() + "/" + s;
-
-			try {
-				final boolean result = serviceInterface.mkdir(url);
-				if (result) {
-					EventBus.publish(new FolderCreatedEvent(url));
-				}
-				return result;
-			} catch (final RemoteFileSystemException e) {
-				return false;
-			}
-		}
-
-	}
 
 	/**
 	 * Create a new folder in a parent directory
@@ -874,11 +806,16 @@ public class FileManager {
 				return result;
 			}
 		} else {
-			url = parent.getUrl() + "/" + s;
+			url = ensureTrailingSlash(parent.getUrl()) + s;
 
 			final boolean result = serviceInterface.mkdir(url);
 			if (result) {
 				EventBus.publish(new FolderCreatedEvent(url));
+				// String optionalPath = parent.getPath();
+				// if (StringUtils.isNotBlank(optionalPath)) {
+				// optionalPath = ensureTrailingSlash(optionalPath) + s;
+				// EventBus.publish(new FolderCreatedEvent(optionalPath));
+				// }
 			}
 			return result;
 
@@ -890,43 +827,6 @@ public class FileManager {
 			throws RemoteFileSystemException {
 
 		createFolder(createGridFile(parentUrl), s);
-
-	}
-
-	/**
-	 * @param url
-	 * @return
-	 * @deprecated don't use {@link GlazedFile} anymore
-	 */
-	@Deprecated
-	public GlazedFile createGlazedFileFromUrl(String url) {
-
-		if (FileManager.isLocal(url)) {
-			final File file = getFileFromUriOrPath(url);
-			return new GlazedFile(file);
-		} else {
-			return new GlazedFile(url, serviceInterface);
-		}
-
-	}
-
-	/**
-	 * Use this method to create a GlazedFile from a url and you already know
-	 * which type (file, folder) the file should be. That saves time in having
-	 * to look up the type.
-	 * 
-	 * @param url
-	 * @param type
-	 * @return
-	 */
-	public GlazedFile createGlazedFileFromUrl(String url, GlazedFile.Type type) {
-
-		if (FileManager.isLocal(url)) {
-			final File file = getFileFromUriOrPath(url);
-			return new GlazedFile(file);
-		} else {
-			return new GlazedFile(url, serviceInterface, type);
-		}
 
 	}
 
@@ -1025,6 +925,11 @@ public class FileManager {
 	 */
 	public final File downloadFile(final String url, final boolean forceDownload)
 			throws FileTransactionException {
+		return downloadFile(url, getLocalCacheFile(url), forceDownload);
+	}
+
+	public final File downloadFile(final String url, File target,
+			final boolean forceDownload) throws FileTransactionException {
 
 		if (isLocal(url)) {
 			return getFileFromUriOrPath(url);
@@ -1034,7 +939,12 @@ public class FileManager {
 			return getLocalCacheFile(url);
 		}
 
-		final File cacheTargetFile = getLocalCacheFile(url);
+		File cacheTargetFile = null;
+		if (target != null) {
+			cacheTargetFile = target;
+		} else {
+			cacheTargetFile = getLocalCacheFile(url);
+		}
 
 		long lastModified;
 		try {
@@ -1051,8 +961,8 @@ public class FileManager {
 		// }
 		// }
 
+		Long size = null;
 		if (!forceDownload) {
-			long size;
 			try {
 				size = serviceInterface.getFileSize(url);
 				if (size > getDownloadFileSizeThreshold()) {
@@ -1069,14 +979,34 @@ public class FileManager {
 			}
 		}
 
-		myLogger.debug("Remote file newer than local cache file or not cached yet, downloading new copy.");
+		if (size == null) {
+			try {
+				size = serviceInterface.getFileSize(url);
+				if ((size > getDownloadFileSizeThreshold()) && (target != null)) {
+					myLogger.info("File bigger than download threshold, not using cache: "
+							+ url);
+					cacheTargetFile = target;
+				}
+			} catch (final RemoteFileSystemException e2) {
+				myLogger.error("Could not get size of file: " + url);
+				throw new FileTransactionException(url,
+						cacheTargetFile.toString(), "Could not get size.", e2);
+
+			}
+		}
+
+		myLogger.debug(
+				"Remote file newer than local cache file, different size or not cached yet, downloading new copy (filesize: {}): {}",
+				size, url);
 		final DataSource source = null;
 		DataHandler handler = null;
 		try {
 
 			handler = serviceInterface.download(url);
+
 		} catch (final Exception e) {
-			myLogger.error("Could not download file: " + url);
+			myLogger.error("Could not download file {}: {}", url,
+					e.getLocalizedMessage());
 			throw new FileTransactionException(url, cacheTargetFile.toString(),
 					"Could not download file.", e);
 		}
@@ -1194,36 +1124,43 @@ public class FileManager {
 			isFolder = serviceInterface.isFolder(url);
 		} catch (final RemoteFileSystemException e) {
 			throw new FileTransactionException(url, targetDir.toString(),
-					"Can't determine whether source is file or folder.", e);
+					"Can't determine whether source is file or folder: " + url,
+					e);
 		}
 
 		File cacheFile = null;
+		final long sizethreshold = ClientPropertiesManager
+				.getFileSizeThresholdForCache();
+
 		if (isFolder) {
 			cacheFile = downloadFolder(url);
 			// File newDir = new File(targetFile, getFilename(url));
 			// boolean canWritePar = targetFile.canWrite();
 			// boolean canWrite = newDir.canWrite();
 			// boolean created = newDir.mkdirs();
-			final long size = ClientPropertiesManager
-					.getFolderSizeThresholdForCache();
 
 			final long dir = FileUtils.sizeOfDirectory(cacheFile);
-			if (dir <= size) {
+			if (dir <= sizethreshold) {
 				FileUtils.copyDirectory(cacheFile, targetFile);
 			} else {
 				FileUtils.moveDirectory(cacheFile, targetFile);
 			}
 
 		} else {
-			cacheFile = downloadFile(url);
-			final File newFile = targetFile;
-			final long size = ClientPropertiesManager
-					.getFileSizeThresholdForCache();
-			if (newFile.length() <= size) {
-				FileUtils.copyFile(cacheFile, newFile);
-			} else {
-				FileUtils.moveFile(cacheFile, newFile);
+			long filesize;
+			try {
+				filesize = getFileSize(url);
+			} catch (RemoteFileSystemException e) {
+				throw new FileTransactionException(url, targetDir.toString(),
+						"Can't determine size of source file: " + url, e);
 			}
+			if (filesize >= sizethreshold) {
+				cacheFile = downloadFile(url, targetFile, true);
+			} else {
+				cacheFile = downloadFile(url);
+				FileUtils.copyFile(cacheFile, targetFile);
+			}
+
 		}
 
 		return targetFile;
@@ -1480,30 +1417,14 @@ public class FileManager {
 	}
 
 	/**
-	 * @param parent
-	 * @return
-	 * @throws RemoteFileSystemException
-	 * @Deprecated don't use {@link GlazedFile} anymore
-	 */
-	public synchronized List<GlazedFile> ls(GlazedFile parent)
-			throws RemoteFileSystemException {
-
-		final List<GlazedFile> result = new ArrayList<GlazedFile>();
-
-		final GridFile folder = ls(parent.getUrl());
-
-		for (final GridFile f : folder.getChildren()) {
-			result.add(new GlazedFile(f));
-		}
-
-		return result;
-	}
-
-	/**
 	 * Returns the children of the specified folder.
+	 * 
+	 * Uses the local cache.
 	 * 
 	 * @param parent
 	 *            the folder to list
+	 * @param forceRefresh
+	 *            whether to use the file listing cache (false) or not (true)
 	 * @return the children of the folder
 	 * @throws RemoteFileSystemException
 	 *             if the folder can't be accessed
@@ -1512,9 +1433,39 @@ public class FileManager {
 
 		GridFile folder = null;
 		if (StringUtils.isNotBlank(parent.getPath())) {
-			folder = ls(parent.getPath());
+			folder = ls(parent.getPath(), false);
 		} else {
-			folder = ls(parent.getUrl());
+			folder = ls(parent.getUrl(), false);
+		}
+
+		if (folder == null) {
+			return null;
+		}
+
+		return folder;
+
+	}
+
+
+	/**
+	 * Returns the children of the specified folder.
+	 * 
+	 * @param parent
+	 *            the folder to list
+	 * @param forceRefresh
+	 *            whether to use the file listing cache (false) or not (true)
+	 * @return the children of the folder
+	 * @throws RemoteFileSystemException
+	 *             if the folder can't be accessed
+	 */
+	public GridFile ls(GridFile parent, boolean forceRefresh)
+			throws RemoteFileSystemException {
+
+		GridFile folder = null;
+		if (StringUtils.isNotBlank(parent.getPath())) {
+			folder = ls(parent.getPath(), forceRefresh);
+		} else {
+			folder = ls(parent.getUrl(), forceRefresh);
 		}
 
 		if (folder == null) {
@@ -1528,6 +1479,8 @@ public class FileManager {
 	/**
 	 * Returns the children of the specified folder.
 	 * 
+	 * Doesn't force a refresh (means: uses cache)
+	 * 
 	 * @param url
 	 *            the url of the folder to list
 	 * @return the children of the folder
@@ -1535,7 +1488,21 @@ public class FileManager {
 	 *             if the folder can't be accessed
 	 */
 	public GridFile ls(String url) throws RemoteFileSystemException {
-		return ls(url, 1);
+		return ls(url, false, 1);
+	}
+
+	/**
+	 * Returns the children of the specified folder.
+	 * 
+	 * @param url
+	 *            the url of the folder to list
+	 *            @param forceRefresh whether to use the file listing cache (false) or not (true)
+	 * @return the children of the folder
+	 * @throws RemoteFileSystemException
+	 *             if the folder can't be accessed
+	 */
+	public GridFile ls(String url, boolean forceRefresh) throws RemoteFileSystemException {
+		return ls(url, forceRefresh, 1);
 	}
 
 	/**
@@ -1547,6 +1514,8 @@ public class FileManager {
 	 * 
 	 * @param url
 	 *            the url of the root folder
+	 * @param forceRefresh
+	 *            whether to use the file listing cache (false) or not (true)
 	 * @param recursionLevel
 	 *            the recursion level
 	 * @return a structure of {@link GridFile}s that mirrors the remote
@@ -1554,10 +1523,11 @@ public class FileManager {
 	 * @throws RemoteFileSystemException
 	 *             if one of the child files/folders can't be accessed
 	 */
-	public GridFile ls(String url, int recursionLevel)
+	public GridFile ls(String url, boolean forceRefresh, int recursionLevel)
 			throws RemoteFileSystemException {
 
 		url = ensureUriFormat(url);
+
 
 		if (isLocal(url)) {
 
@@ -1577,9 +1547,18 @@ public class FileManager {
 		} else {
 
 			try {
-				final GridFile result = serviceInterface
-						.ls(url, recursionLevel);
-				return result;
+				if (!forceRefresh) {
+					GridFile cache = FileCache.getFileList(url);
+					if (cache != null) {
+						return cache;
+					}
+				}
+				synchronized (url) {
+					final GridFile result = serviceInterface
+							.ls(url, recursionLevel);
+					FileCache.putFileList(url, result);
+					return result;
+				}
 			} catch (final RemoteFileSystemException e) {
 
 				throw e;
@@ -1618,8 +1597,22 @@ public class FileManager {
 			myLogger.debug("local file timestamp:\t" + local_last_modified);
 			myLogger.debug("remote file timestamp:\t" + lastModified);
 			if (local_last_modified >= lastModified) {
-				myLogger.debug("Local cache file is not older than remote file. No download necessary...");
-				return false;
+				myLogger.debug("Local cache file is not older than remote file. Checking size...");
+				long remote_size;
+				try {
+					remote_size = serviceInterface.getFileSize(url);
+				} catch (RemoteFileSystemException e) {
+					throw new RuntimeException(
+							"Could not get filesize for file: " + url, e);
+				}
+				long size = cacheTargetFile.length();
+				if (remote_size != size) {
+					myLogger.debug("Remote file differes in size from local cache file. Download needed.");
+					return true;
+				} else {
+					myLogger.debug("Remote file has same size than local cache file, no download necessary.");
+					return false;
+				}
 			} else {
 				return true;
 			}
@@ -2192,7 +2185,8 @@ public class FileManager {
 		} catch (final Exception e) {
 			throw new FileTransactionException(file.toString(),
 					targetDirectory,
-					"Could not determine whether target directory exists: ", e);
+					"Could not determine whether target directory exists: "
+							+ e.getLocalizedMessage(), e);
 		}
 
 		if (file.isDirectory()) {
@@ -2246,12 +2240,33 @@ public class FileManager {
 				myLogger.debug("local file timestamp:\t" + local_last_modified);
 				myLogger.debug("remote file timestamp:\t" + lastModified);
 				if (local_last_modified >= lastModified) {
-					myLogger.debug("Local cache file is not older than remote file. Doing nothing...");
-					return true;
+					myLogger.debug("Local cache file is not older than remote file. Checking filesize...");
+					long remote_size;
+					try {
+						remote_size = serviceInterface.getFileSize(url);
+					} catch (RemoteFileSystemException e) {
+						myLogger.debug("Can't get filesize for {}: {}", url, e);
+						return false;
+					}
+					long size = cacheTargetFile.length();
+					if (remote_size != size) {
+						myLogger.debug("Local cache file has different size to remote file, needs re-downloading...");
+						myLogger.debug("Deleting wrong sized cache file: "
+								+ cacheTargetFile.getAbsolutePath());
+						FileUtils.deleteQuietly(cacheTargetFile);
+						return false;
+					} else {
+						return true;
+					}
+				} else {
+					myLogger.debug("Deleting out of date cache file: "
+							+ cacheTargetFile.getAbsolutePath());
+					FileUtils.deleteQuietly(cacheTargetFile);
+					return false;
 				}
+			} else {
+				return false;
 			}
-
-			return false;
 		}
 	}
 }

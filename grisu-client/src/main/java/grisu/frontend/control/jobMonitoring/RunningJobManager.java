@@ -17,7 +17,7 @@ import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.DtoJobs;
-import grisu.model.files.GlazedFile;
+import grisu.model.dto.GridFile;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -299,18 +299,17 @@ public class RunningJobManager implements EventSubscriber {
 		return cachedBatchJobsPerApplication.get(application);
 	}
 
-	public List<GlazedFile> getFinishedOutputFilesForBatchJob(
+	public List<GridFile> getFinishedOutputFilesForBatchJob(
 			BatchJobObject batchJob, String[] patterns)
 					throws RemoteFileSystemException {
 
-		final List<GlazedFile> files = new LinkedList<GlazedFile>();
+		final List<GridFile> files = new LinkedList<GridFile>();
 
 		final List<String> fileurls = batchJob.getListOfOutputFiles(true,
 				patterns);
 
 		for (final String url : fileurls) {
-			files.add(fm.createGlazedFileFromUrl(url,
-					GlazedFile.Type.FILETYPE_FILE));
+			files.add(fm.createGridFile(url));
 		}
 
 		return files;

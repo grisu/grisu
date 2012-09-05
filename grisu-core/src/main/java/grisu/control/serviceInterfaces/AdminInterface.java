@@ -3,7 +3,9 @@ package grisu.control.serviceInterfaces;
 import grisu.backend.hibernate.UserDAO;
 import grisu.backend.model.User;
 import grisu.jcommons.constants.Constants;
-import grisu.model.dto.DtoStringList;
+import grisu.jcommons.interfaces.InformationManager;
+import grisu.model.info.dto.DtoStringList;
+import grisu.model.info.dto.VO;
 import grisu.settings.Environment;
 import grisu.settings.ServerPropertiesManager;
 import grith.jgrith.voms.VOManagement.VOManagement;
@@ -12,6 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -31,10 +37,14 @@ public class AdminInterface {
 
 	final private String adminUserFile;
 
-	public AdminInterface(String adminUserFile, UserDAO userdao) {
+	private final InformationManager im;
+
+	public AdminInterface(String adminUserFile, InformationManager im,
+			UserDAO userdao) {
 
 		this.userdao = userdao;
 		this.adminUserFile = adminUserFile;
+		this.im = im;
 
 		readAdminConfigFile();
 
@@ -55,14 +65,50 @@ public class AdminInterface {
 							+ user.getDn());
 					user.clearMountPointCache(null);
 				}
+				
+				// CacheManager.getInstance();
+				myLogger.debug("clearing all user cache sessions...");
+				for (CacheManager cm : CacheManager.ALL_CACHE_MANAGERS) {
+					if (cm.getName().equals("grisu")) {
+						Cache usercache = cm.getCache("userCache");
+						if (usercache != null) {
+							// for (Object key : usercache.getKeys()) {
+							// System.out.println("KEY: " + key);
+							// }
+							// keys are myproxyUsername[@<myproxyHost>]
+							usercache.removeAll();
+						}
+						break;
+					}
+				}
+				
 				return DtoStringList
 						.fromSingleString("All user mountpointchaches cleared.");
 			}
+		
 
 			// clear cache for all users
 			User user = userdao.findUserByDN(userdn);
 			myLogger.debug("Clearing mountpointcache for user " + user.getDn());
 			user.clearMountPointCache(null);
+			
+
+			// CacheManager.getInstance();
+			myLogger.debug("clearing all user cache sessions...");
+			for (CacheManager cm : CacheManager.ALL_CACHE_MANAGERS) {
+				if (cm.getName().equals("grisu")) {
+					Cache usercache = cm.getCache("userCache");
+					if (usercache != null) {
+						// for (Object key : usercache.getKeys()) {
+						// System.out.println("KEY: " + key);
+						// }
+						// keys are myproxyUsername[@<myproxyHost>]
+						usercache.removeAll();
+					}
+					break;
+				}
+			}
+			
 			return DtoStringList
 					.fromSingleString("Mountpointchache cleared for user "
 							+ user.getDn());
@@ -145,7 +191,9 @@ public class AdminInterface {
 	private DtoStringList refreshVos() {
 
 		refreshConfig();
-		VOManagement.refreshAllVOs();
+		im.refresh();
+		Set<VO> vos = im.getAllVOs();
+		VOManagement.setVOsToUse(vos);
 
 		return DtoStringList.fromSingleString("VOs refreshed.");
 

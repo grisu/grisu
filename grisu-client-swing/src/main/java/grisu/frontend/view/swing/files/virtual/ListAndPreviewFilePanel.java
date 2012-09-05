@@ -124,6 +124,12 @@ public class ListAndPreviewFilePanel extends JPanel {
 		return virtualFileSystemTreeTablePanel;
 	}
 
+	public void refreshFolder(String url) {
+
+		getVirtualFileSystemTreeTablePanel().refreshFolder(url);
+
+	}
+
 	public void switchToFileList() {
 		final CardLayout cl = (CardLayout) getCardPanel().getLayout();
 		cl.show(getCardPanel(), STATE.Files.toString());

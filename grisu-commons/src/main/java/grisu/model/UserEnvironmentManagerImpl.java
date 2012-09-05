@@ -1,17 +1,19 @@
 package grisu.model;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
+import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.exceptions.StatusException;
 import grisu.jcommons.constants.Constants;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
-import grisu.model.dto.DtoStringList;
+import grisu.model.dto.GridFile;
 import grisu.model.files.FileSystemItem;
-import grisu.model.files.GlazedFile;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
+import grisu.model.info.dto.Application;
+import grisu.model.info.dto.DtoStringList;
+import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
 import grith.jgrith.utils.FqanHelpers;
@@ -43,11 +45,10 @@ import net.sf.ehcache.util.NamedThreadFactory;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
-import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
+import com.google.common.base.Strings;
 
 /**
  * The implemenation of {@link UserEnvironmentManager}.
@@ -67,12 +68,12 @@ EventSubscriber<FqanEvent> {
 	private FileManager fm;
 
 	private String[] cachedFqans = null;
-	private String[] cachedApplications = null;
+	private Application[] cachedApplications = null;
 	private String[] cachedFqansUsable = null;
 	private String[] cachedUniqueGroupnames = null;
 	private String[] cachedUniqueGroupnamesUsable = null;
 	private final Map<String, Set<String>> cachedFqansPerApplication = new HashMap<String, Set<String>>();
-	private Set<String> cachedAllSubmissionLocations = null;
+	private Set<Queue> cachedAllSubmissionLocations = null;
 	private SortedSet<String> cachedAllSites = null;
 	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
 	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
@@ -138,74 +139,75 @@ EventSubscriber<FqanEvent> {
 		return temp;
 	}
 
-	public synchronized String[] getAllAvailableApplications() {
+	public synchronized Application[] getAllAvailableApplications() {
 
 		if (cachedApplications == null) {
 
-			cachedApplications = serviceInterface.getAllAvailableApplications(
-					DtoStringList.fromStringArray(getAllAvailableFqans(true)))
-					.asArray();
+			cachedApplications = serviceInterface
+					.getAllAvailableApplications(DtoStringList
+							.fromStringArray(getAllAvailableFqans(true)));
 		}
 
 		return cachedApplications;
 	}
 
-	public synchronized Map<String, Set<String>> getAllAvailableExecutables() {
-
-		final Map<String, Set<String>> allExes = Collections
-				.synchronizedMap(new TreeMap<String, Set<String>>());
-
-		final ThreadFactory tf = new NamedThreadFactory(
-				"infoGetAllAvailableExecutables");
-		final ExecutorService executor = Executors.newFixedThreadPool(50, tf);
-
-		for (final String application : getAllAvailableApplications()) {
-			allExes.put(application,
-					Collections.synchronizedSet(new TreeSet<String>()));
-		}
-
-		for (final String application : getAllAvailableApplications()) {
-
-			final ApplicationInformation ai = GrisuRegistryManager.getDefault(
-					serviceInterface).getApplicationInformation(application);
-
-			final Set<String> sublocs = ai.getAvailableAllSubmissionLocations();
-
-			final Set<String> sublocsUser = getAllAvailableSubmissionLocations();
-
-			for (final String subLoc : Sets.intersection(sublocs, sublocsUser)) {
-
-				final Set<String> versions = ai.getAvailableVersions(subLoc);
-
-				for (final String version : versions) {
-
-					final Thread t = new Thread() {
-						@Override
-						public void run() {
-							final String[] exes = ai.getExecutables(subLoc,
-									version);
-							X.p("Exes for: " + application + " " + subLoc + " "
-									+ version);
-							allExes.get(application)
-							.addAll(Arrays.asList(exes));
-						}
-					};
-					executor.execute(t);
-				}
-			}
-
-		}
-
-		executor.shutdown();
-
-		try {
-			executor.awaitTermination(120, TimeUnit.SECONDS);
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		return allExes;
-	}
+	// public synchronized Map<String, Set<String>> getAllAvailableExecutables()
+	// {
+	//
+	// final Map<String, Set<String>> allExes = Collections
+	// .synchronizedMap(new TreeMap<String, Set<String>>());
+	//
+	// final ThreadFactory tf = new NamedThreadFactory(
+	// "infoGetAllAvailableExecutables");
+	// final ExecutorService executor = Executors.newFixedThreadPool(50, tf);
+	//
+	// for (final String application : getAllAvailableApplications()) {
+	// allExes.put(application,
+	// Collections.synchronizedSet(new TreeSet<String>()));
+	// }
+	//
+	// for (final String application : getAllAvailableApplications()) {
+	//
+	// final ApplicationInformation ai = GrisuRegistryManager.getDefault(
+	// serviceInterface).getApplicationInformation(application);
+	//
+	// final Set<String> sublocs = ai.getAvailableAllSubmissionLocations();
+	//
+	// final Set<String> sublocsUser = getAllAvailableSubmissionLocations();
+	//
+	// for (final String subLoc : Sets.intersection(sublocs, sublocsUser)) {
+	//
+	// final Set<String> versions = ai.getAvailableVersions(subLoc);
+	//
+	// for (final String version : versions) {
+	//
+	// final Thread t = new Thread() {
+	// @Override
+	// public void run() {
+	// final String[] exes = ai.getExecutables(subLoc,
+	// version);
+	// X.p("Exes for: " + application + " " + subLoc + " "
+	// + version);
+	// allExes.get(application)
+	// .addAll(Arrays.asList(exes));
+	// }
+	// };
+	// executor.execute(t);
+	// }
+	// }
+	//
+	// }
+	//
+	// executor.shutdown();
+	//
+	// try {
+	// executor.awaitTermination(120, TimeUnit.SECONDS);
+	// } catch (final InterruptedException e) {
+	// e.printStackTrace();
+	// }
+	//
+	// return allExes;
+	// }
 
 	public final String[] getAllAvailableFqans() {
 		return getAllAvailableFqans(false);
@@ -217,7 +219,8 @@ EventSubscriber<FqanEvent> {
 		if (!excludeUnusableFqans) {
 
 			if (cachedFqans == null) {
-				this.cachedFqans = serviceInterface.getFqans().asArray();
+				DtoStringList temp = serviceInterface.getFqans();
+				this.cachedFqans = temp.asArray();
 			}
 
 			return cachedFqans;
@@ -246,7 +249,7 @@ EventSubscriber<FqanEvent> {
 
 			for (final String vo : getAllAvailableFqans()) {
 
-				final Set<String> temp = ai
+				final Set<Queue> temp = ai
 						.getAvailableSubmissionLocationsForFqan(vo);
 				if (temp.size() > 0) {
 					result.add(vo);
@@ -278,11 +281,11 @@ EventSubscriber<FqanEvent> {
 		return cachedAllSites;
 	}
 
-	public synchronized final Set<String> getAllAvailableSubmissionLocations() {
+	public synchronized final Set<Queue> getAllAvailableSubmissionLocations() {
 
 		if (cachedAllSubmissionLocations == null) {
 			cachedAllSubmissionLocations = Collections
-					.synchronizedSet(new TreeSet<String>());
+					.synchronizedSet(new TreeSet<Queue>());
 			cachedAllSites = new TreeSet<String>();
 
 			if ((getAllAvailableFqans() == null)
@@ -300,6 +303,10 @@ EventSubscriber<FqanEvent> {
 				final Thread t = new Thread() {
 					@Override
 					public void run() {
+						myLogger.debug(
+								"Adding all sublocs to cache for fqan (current size: {}): {}",
+								cachedAllSubmissionLocations.size(),
+								fqan);
 						cachedAllSubmissionLocations
 						.addAll(Arrays.asList(resourceInfo
 								.getAllAvailableSubmissionLocations(fqan)));
@@ -407,9 +414,16 @@ EventSubscriber<FqanEvent> {
 			cachedBookmarkFilesystemList = new LinkedList<FileSystemItem>();
 			for (final String bookmark : getBookmarks().keySet()) {
 				final String url = getBookmarks().get(bookmark);
-				cachedBookmarkFilesystemList.add(new FileSystemItem(bookmark,
-						FileSystemItem.Type.BOOKMARK, getFileManager()
-						.createGlazedFileFromUrl(url)));
+				try {
+					cachedBookmarkFilesystemList.add(new FileSystemItem(
+							bookmark, FileSystemItem.Type.BOOKMARK,
+							getFileManager().createGridFile(url)));
+				} catch (RemoteFileSystemException e) {
+					cachedBookmarkFilesystemList.add(new FileSystemItem(
+							bookmark, FileSystemItem.Type.BOOKMARK,
+							new GridFile(url, false, e)));
+				}
+
 			}
 		}
 		return cachedBookmarkFilesystemList;
@@ -601,14 +615,14 @@ EventSubscriber<FqanEvent> {
 		return FqanHelpers.getFullFqan(getAllAvailableFqans(), uniqueGroupname);
 	}
 
-	public TreeModel getGroupTreeFileModel(GlazedFile root) {
-
-		if (groupFileTreemodel == null) {
-			groupFileTreemodel = new UserspaceFileTreeModel(serviceInterface,
-					root);
-		}
-		return groupFileTreemodel;
-	}
+	// public TreeModel getGroupTreeFileModel(GlazedFile root) {
+	//
+	// if (groupFileTreemodel == null) {
+	// groupFileTreemodel = new UserspaceFileTreeModel(serviceInterface,
+	// root);
+	// }
+	// return groupFileTreemodel;
+	// }
 
 	public synchronized List<FileSystemItem> getLocalFileSystems() {
 
@@ -618,12 +632,12 @@ EventSubscriber<FqanEvent> {
 			final File userHome = new File(System.getProperty("user.home"));
 			cachedLocalFilesystemList.add(new FileSystemItem(
 					userHome.getName(), FileSystemItem.Type.LOCAL,
-					new GlazedFile(userHome)));
+					new GridFile(userHome)));
 
 			for (final File file : File.listRoots()) {
 				cachedLocalFilesystemList.add(new FileSystemItem(
 						file.getName(), FileSystemItem.Type.LOCAL,
-						new GlazedFile(file)));
+						new GridFile(file)));
 			}
 		}
 		return cachedLocalFilesystemList;
@@ -867,7 +881,7 @@ EventSubscriber<FqanEvent> {
 			cachedRemoteFilesystemList = new LinkedList<FileSystemItem>();
 			for (final String site : getAllAvailableSites()) {
 				cachedRemoteFilesystemList.add(new FileSystemItem(site,
-						FileSystemItem.Type.REMOTE, new GlazedFile(site)));
+						FileSystemItem.Type.REMOTE, new GridFile(site)));
 			}
 		}
 		return cachedRemoteFilesystemList;
@@ -936,9 +950,16 @@ EventSubscriber<FqanEvent> {
 			getFileSystems().remove(temp);
 			return temp;
 		} else {
-			final FileSystemItem temp = new FileSystemItem(alias,
-					FileSystemItem.Type.BOOKMARK, getFileManager()
-					.createGlazedFileFromUrl(url));
+			FileSystemItem temp;
+			try {
+				temp = new FileSystemItem(alias,
+						FileSystemItem.Type.BOOKMARK, getFileManager()
+						.createGridFile(url));
+			} catch (RemoteFileSystemException e) {
+				temp = new FileSystemItem(alias, FileSystemItem.Type.BOOKMARK,
+						new GridFile(alias, true, e));
+			}
+
 			getBookmarks().put(alias, url);
 			getBookmarksFilesystems().add(temp);
 			getFileSystems().add(temp);

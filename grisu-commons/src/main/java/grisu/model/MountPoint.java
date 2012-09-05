@@ -1,7 +1,7 @@
 package grisu.model;
 
 import grisu.jcommons.utils.FileSystemHelpers;
-import grisu.model.dto.DtoProperty;
+import grisu.model.info.dto.DtoProperty;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +19,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Objects;
+import com.google.common.collect.ComparisonChain;
 
 /**
  * The concept of MountPoints is pretty important within grisu. A MountPoint is
@@ -74,6 +77,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	private boolean automaticallyMounted = false;
 	private boolean disabled = false;
 
+	private boolean isHomeDir = false;
+
 	private boolean isVolatileFileSystem = false;
 
 	// for hibernate
@@ -110,7 +115,7 @@ public class MountPoint implements Comparable<MountPoint> {
 			final String mountpoint, final String site) {
 		this.dn = dn;
 		this.fqan = fqan;
-		this.rootUrl = url;
+		this.rootUrl = FileManager.ensureTrailingSlash(url);
 		this.alias = mountpoint;
 		this.site = site;
 	}
@@ -133,9 +138,10 @@ public class MountPoint implements Comparable<MountPoint> {
 	 */
 	public MountPoint(final String dn, final String fqan, final String url,
 			final String mountpoint, final String site,
-			final boolean automaticallyMounted) {
+			final boolean automaticallyMounted, boolean homedir) {
 		this(dn, fqan, url, mountpoint, site);
 		this.automaticallyMounted = automaticallyMounted;
+		this.isHomeDir = homedir;
 	}
 
 	public void addProperty(String key, String value) {
@@ -143,7 +149,8 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	public int compareTo(final MountPoint mp) {
-		return getAlias().compareTo(mp.getAlias());
+		return ComparisonChain.start().compare(getRootUrl(), mp.getRootUrl())
+				.compare(getAlias(), mp.getAlias()).result();
 	}
 
 	@Override
@@ -152,27 +159,8 @@ public class MountPoint implements Comparable<MountPoint> {
 		if (otherMountPoint instanceof MountPoint) {
 			final MountPoint other = (MountPoint) otherMountPoint;
 
-			return other.getAlias().equals(this.getAlias());
-
-			// if ( other.getDn().equals(this.getDn()) &&
-			// other.getRootUrl().equals(this.getRootUrl()) ) {
-			//
-			// if ( other.getFqan() == null ) {
-			// if ( this.getFqan() == null ) {
-			// return true;
-			// } else {
-			// return false;
-			// }
-			// } else {
-			// if ( this.getFqan() == null ) {
-			// return false;
-			// } else {
-			// return other.getFqan().equals(this.getFqan());
-			// }
-			// }
-			// } else {
-			// return false;
-			// }
+			return Objects.equal(getRootUrl(), other.getRootUrl())
+					&& Objects.equal(getAlias(), other.getAlias());
 		} else {
 			return false;
 		}
@@ -280,7 +268,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	@Override
 	public int hashCode() {
 		// return dn.hashCode() + mountpoint.hashCode();
-		return alias.hashCode();
+		return Objects.hashCode(getRootUrl(), alias.hashCode());
 	}
 
 	@Column(nullable = false)
@@ -293,6 +281,11 @@ public class MountPoint implements Comparable<MountPoint> {
 	@XmlElement(name = "disabled")
 	public boolean isDisabled() {
 		return disabled;
+	}
+
+	@Transient
+	public boolean isHomeDir() {
+		return isHomeDir;
 	}
 
 	/**
@@ -396,6 +389,10 @@ public class MountPoint implements Comparable<MountPoint> {
 		this.fqan = fqan;
 	}
 
+	private void setHomeDir(final boolean homedir) {
+		this.isHomeDir = homedir;
+	}
+
 	public void setMountPointId(final Long id) {
 		this.mountPointId = id;
 	}
@@ -410,7 +407,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	// }
 
 	public void setRootUrl(final String rootUrl) {
-		this.rootUrl = rootUrl;
+		this.rootUrl = FileManager.ensureTrailingSlash(rootUrl);
 	}
 
 	public void setSite(final String site) {
@@ -418,7 +415,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	}
 
 	public void setUrl(final String url) {
-		this.rootUrl = url;
+		this.rootUrl = FileManager.ensureTrailingSlash(url);
 	}
 
 	public void setVolatileFileSystem(final boolean isVolatile) {
