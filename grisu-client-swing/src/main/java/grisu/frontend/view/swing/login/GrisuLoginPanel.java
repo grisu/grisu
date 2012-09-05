@@ -70,6 +70,7 @@ public class GrisuLoginPanel extends JPanel implements PropertyChangeListener {
 	private final ServiceInterfaceHolder siHolder;
 
 	private boolean loggingIn = false;
+	private boolean failed = false;
 
 	/**
 	 * Create the panel.
@@ -145,11 +146,18 @@ public class GrisuLoginPanel extends JPanel implements PropertyChangeListener {
 		if (evt.getSource() != credCreationPanel) {
 			return;
 		}
+		
+		if ( "credentialCreationFailed".equals(evt.getPropertyName()) ) {
+			this.failed= (Boolean)evt.getNewValue();
+			return;
+		}
 
 		if ("creatingCredential".equals(evt.getPropertyName())) {
 			boolean creating = (Boolean) evt.getNewValue();
-			if (!loggingIn) {
-				lockUI(creating);
+			
+			if (failed) {
+				lockUI(false);
+				failed = false;
 			}
 			return;
 		}
@@ -157,7 +165,7 @@ public class GrisuLoginPanel extends JPanel implements PropertyChangeListener {
 		if ("credential".equals(evt.getPropertyName())) {
 			String backend = getAdvancedLoginPanelOptions()
 					.getServiceInterfaceUrl();
-
+			
 			Cred cred = getCredCreationPanel().getCredential();
 
 			try {
