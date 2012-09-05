@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5-rc3-SNAPSHOT</version>
+		<version>0.5</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>grisu-commons</artifactId>
@@ -331,7 +331,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
