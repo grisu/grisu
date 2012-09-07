@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5</version>
+		<version>0.5.1-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>grisu-commons</artifactId>
@@ -148,9 +148,8 @@
 
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
+			<artifactId>ehcache-core</artifactId>
 			<version>2.3.1</version>
-			<type>pom</type>
 		</dependency>
 		<!-- enunciate dependencies for annotations -->
 		<!-- <dependency> <groupId>org.codehaus.enunciate</groupId> <artifactId>enunciate-core-annotations</artifactId>
