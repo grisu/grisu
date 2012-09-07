@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.5</version>
+			<version>0.5.2-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
