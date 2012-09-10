@@ -207,7 +207,7 @@ public class GT4Submitter extends JobSubmitter {
 			// convert from bytes to mb
 			memory = memory / (1024 * 1024);
 			// for mpi we need the memory for every core
-			memory = memory + processorCount;
+			memory = memory * processorCount;
 			totalMemory.setTextContent(memory.toString());
 			job.appendChild(totalMemory);
 		}
