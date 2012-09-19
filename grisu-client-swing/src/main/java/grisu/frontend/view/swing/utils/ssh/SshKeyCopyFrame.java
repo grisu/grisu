@@ -54,9 +54,12 @@ public class SshKeyCopyFrame extends JFrame {
 	private PanSSHKeyCopyPanel getPanSSHKeyCopyPanel() {
 		if (panSSHKeyCopyPanel == null) {
 			panSSHKeyCopyPanel = new PanSSHKeyCopyPanel();
-			if (args.length == 2) {
+			if (args.length >= 2) {
 				panSSHKeyCopyPanel.setTemplatePath(args[0]);
 				panSSHKeyCopyPanel.setMobaxtermpath(args[1]);
+			}
+			if (args.length == 3 ) {
+				panSSHKeyCopyPanel.setBackend(args[2]);
 			}
 		}
 		return panSSHKeyCopyPanel;

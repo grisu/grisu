@@ -56,6 +56,12 @@ public class PanSSHKeyCopyPanel extends JPanel {
 	private JLabel lblConfirmPassword;
 	private JPasswordField confirmPasswordField;
 	private JLabel lblNewLabel;
+	
+	private String backend = "bestgrid";
+	
+	public void setBackend(String backend) {
+		this.backend = backend;
+	}
 
 	private String templatePath, mobaxtermpath;
 
@@ -304,7 +310,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 					addLogMessage("Logging into grid...");
 					ServiceInterface si = null;
 					try {
-						si = LoginManager.login("nesi", cred, false);
+						si = LoginManager.login(backend, cred, false);
 					} catch (LoginException e) {
 						e.printStackTrace();
 					}
