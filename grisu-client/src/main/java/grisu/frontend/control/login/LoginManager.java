@@ -195,6 +195,8 @@ public class LoginManager {
 	public static ServiceInterface login(String backend,
 			boolean displayCliProgress) throws NoCredentialException,
 			LoginException {
+		
+		initEnvironment();
 
 		Cred c = null;
 		try {
