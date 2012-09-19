@@ -104,15 +104,21 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 
 				if (folder) {
 					getDownloadMenuItem().setEnabled(false);
-					getOpenMenuItem().setEnabled(false);
+					if (getOpenMenuItem() != null) {
+						getOpenMenuItem().setEnabled(false);
+					}
 					getCreateFolderMenuItem().setEnabled(true);
 				} else {
 					if (file.getUrls().size() == 1) {
 						getDownloadMenuItem().setEnabled(true);
-						getOpenMenuItem().setEnabled(true);
+						if (getOpenMenuItem() != null) {
+							getOpenMenuItem().setEnabled(true);
+						}
 					} else {
 						getDownloadMenuItem().setEnabled(false);
-						getOpenMenuItem().setEnabled(false);
+						if (getOpenMenuItem() != null) {
+							getOpenMenuItem().setEnabled(false);
+						}
 					}
 					getCreateFolderMenuItem().setEnabled(false);
 				}
@@ -125,10 +131,14 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 
 		if (folder) {
 			getViewMenuItem().setEnabled(false);
-			getOpenMenuItem().setEnabled(false);
+			if (getOpenMenuItem() != null) {
+				getOpenMenuItem().setEnabled(false);
+			}
 		} else {
 			getViewMenuItem().setEnabled(true);
-			getOpenMenuItem().setEnabled(true);
+			if (getOpenMenuItem() != null) {
+				getOpenMenuItem().setEnabled(true);
+			}
 		}
 		getDownloadMenuItem().setEnabled(true);
 		getCreateFolderMenuItem().setEnabled(true);
@@ -184,7 +194,11 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 	private JMenuItem getOpenMenuItem() {
 		if (openMenuItem == null) {
 			openMenuItem = new JMenuItem("Open");
-			openMenuItem.setAction(new OpenAction(fileList));
+			try {
+				openMenuItem.setAction(new OpenAction(fileList));
+			} catch (Exception e) {
+				openMenuItem = null;
+			}
 		}
 		return openMenuItem;
 	}
@@ -227,7 +241,10 @@ public class DefaultGridFileContextMenu extends JPopupMenu implements
 	public void setGridFileListPanel(GridFileListPanel panel) {
 		this.fileList = panel;
 
-		add(getOpenMenuItem());
+		JMenuItem openItem = getOpenMenuItem();
+		if (openItem != null) {
+			add(getOpenMenuItem());
+		}
 
 		add(getRefreshMenuItem());
 		add(getCopyMenuItem());

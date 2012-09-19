@@ -16,7 +16,7 @@ public class SshKeyCopyFrame extends JFrame {
 	 */
 	public static void main(final String[] args) {
 
-		LoginManager.initEnvironment();
+		LoginManager.initGrisuClient("Ssh-key-copy-client");
 		EventQueue.invokeLater(new Runnable() {
 
 			public void run() {
