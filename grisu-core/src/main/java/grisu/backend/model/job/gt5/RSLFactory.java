@@ -227,6 +227,9 @@ public class RSLFactory {
 		}
 
 		final Package pkg = this.infoManager.getPackage(application, version, subLoc);
+		if ( pkg == null ) {
+			return new String[]{};
+		}
 
 		final Module m = pkg.getModule();
 		if (m == null) {
