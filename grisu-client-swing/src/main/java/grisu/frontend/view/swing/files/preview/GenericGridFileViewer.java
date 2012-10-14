@@ -5,6 +5,7 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.view.swing.files.GridFileListListener;
 import grisu.frontend.view.swing.files.preview.fileViewers.GridFilePropertiesViewer;
+import grisu.frontend.view.swing.files.preview.fileViewers.PlainTextGridFileViewer;
 import grisu.jcommons.utils.FileAndUrlHelpers;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
@@ -67,14 +68,17 @@ GridFileListListener {
 						}
 					}
 				}
+
 			} catch (final Exception e) {
 				myLogger.error(e.getLocalizedMessage(), e);
 			}
 
 		}
+		
+//		GridFileViewer viewer = new PlainTextGridFileViewer();
 
 
-		return null;
+		return viewer;
 	}
 
 	public static Set<String> findViewers() {

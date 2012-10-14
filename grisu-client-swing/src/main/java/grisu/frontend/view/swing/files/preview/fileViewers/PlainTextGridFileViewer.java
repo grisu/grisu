@@ -36,7 +36,7 @@ public class PlainTextGridFileViewer extends JPanel implements GridFileViewer {
 	}
 
 	public String[] getSupportedMimeTypes() {
-		return new String[] { "text" };
+		return new String[] { "text", "application/x-bash" };
 	}
 
 	private JTextArea getTextArea() {
