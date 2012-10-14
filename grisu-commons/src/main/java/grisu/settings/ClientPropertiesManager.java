@@ -61,6 +61,7 @@ public final class ClientPropertiesManager {
 	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 
 	public static final String AUTO_LOGIN_KEY = "autoLogin";
+	public static final String ADMIN_KEY = "admin";
 
 	/**
 	 * Call this if the user wants a new (server-side) template to his personal
@@ -132,6 +133,22 @@ public final class ClientPropertiesManager {
 		}
 
 		return autoLogin;
+
+	}
+	
+	public static boolean isAdmin() {
+
+		boolean admin = false;
+		try {
+			admin = Boolean.parseBoolean(getClientConfiguration()
+					.getString(ADMIN_KEY));
+
+		} catch (final Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return false;
+		}
+
+		return admin;
 
 	}
 

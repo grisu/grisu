@@ -5,6 +5,7 @@ import grisu.frontend.control.login.LoginException;
 import grisu.frontend.control.login.LoginManager;
 import grith.gridsession.GridClient;
 import grith.jgrith.cred.GridLoginParameters;
+import grith.jgrith.utils.CommandlineArgumentHelpers;
 
 public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 
@@ -21,6 +22,7 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 	// protected final String[] args;
 
 	private ServiceInterface si;
+	private String[] args;
 
 
 	private final T cliParams;
@@ -35,10 +37,19 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 		super(GridLoginParameters.createFromCommandlineArgs(params, args));
 		// this.args = args;
 		this.cliParams = params;
+		this.args = args;
 
 		LoginManager.initEnvironment();
 	}
 
+	public String[] getGridCliArguments() {
+		return CommandlineArgumentHelpers.extractGridParameters(this.cliParams, args);
+	}
+
+	public String[] getNonGridCliArguments() {
+		return CommandlineArgumentHelpers.extractNonGridParameters(this.cliParams, args);
+	}
+	
 	public T getCliParameters() {
 
 		return this.cliParams;
