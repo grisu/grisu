@@ -78,7 +78,7 @@ GridFileListListener {
 //		GridFileViewer viewer = new PlainTextGridFileViewer();
 
 
-		return viewer;
+		return null;
 	}
 
 	public static Set<String> findViewers() {
