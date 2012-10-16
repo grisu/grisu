@@ -612,7 +612,9 @@ public final class ClientPropertiesManager {
 
 		if (templates.length == 0) {
 			myLogger.debug("No server templates found.");
-			return new String[] {};
+			addServerTemplate("generic");
+			setProperty("lastCreatePanel", "Generic");
+			templates = new String[] {"generic"};
 		}
 		return templates;
 	}
