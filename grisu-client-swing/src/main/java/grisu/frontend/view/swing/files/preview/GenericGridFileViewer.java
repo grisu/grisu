@@ -63,7 +63,7 @@ GridFileListListener {
 
 				if (viewerClass != null) {
 					for (final String t : viewerClass.getSupportedMimeTypes()) {
-						if (match.getMimeType().contains(t)) {
+						if (match != null && match.getMimeType().contains(t)) {
 							return viewerClass;
 						}
 					}
@@ -75,10 +75,10 @@ GridFileListListener {
 
 		}
 		
-//		GridFileViewer viewer = new PlainTextGridFileViewer();
+		GridFileViewer viewer = new PlainTextGridFileViewer();
 
 
-		return null;
+		return viewer;
 	}
 
 	public static Set<String> findViewers() {
