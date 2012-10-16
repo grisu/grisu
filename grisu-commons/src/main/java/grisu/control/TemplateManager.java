@@ -180,7 +180,11 @@ public class TemplateManager {
 
 	public List<String> getMyRemoteTemplateNames() {
 
-		final String[] myTemps = ClientPropertiesManager.getServerTemplates();
+		String[] myTemps = ClientPropertiesManager.getServerTemplates();
+		
+		if ( myTemps == null || myTemps.length == 0 ) {
+			myTemps = new String[]{"generic"};
+		}
 
 		return Arrays.asList(myTemps);
 	}

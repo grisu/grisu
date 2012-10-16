@@ -132,6 +132,7 @@ PropertyChangeListener, JobDetailPanel {
 	private JButton killButton;
 	private JButton cleanButton;
 	private JSeparator separator;
+	private JButton btnRefresh;
 
 	/**
 	 * Create the panel.
@@ -151,14 +152,19 @@ PropertyChangeListener, JobDetailPanel {
 				ColumnSpec.decode("max(24dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(42dlu;default)"),
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				RowSpec.decode("10dlu"),
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, }));
+				FormFactory.RELATED_GAP_ROWSPEC,}));
 		add(getLblJobname(), "2, 2, right, default");
 		add(getJobnameTextField(), "4, 2, fill, default");
 		add(getSeparator(), "6, 2, 1, 7, right, default");
@@ -166,11 +172,12 @@ PropertyChangeListener, JobDetailPanel {
 		add(getLblSubmitted(), "2, 4, right, default");
 		add(getSubmittedTextField(), "4, 4, fill, default");
 		add(getKillButton(), "8, 4");
-		add(getStatusRefreshButton(), "2, 6, right, default");
-		add(getTxtNa(), "4, 6, fill, default");
+		add(getLblApplication(), "2, 6, right, default");
+		add(getApplicationTextField(), "4, 6, fill, default");
 		add(getCleanButton(), "8, 6");
-		add(getLblApplication(), "2, 8, right, default");
-		add(getApplicationTextField(), "4, 8, fill, default");
+		add(getStatusRefreshButton(), "2, 8, right, default");
+		add(getTxtNa(), "4, 8, fill, default");
+		add(getBtnRefresh(), "8, 8");
 		add(getJideTabbedPane(), "2, 10, 7, 1, fill, fill");
 
 	}
@@ -488,37 +495,7 @@ PropertyChangeListener, JobDetailPanel {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 
-					if (job != null) {
-						new Thread() {
-							@Override
-							public void run() {
-								SwingUtilities.invokeLater(new Thread() {
-									@Override
-									public void run() {
-										statusRefreshButton.setCursor(Cursor
-												.getPredefinedCursor(Cursor.WAIT_CURSOR));
-										getTxtNa().setText("Getting status...");
-									}
-								});
-
-								try {
-									job.getStatus(true);
-								} finally {
-									SwingUtilities.invokeLater(new Thread() {
-										@Override
-										public void run() {
-											statusRefreshButton.setCursor(Cursor
-													.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-											getTxtNa().setText(
-													job.getStatusString(false));
-										}
-									});
-
-								}
-							}
-						}.start();
-						getFileManagementPanel().refresh(true);
-					}
+					refreshJob();
 
 				}
 
@@ -537,7 +514,7 @@ PropertyChangeListener, JobDetailPanel {
 
 			});
 			statusRefreshButton.setBorder(null);
-			statusRefreshButton.setIcon(REFRESH_ICON);
+//			statusRefreshButton.setIcon(REFRESH_ICON);
 		}
 		return statusRefreshButton;
 	}
@@ -662,5 +639,57 @@ PropertyChangeListener, JobDetailPanel {
 		getApplicationTextField().setText(
 				job.getJobProperty(Constants.APPLICATIONNAME_KEY, false));
 
+	}
+	
+	private synchronized void refreshJob() {
+		if (job != null) {
+			new Thread() {
+				@Override
+				public void run() {
+					SwingUtilities.invokeLater(new Thread() {
+						@Override
+						public void run() {
+							getStatusRefreshButton().setCursor(Cursor
+									.getPredefinedCursor(Cursor.WAIT_CURSOR));
+							getBtnRefresh().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+							getBtnRefresh().setEnabled(false);
+							getTxtNa().setText("Getting status...");
+						}
+					});
+
+					try {
+						job.getStatus(true);
+					} finally {
+						SwingUtilities.invokeLater(new Thread() {
+							@Override
+							public void run() {
+								getStatusRefreshButton().setCursor(Cursor
+										.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+								getBtnRefresh().setCursor(Cursor
+										.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+								getTxtNa().setText(
+										job.getStatusString(false));
+								getBtnRefresh().setEnabled(true);
+							}
+						});
+
+					}
+				}
+			}.start();
+			getFileManagementPanel().refresh(true);
+		}
+	}
+	
+	private JButton getBtnRefresh() {
+		if (btnRefresh == null) {
+			btnRefresh = new JButton("Refresh");
+			btnRefresh.setIcon(REFRESH_ICON);
+			btnRefresh.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					refreshJob();
+				}
+			});
+		}
+		return btnRefresh;
 	}
 }
