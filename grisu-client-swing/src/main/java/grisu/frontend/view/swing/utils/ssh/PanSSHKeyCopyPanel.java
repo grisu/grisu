@@ -11,8 +11,8 @@ import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
 import grith.gridsession.view.SLCSCredPanel;
 import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.AbstractCred.PROPERTY;
 import grith.jgrith.cred.Cred;
-import grith.jgrith.credential.Credential.PROPERTY;
 import grith.jgrith.utils.GridSshKey;
 
 import java.awt.Color;

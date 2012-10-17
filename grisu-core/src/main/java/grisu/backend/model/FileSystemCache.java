@@ -3,7 +3,6 @@ package grisu.backend.model;
 import grisu.model.MountPoint;
 import grisu.settings.ServerPropertiesManager;
 import grith.jgrith.cred.AbstractCred;
-import grith.jgrith.credential.Credential;
 
 import java.util.Date;
 import java.util.HashMap;
