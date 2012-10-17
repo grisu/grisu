@@ -10,6 +10,7 @@ import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
 import grisu.utils.SeveralXMLHelpers;
+import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.credential.Credential;
 
 import java.io.BufferedWriter;
@@ -553,12 +554,12 @@ public class GT4Submitter extends JobSubmitter {
 	 * grisu.credential.model.ProxyCredential)
 	 */
 	@Override
-	public final int getJobStatus(final Job job, final Credential cred) {
+	public final int getJobStatus(final Job job, final AbstractCred cred) {
 
 		String status = null;
 		int grisu_status = Integer.MIN_VALUE;
 		status = GramClient.getJobStatus(job.getJobhandle(),
-				cred.getCredential());
+				cred.getGSSCredential());
 
 		grisu_status = translateToGrisuStatus(status);
 
@@ -579,9 +580,9 @@ public class GT4Submitter extends JobSubmitter {
 	 * grisu.credential.model.ProxyCredential)
 	 */
 	@Override
-	public final int killJob(final Job job, final Credential cred) {
+	public final int killJob(final Job job, final AbstractCred cred) {
 
-		return killJob(job.getJobhandle(), cred.getCredential());
+		return killJob(job.getJobhandle(), cred.getGSSCredential());
 
 	}
 
@@ -665,7 +666,7 @@ public class GT4Submitter extends JobSubmitter {
 				// .convertByteArrayToGSSCredential(job.getCredential()
 				// .getCredentialData());
 
-				credential = job.getCredential().getCredential();
+				credential = job.getCredential().getGSSCredential();
 
 				if ((credential == null)
 						|| (credential.getRemainingLifetime() < 1)) {

@@ -10,7 +10,7 @@ import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.settings.ServerPropertiesManager;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.io.BufferedInputStream;
@@ -595,7 +595,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	 *             if the filesystem could not be mounted
 	 */
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final Credential cred, final boolean useHomeDirectory,
+			final AbstractCred cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 
 		// if (!mountPointName.startsWith("/")) {
@@ -611,7 +611,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 			}
 		}
 
-		MountPoint new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
+		MountPoint new_mp = new MountPoint(cred.getDN(), cred.getFqan(), uri,
 				mountPointName, site);
 
 		final FileSystemCache fsCache = new FileSystemCache(user);
@@ -646,14 +646,14 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				// if vo user, use $VOHOME/<DN> as homedirectory
 				if (cred.getFqan() != null) {
 					uri = uri + File.separator
-							+ User.get_vo_dn_path(cred.getDn());
+							+ User.get_vo_dn_path(cred.getDN());
 					fileSystem.resolveFile(
 							((String) fileSystem.getAttribute("HOME_DIRECTORY")
-									+ File.separator + cred.getDn()
+									+ File.separator + cred.getDN()
 									.replace("=", "_").replace(",", "_")
 									.replace(" ", "_"))).createFolder();
 				}
-				new_mp = new MountPoint(cred.getDn(), cred.getFqan(), uri,
+				new_mp = new MountPoint(cred.getDN(), cred.getFqan(), uri,
 						mountPointName, site);
 			}
 

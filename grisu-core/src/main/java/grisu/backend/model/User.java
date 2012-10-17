@@ -24,7 +24,7 @@ import grisu.model.info.dto.VO;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.vomsProxy.VomsException;
 
@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+//import grith.jgrith.credential.Credential;
 
 /**
  * The User class holds all the relevant data a job could want to know from the
@@ -98,7 +99,7 @@ public class User {
 
 	private static final String ACCESSIBLE = "Accessible";
 
-	public static User createUser(Credential cred,
+	public static User createUser(AbstractCred cred,
 			AbstractServiceInterface si) {
 
 		// make sure there is a valid credential
@@ -115,7 +116,7 @@ public class User {
 
 		User user;
 		// try to look up user in the database
-		user = userdao.findUserByDN(cred.getDn());
+		user = userdao.findUserByDN(cred.getDN());
 		Date time2 = new Date();
 
 		myLogger.debug("Login benchmark - db lookup: "
@@ -184,7 +185,7 @@ public class User {
 	// the (default) credential to contact gridftp file shares
 	// private ProxyCredential cred = null;
 
-	private Credential credential;
+	private AbstractCred credential;
 
 	private UserJobManager jobmanager;
 	// the (default) credentials dn
@@ -236,8 +237,8 @@ public class User {
 	 * @throws FileSystemException
 	 *             if the users default filesystems can't be mounted
 	 */
-	private User(final Credential cred) {
-		this.dn = cred.getDn();
+	private User(final AbstractCred cred) {
+		this.dn = cred.getDN();
 		this.credential = cred;
 		// this.infoManager = AbstractServiceInterface.informationManager;
 		// this.matchmaker = AbstractServiceInterface.matchmaker;
@@ -446,7 +447,7 @@ public class User {
 		// add dn dir if necessary
 
 		if (userDnPath) {
-			url = url + "/" + User.get_vo_dn_path(getCredential().getDn());
+			url = url + "/" + User.get_vo_dn_path(getCredential().getDN());
 
 			// try to connect to filesystem in background and store in database
 			// if not successful, so next time won't be tried again...
@@ -970,14 +971,14 @@ public class User {
 	 * @return the default credential or null if there is none
 	 */
 	@Transient
-	public Credential getCredential() {
+	public AbstractCred getCredential() {
 		return credential;
 	}
 
 	@Transient
-	public Credential getCredential(String fqan) {
+	public AbstractCred getCredential(String fqan) {
 
-		Credential cred = getCredential().getVomsCredential(fqan);
+		AbstractCred cred = getCredential().getGroupCredential(fqan);
 
 		return cred;
 	}
@@ -1490,7 +1491,7 @@ public class User {
 	 *             if the filesystem could not be mounted
 	 */
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final Credential cred, final boolean useHomeDirectory,
+			final AbstractCred cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 
 		final MountPoint new_mp = getFileManager().mountFileSystem(uri,
@@ -1515,7 +1516,7 @@ public class User {
 			return mountFileSystem(root, name, useHomeDirectory, site);
 		} else {
 
-			final Credential vomsProxyCred = getCredential(fqan);
+			final AbstractCred vomsProxyCred = getCredential(fqan);
 
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
@@ -1611,14 +1612,14 @@ public class User {
 	 * @param cred
 	 *            the credential to use as default
 	 */
-	public synchronized void setCredential(final Credential cred) {
+	public synchronized void setCredential(final AbstractCred cred) {
 
 		if (cred.equals(this.credential)) {
 			myLogger.debug("Not setting new credential since it's the same...");
 			return;
 		}
 
-		myLogger.debug(cred.getDn() + ": Setting new credential.");
+		myLogger.debug(cred.getDN() + ": Setting new credential.");
 
 		this.credential = cred;
 	}

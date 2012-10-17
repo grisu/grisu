@@ -30,7 +30,7 @@ import grisu.model.status.StatusObject;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.ServiceInterfaceUtils;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.AbstractCred;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -835,7 +835,7 @@ public class UserJobManager {
 			return job.getStatus();
 		}
 
-		final Credential cred = job.getCredential();
+		final AbstractCred cred = job.getCredential();
 		boolean changedCred = false;
 		// TODO check whether cred is stored in the database in that case? also,
 		// is a voms credential needed? -- apparently not - only dn must match
@@ -952,7 +952,7 @@ public class UserJobManager {
 
 		if (old_status > JobConstants.READY_TO_SUBMIT) {
 
-			final Credential cred = job.getCredential();
+			final AbstractCred cred = job.getCredential();
 			boolean changedCred = false;
 			// TODO check whether cred is stored in the database in that case?
 			if ((cred == null) || !cred.isValid()) {

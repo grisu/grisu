@@ -5,7 +5,7 @@ import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.AbstractCred;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,11 +39,11 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int getJobStatus(Job job, Credential credential) {
+	public int getJobStatus(Job job, AbstractCred credential) {
 		return getJobStatus(job, credential, true);
 	}
 
-	public int getJobStatus(Job grisuJob, Credential credential,
+	public int getJobStatus(Job grisuJob, AbstractCred credential,
 			boolean restart) {
 
 		final String handle = grisuJob.getJobhandle();
@@ -53,7 +53,7 @@ public class GT5Submitter extends JobSubmitter {
 		final String contact = getContactString(handle);
 		final GramJob job = new GramJob(null);
 		GramJob restartJob = new GramJob(null);
-		final GSSCredential cred = credential.getCredential();
+		final GSSCredential cred = credential.getGSSCredential();
 
 		// try to get the state from the notification listener cache
 		Integer jobStatus = l.getStatus(handle);
@@ -165,13 +165,13 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int killJob(Job grisuJob, Credential cred) {
+	public int killJob(Job grisuJob, AbstractCred cred) {
 
 		getJobStatus(grisuJob, cred);
 		final GramJob job = new GramJob(null);
 		try {
 			job.setID(grisuJob.getJobhandle());
-			job.setCredentials(cred.getCredential());
+			job.setCredentials(cred.getGSSCredential());
 			try {
 				Gram.cancel(job);
 				Gram.jobStatus(job);
@@ -208,7 +208,7 @@ public class GT5Submitter extends JobSubmitter {
 			// credential =
 			// CredentialHelpers.convertByteArrayToGSSCredential(job
 			// .getCredential().getCredentialData());
-			credential = job.getCredential().getCredential();
+			credential = job.getCredential().getGSSCredential();
 
 			final GramJob gt5Job = new GramJob(rsl);
 			final Gram5JobListener l = Gram5JobListener.getJobListener();

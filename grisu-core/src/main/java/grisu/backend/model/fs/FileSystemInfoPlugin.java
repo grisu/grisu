@@ -4,7 +4,7 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.AbstractCred;
 
 import java.util.Set;
 
@@ -38,7 +38,7 @@ public interface FileSystemInfoPlugin {
 	public long lastModified(final String url) throws RemoteFileSystemException;
 
 	public MountPoint mountFileSystem(String uri, String mountPointName,
-			Credential cred, boolean useHomeDirectory, String site)
+			AbstractCred cred, boolean useHomeDirectory, String site)
 					throws RemoteFileSystemException;
 
 	public String resolveFileSystemHomeDirectory(String filesystemRoot,

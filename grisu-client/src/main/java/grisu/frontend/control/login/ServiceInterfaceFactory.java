@@ -36,6 +36,8 @@ public final class ServiceInterfaceFactory {
 		// the old xfire client...
 		// "XFireServiceInterfaceCreator"
 	};
+	
+
 
 	/**
 	 * Creates a serviceInterface from a {@link LoginParams} object.

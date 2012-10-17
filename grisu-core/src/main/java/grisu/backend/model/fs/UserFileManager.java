@@ -11,7 +11,7 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.DtoStringList;
 import grisu.model.status.StatusObject;
-import grith.jgrith.credential.Credential;
+import grith.jgrith.cred.AbstractCred;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -292,7 +292,7 @@ public class UserFileManager {
 	}
 
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final Credential cred, final boolean useHomeDirectory,
+			final AbstractCred cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 		return getFileSystemInfoPlugin(uri).mountFileSystem(uri,
 				mountPointName, cred, useHomeDirectory, site);

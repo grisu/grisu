@@ -7,10 +7,9 @@ import grisu.control.exceptions.NoSuchTemplateException;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
-import grith.jgrith.credential.Credential;
-import grith.jgrith.credential.MyProxyCredential;
-import grith.jgrith.credential.WrappedGssCredential;
-import grith.jgrith.plainProxy.LocalProxy;
+import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.MyProxyCred;
+import grith.jgrith.cred.ProxyCred;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -25,7 +24,7 @@ import org.ietf.jgss.GSSException;
 public class LocalServiceInterface extends AbstractServiceInterface implements
 ServiceInterface {
 
-	private Credential credential = null;
+	private AbstractCred credential = null;
 	private String myproxy_username = null;
 
 	private String host = null;
@@ -37,12 +36,12 @@ ServiceInterface {
 
 
 	// @Override
-	protected final Credential getCredential() {
+	protected final AbstractCred getCredential() {
 
 		long oldLifetime = -1;
 		try {
 			if (credential != null) {
-				oldLifetime = credential.getCredential()
+				oldLifetime = credential.getGSSCredential()
 						.getRemainingLifetime();
 			}
 		} catch (final GSSException e2) {
@@ -63,10 +62,9 @@ ServiceInterface {
 				if ((passphrase == null) || (passphrase.length == 0)) {
 					// try local proxy
 					try {
-						credential = new WrappedGssCredential(
-								LocalProxy.loadGSSCredential());
+						credential = new ProxyCred();
 
-						final long newLifeTime = credential.getCredential()
+						final long newLifeTime = credential.getGSSCredential()
 								.getRemainingLifetime();
 						if (oldLifetime < ServerPropertiesManager
 								.getMinProxyLifetimeBeforeGettingNewProxy()) {
@@ -100,12 +98,11 @@ ServiceInterface {
 				}
 
 				try {
-
-					credential = new MyProxyCredential(myproxy_username,
-							passphrase, host, port,
-							ServerPropertiesManager.getMyProxyLifetime());
-
-					final long newLifeTime = credential.getCredential()
+					
+					credential = new MyProxyCred(myproxy_username, passphrase, host, port, ServerPropertiesManager.getMyProxyLifetime());
+					credential.init();
+					
+					final long newLifeTime = credential.getGSSCredential()
 							.getRemainingLifetime();
 					if (newLifeTime < ServerPropertiesManager
 							.getMinProxyLifetimeBeforeGettingNewProxy()) {
@@ -185,7 +182,7 @@ ServiceInterface {
 		final MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
 		CredentialInfo info = null;
 		try {
-			info = myproxy.info(getCredential().getCredential(),
+			info = myproxy.info(getCredential().getGSSCredential(),
 					myproxy_username, new String(passphrase));
 		} catch (final MyProxyException e) {
 			myLogger.error(e.getLocalizedMessage(), e);

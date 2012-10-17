@@ -3,6 +3,7 @@ package grisu.backend.model.job;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.utils.SeveralXMLHelpers;
+import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.credential.Credential;
 
 import java.io.IOException;
@@ -86,7 +87,7 @@ public class Job implements Comparable<Job> {
 	private int status = -1000;
 
 	// the credential that is/was used to submit the job
-	private Credential credential = null;
+	private AbstractCred credential = null;
 
 	@Element
 	private String submissionType = null;
@@ -237,7 +238,7 @@ public class Job implements Comparable<Job> {
 	 * @return the credential
 	 */
 	@Transient
-	public Credential getCredential() {
+	public AbstractCred getCredential() {
 		return this.credential;
 	}
 
@@ -435,7 +436,7 @@ public class Job implements Comparable<Job> {
 	 * @param credential
 	 *            the credential
 	 */
-	public void setCredential(final Credential credential) {
+	public void setCredential(final AbstractCred credential) {
 		this.credential = credential;
 	}
 
