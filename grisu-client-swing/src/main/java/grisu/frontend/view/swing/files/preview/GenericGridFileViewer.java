@@ -25,6 +25,7 @@ import javax.swing.SwingUtilities;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 
+import org.python.antlr.PythonParser.continue_stmt_return;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class GenericGridFileViewer extends JPanel implements GridFileViewer,
-GridFileListListener {
+		GridFileListListener {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GenericGridFileViewer.class.getName());
@@ -62,9 +63,14 @@ GridFileListListener {
 						.forName(f).newInstance());
 
 				if (viewerClass != null) {
-					for (final String t : viewerClass.getSupportedMimeTypes()) {
-						if (match != null && match.getMimeType().contains(t)) {
-							return viewerClass;
+					if (viewerClass.getSupportedMimeTypes() != null) {
+
+						for (final String t : viewerClass
+								.getSupportedMimeTypes()) {
+							if (match != null
+									&& match.getMimeType().contains(t)) {
+								return viewerClass;
+							}
 						}
 					}
 				}
@@ -74,9 +80,8 @@ GridFileListListener {
 			}
 
 		}
-		
-		GridFileViewer viewer = new PlainTextGridFileViewer();
 
+		GridFileViewer viewer = new PlainTextGridFileViewer();
 
 		return viewer;
 	}
@@ -287,12 +292,12 @@ GridFileListListener {
 										getRootPane(),
 										"The file you selected is bigger than the default threshold\n"
 												+ FileAndUrlHelpers
-												.calculateSizeString(FileManager
-														.getDownloadFileSizeThreshold())
-														+ "bytes. It may take a long time to load.\n"
-														+ "Do you still want to preview that file?",
-														"Warning: big file",
-														JOptionPane.YES_NO_OPTION);
+														.calculateSizeString(FileManager
+																.getDownloadFileSizeThreshold())
+												+ "bytes. It may take a long time to load.\n"
+												+ "Do you still want to preview that file?",
+										"Warning: big file",
+										JOptionPane.YES_NO_OPTION);
 
 						if (n == JOptionPane.NO_OPTION) {
 							showsValidViewerAtTheMoment = false;
