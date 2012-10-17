@@ -99,8 +99,8 @@ ServiceInterface {
 
 				try {
 					
-					credential = new MyProxyCred(myproxy_username, passphrase, host, port, ServerPropertiesManager.getMyProxyLifetime());
-					credential.setSaveDetails(false);
+					credential = new MyProxyCred(myproxy_username, passphrase, host, port, false);
+					credential.setProxyLifetimeInSeconds(ServerPropertiesManager.getMyProxyLifetime());
 					credential.init();
 					
 					final long newLifeTime = credential.getGSSCredential()
