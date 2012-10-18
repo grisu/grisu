@@ -29,7 +29,7 @@ ServiceInterface {
 			throw new NoValidCredentialException("No credential set.");
 		}
 		
-		if ( credential.isValid() ) {
+		if ( !credential.isValid() ) {
 			throw new NoValidCredentialException("Credential set but not valid.");
 		}
 
