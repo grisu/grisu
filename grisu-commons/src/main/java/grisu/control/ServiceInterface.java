@@ -1070,11 +1070,11 @@ public interface ServiceInterface {
 //	 * @throws NoValidCredentialException
 //	 *             if the login was not successful
 //	 */
-//	@POST
-//	@Path("/user/login")
-//	void login(@QueryParam("username") String username,
-//			@QueryParam("password") String password,
-//			@QueryParam("host") String host, @QueryParam("port") int port);
+	@POST
+	@Path("/user/login")
+	void login(@QueryParam("username") String username,
+			@QueryParam("password") String password,
+			@QueryParam("host") String host, @QueryParam("port") int port);
 
 	/**
 	 * Logout of the service. Performs housekeeping tasks and usually deletes

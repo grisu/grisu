@@ -12,6 +12,10 @@ import grith.jgrith.cred.Cred;
 import java.util.Arrays;
 import java.util.Date;
 
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
 import org.apache.commons.lang.StringUtils;
 
 public class LocalServiceInterface extends AbstractServiceInterface implements
@@ -102,6 +106,17 @@ ServiceInterface {
 	public final String logout() {
 		//Arrays.fill(passphrase, 'x');
 		return null;
+	}
+
+
+
+	@POST
+	@Path("/user/login")
+	public void login(@QueryParam("username") String username,
+			@QueryParam("password") String password,
+			@QueryParam("host") String host, @QueryParam("port") int port) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

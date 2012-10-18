@@ -113,6 +113,10 @@
 					<artifactId>log4j</artifactId>
 					<groupId>log4j</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>grid-jcommons</artifactId>
+					<groupId>grisu</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -133,11 +137,6 @@
 					<groupId>activation</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>grisu</groupId>
-			<artifactId>grid-jcommons</artifactId>
-			<version>${grid-jcommons.version}</version>
 		</dependency>
 
 		<dependency>
@@ -182,6 +181,7 @@
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
 			<version>0.8-SNAPSHOT</version>
+
 		</dependency>
 
 		<dependency>
