@@ -5,191 +5,43 @@ import grisu.backend.model.User;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchTemplateException;
 import grisu.control.exceptions.NoValidCredentialException;
-import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
 import grith.jgrith.cred.AbstractCred;
-import grith.jgrith.cred.MyProxyCred;
-import grith.jgrith.cred.ProxyCred;
+import grith.jgrith.cred.Cred;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
-import org.globus.myproxy.CredentialInfo;
-import org.globus.myproxy.MyProxy;
-import org.globus.myproxy.MyProxyException;
-import org.ietf.jgss.GSSException;
 
 public class LocalServiceInterface extends AbstractServiceInterface implements
 ServiceInterface {
 
-	private AbstractCred credential = null;
-	private String myproxy_username = null;
-
-	private String host = null;
-	private int port = -1;
-
-	private char[] passphrase = null;
+	private Cred credential = null;
 
 	private User user;
 
 
 	// @Override
-	protected final AbstractCred getCredential() {
+	protected final Cred getCredential() {
 
-		long oldLifetime = -1;
-		try {
-			if (credential != null) {
-				oldLifetime = credential.getGSSCredential()
-						.getRemainingLifetime();
-			}
-		} catch (final GSSException e2) {
-			myLogger.debug("Problem getting lifetime of old certificate: " + e2);
-			credential = null;
+		if ( credential == null) {
+			throw new NoValidCredentialException("No credential set.");
 		}
-		if (oldLifetime < ServerPropertiesManager
-				.getMinProxyLifetimeBeforeGettingNewProxy()) {
-			myLogger.debug("Credential reached minimum lifetime. Getting new one from myproxy. Old lifetime: "
-					+ oldLifetime);
-			this.credential = null;
-			// user.cleanCache();
-		}
-
-		if ((credential == null) || !credential.isValid()) {
-
-			if ((myproxy_username == null) || (myproxy_username.length() == 0)) {
-				if ((passphrase == null) || (passphrase.length == 0)) {
-					// try local proxy
-					try {
-						credential = new ProxyCred();
-
-						final long newLifeTime = credential.getGSSCredential()
-								.getRemainingLifetime();
-						if (oldLifetime < ServerPropertiesManager
-								.getMinProxyLifetimeBeforeGettingNewProxy()) {
-							throw new NoValidCredentialException(
-									"Proxy lifetime smaller than minimum allowed lifetime.");
-						}
-
-					} catch (final Exception e) {
-						throw new NoValidCredentialException(
-								"Could not load credential/no valid login data.");
-					}
-					if (!credential.isValid()) {
-						throw new NoValidCredentialException(
-								"Local proxy is not valid anymore.");
-					}
-				}
-			} else {
-				// get credential from myproxy
-
-
-				try {
-					// this is needed because of a possible round-robin myproxy
-					// server
-					host = InetAddress.getByName(host)
-							.getHostAddress();
-				} catch (final UnknownHostException e1) {
-					myLogger.error(e1.getLocalizedMessage(), e1);
-					throw new NoValidCredentialException(
-							"Could not download myproxy credential: "
-									+ e1.getLocalizedMessage());
-				}
-
-				try {
-					
-					credential = new MyProxyCred(myproxy_username, passphrase, host, port, false);
-					credential.setProxyLifetimeInSeconds(ServerPropertiesManager.getMyProxyLifetime());
-					credential.init();
-					
-					final long newLifeTime = credential.getGSSCredential()
-							.getRemainingLifetime();
-					if (newLifeTime < ServerPropertiesManager
-							.getMinProxyLifetimeBeforeGettingNewProxy()) {
-						throw new NoValidCredentialException(
-								"Proxy lifetime smaller than minimum allowed lifetime.");
-					}
-
-					if (getUser() != null) {
-						getUser().cleanCache();
-					}
-				} catch (final RuntimeException re) {
-					throw re;
-				} catch (final Throwable e) {
-					myLogger.error(e.getLocalizedMessage(), e);
-					throw new NoValidCredentialException(
-							"Could not get myproxy credential: "
-									+ e.getLocalizedMessage());
-				}
-				if (!credential.isValid()) {
-					throw new NoValidCredentialException(
-							"MyProxy credential is not valid.");
-				}
-			}
+		
+		if ( credential.isValid() ) {
+			throw new NoValidCredentialException("Credential set but not valid.");
 		}
 
 		return credential;
 
 	}
 
-	// // @Override
-	// protected final ProxyCredential getCredential(String fqan,
-	// int lifetimeInSeconds) {
-	//
-	// final String myProxyServer = MyProxyServerParams.getMyProxyServer();
-	// final int myProxyPort = MyProxyServerParams.getMyProxyPort();
-	//
-	// ProxyCredential temp;
-	// try {
-	// temp = new ProxyCredential(MyProxy_light.getDelegation(
-	// myProxyServer, myProxyPort, myproxy_username, passphrase,
-	// lifetimeInSeconds));
-	// if (StringUtils.isNotBlank(fqan)) {
-	//
-	// final VO vo = getUser().getFqans().get(fqan);
-	// final ProxyCredential credToUse = CertHelpers
-	// .getVOProxyCredential(vo, fqan, temp);
-	//
-	// myLogger.debug("Created proxy with lifetime: "
-	// + credToUse.getExpiryDate().toString());
-	// return credToUse;
-	// } else {
-	// myLogger.debug("Created proxy with lifetime: "
-	// + temp.getExpiryDate().toString());
-	// return temp;
-	// }
-	// } catch (final Exception e) {
-	// throw new RuntimeException(e);
-	// }
-	// }
+
 
 	public final long getCredentialEndTime() {
 
-		String myProxyServer = ServerPropertiesManager.getMyProxyHost();
-		final int myProxyPort = ServerPropertiesManager.getMyProxyPort();
-
-		try {
-			// this is needed because of a possible round-robin myproxy server
-			myProxyServer = InetAddress.getByName(myProxyServer)
-					.getHostAddress();
-		} catch (final UnknownHostException e1) {
-			myLogger.error(e1.getLocalizedMessage(), e1);
-			throw new NoValidCredentialException(
-					"Could not download myproxy credential: "
-							+ e1.getLocalizedMessage());
-		}
-
-		final MyProxy myproxy = new MyProxy(myProxyServer, myProxyPort);
-		CredentialInfo info = null;
-		try {
-			info = myproxy.info(getCredential().getGSSCredential(),
-					myproxy_username, new String(passphrase));
-		} catch (final MyProxyException e) {
-			myLogger.error(e.getLocalizedMessage(), e);
-		}
-
-		return info.getEndTime();
+		return new Date().getTime() + getCredential().getRemainingLifetime()*1000L;
 	}
 
 	@Override
@@ -226,19 +78,7 @@ ServiceInterface {
 		return ServiceTemplateManagement.getAllAvailableApplications();
 	}
 
-	public final void login(final String username, final String password,
-			final String loginhost, final int loginport) {
-
-		this.myproxy_username = username;
-		this.passphrase = password.toCharArray();
-
-		this.host = loginhost;
-		this.port = loginport;
-
-		if (StringUtils.isBlank(this.host)) {
-			host = ServerPropertiesManager.getMyProxyHost();
-			port = ServerPropertiesManager.getMyProxyPort();
-		}
+	public final void init(final Cred cred) {
 
 		try {
 			// init database and make sure everything is all right
@@ -248,7 +88,7 @@ ServiceInterface {
 		}
 
 		try {
-			getCredential();
+			this.credential = cred;
 		} catch (final RuntimeException re) {
 			throw re;
 		} catch (final Exception e) {
@@ -260,7 +100,7 @@ ServiceInterface {
 	}
 
 	public final String logout() {
-		Arrays.fill(passphrase, 'x');
+		//Arrays.fill(passphrase, 'x');
 		return null;
 	}
 

@@ -25,6 +25,7 @@ import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
 import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.vomsProxy.VomsException;
 
@@ -99,7 +100,7 @@ public class User {
 
 	private static final String ACCESSIBLE = "Accessible";
 
-	public static User createUser(AbstractCred cred,
+	public static User createUser(Cred cred,
 			AbstractServiceInterface si) {
 
 		// make sure there is a valid credential
@@ -185,7 +186,7 @@ public class User {
 	// the (default) credential to contact gridftp file shares
 	// private ProxyCredential cred = null;
 
-	private AbstractCred credential;
+	private Cred credential;
 
 	private UserJobManager jobmanager;
 	// the (default) credentials dn
@@ -237,7 +238,7 @@ public class User {
 	 * @throws FileSystemException
 	 *             if the users default filesystems can't be mounted
 	 */
-	private User(final AbstractCred cred) {
+	private User(final Cred cred) {
 		this.dn = cred.getDN();
 		this.credential = cred;
 		// this.infoManager = AbstractServiceInterface.informationManager;
@@ -971,14 +972,14 @@ public class User {
 	 * @return the default credential or null if there is none
 	 */
 	@Transient
-	public AbstractCred getCredential() {
+	public Cred getCredential() {
 		return credential;
 	}
 
 	@Transient
-	public AbstractCred getCredential(String fqan) {
+	public Cred getCredential(String fqan) {
 
-		AbstractCred cred = getCredential().getGroupCredential(fqan);
+		Cred cred = getCredential().getGroupCredential(fqan);
 
 		return cred;
 	}
@@ -1491,7 +1492,7 @@ public class User {
 	 *             if the filesystem could not be mounted
 	 */
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final AbstractCred cred, final boolean useHomeDirectory,
+			final Cred cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 
 		final MountPoint new_mp = getFileManager().mountFileSystem(uri,
@@ -1516,7 +1517,7 @@ public class User {
 			return mountFileSystem(root, name, useHomeDirectory, site);
 		} else {
 
-			final AbstractCred vomsProxyCred = getCredential(fqan);
+			final Cred vomsProxyCred = getCredential(fqan);
 
 			return mountFileSystem(root, name, vomsProxyCred, useHomeDirectory,
 					site);
@@ -1612,7 +1613,7 @@ public class User {
 	 * @param cred
 	 *            the credential to use as default
 	 */
-	public synchronized void setCredential(final AbstractCred cred) {
+	public synchronized void setCredential(final Cred cred) {
 
 		if (cred.equals(this.credential)) {
 			myLogger.debug("Not setting new credential since it's the same...");

@@ -10,7 +10,7 @@ import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.settings.ServerPropertiesManager;
-import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.io.BufferedInputStream;
@@ -595,7 +595,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	 *             if the filesystem could not be mounted
 	 */
 	public MountPoint mountFileSystem(String uri, final String mountPointName,
-			final AbstractCred cred, final boolean useHomeDirectory,
+			final Cred cred, final boolean useHomeDirectory,
 			final String site) throws RemoteFileSystemException {
 
 		// if (!mountPointName.startsWith("/")) {

@@ -3,6 +3,8 @@ package grisu.frontend.control;
 import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
+import grisu.control.serviceInterfaces.LocalServiceInterface;
+import grith.jgrith.cred.Cred;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,27 +29,26 @@ public class LocalServiceInterfaceCreator implements ServiceInterfaceCreator {
 		return DEFAULT_LOCAL_URL.equals(url);
 	}
 
-	public final ServiceInterface create(final String interfaceUrl,
-			final String username, final char[] password,
-			final String myProxyServer, final String myProxyPort,
-			final Object[] otherOptions) throws ServiceInterfaceException {
 
-		Class localServiceInterfaceClass = null;
+	public ServiceInterface create(String interfaceUrl, Cred cred,
+			Object[] otherOptions) throws ServiceInterfaceException {
+		
+//		Class localServiceInterfaceClass = null;
+//
+//		try {
+//			localServiceInterfaceClass = Class
+//					.forName("grisu.control.serviceInterfaces.LocalServiceInterface");
+//		} catch (final ClassNotFoundException e) {
+//			myLogger.warn("Could not find local service interface class.");
+//			throw new ServiceInterfaceException(
+//					"Could not find LocalServiceInterface class. Probably local-backend.jar is not in the classpath.",
+//					e);
+//		}
 
+		LocalServiceInterface localServiceInterface;
 		try {
-			localServiceInterfaceClass = Class
-					.forName("grisu.control.serviceInterfaces.LocalServiceInterface");
-		} catch (final ClassNotFoundException e) {
-			myLogger.warn("Could not find local service interface class.");
-			throw new ServiceInterfaceException(
-					"Could not find LocalServiceInterface class. Probably local-backend.jar is not in the classpath.",
-					e);
-		}
-
-		ServiceInterface localServiceInterface;
-		try {
-			localServiceInterface = (ServiceInterface) localServiceInterfaceClass
-					.newInstance();
+			localServiceInterface = new LocalServiceInterface();
+			localServiceInterface.init(cred);
 		} catch (final Exception e) {
 			throw new ServiceInterfaceException(
 					"Could not create LocalServiceInterface: "

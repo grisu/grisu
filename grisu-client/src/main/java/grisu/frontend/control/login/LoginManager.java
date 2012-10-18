@@ -245,47 +245,7 @@ public class LoginManager {
 				throw new RuntimeException(e2);
 			}
 
-			// do the cacert thingy
-			try {
-				final URL cacertURL = LoginManager.class
-						.getResource("/ipsca.pem");
-				final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
 
-				TrustMaterial trustMaterial = null;
-				trustMaterial = new TrustMaterial(cacertURL);
-
-				// We can use setTrustMaterial() instead of addTrustMaterial()
-				// if we want to remove
-				// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
-				protocolSocketFactory.addTrustMaterial(trustMaterial);
-
-				// Maybe we want to turn off CN validation (not recommended!):
-				protocolSocketFactory.setCheckHostname(false);
-
-				final Protocol protocol = new Protocol("https",
-						(ProtocolSocketFactory) protocolSocketFactory, 443);
-				Protocol.registerProtocol("https", protocol);
-			} catch (final Exception e) {
-				myLogger.error(e.getLocalizedMessage(), e);
-			}
-
-			if (displayCliProgress) {
-				CliHelpers.setIndeterminateProgress("Uploading credential...",
-						true);
-			}
-
-			try {
-				cred.saveProxy();
-			} catch (Exception e) {
-				myLogger.error("Can't save proxy to disk", e);
-			}
-
-			try {
-				cred.uploadMyProxy();
-			} catch (Exception e) {
-				throw new LoginException(
-						"Could not upload myproxy credential.", e);
-			}
 
 			ServiceInterface si;
 			if (displayCliProgress) {
@@ -295,10 +255,7 @@ public class LoginManager {
 			try {
 
 				si = ServiceInterfaceFactory.createInterface(backend,
-						cred.getMyProxyUsername(), cred.getMyProxyPassword(),
-						cred.getMyProxyHost(),
-						Integer.toString(cred.getMyProxyPort()), null, -1,
-						null, null);
+						cred, null);
 				// loginParams.getHttpProxy(),
 				// loginParams.getHttpProxyPort(),
 				// loginParams.getHttpProxyUsername(),

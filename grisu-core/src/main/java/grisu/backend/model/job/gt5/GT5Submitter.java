@@ -6,6 +6,7 @@ import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
 import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,11 +40,11 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int getJobStatus(Job job, AbstractCred credential) {
+	public int getJobStatus(Job job, Cred credential) {
 		return getJobStatus(job, credential, true);
 	}
 
-	public int getJobStatus(Job grisuJob, AbstractCred credential,
+	public int getJobStatus(Job grisuJob, Cred credential,
 			boolean restart) {
 
 		final String handle = grisuJob.getJobhandle();
@@ -165,7 +166,7 @@ public class GT5Submitter extends JobSubmitter {
 	}
 
 	@Override
-	public int killJob(Job grisuJob, AbstractCred cred) {
+	public int killJob(Job grisuJob, Cred cred) {
 
 		getJobStatus(grisuJob, cred);
 		final GramJob job = new GramJob(null);

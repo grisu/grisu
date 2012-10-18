@@ -1,6 +1,6 @@
 package grisu.backend.model.job;
 
-import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
 
 /**
  * Extend this abstract class if you want to write a connector to a new
@@ -31,7 +31,7 @@ public abstract class JobSubmitter {
 	 *            kill the job
 	 * @return the status of the job
 	 */
-	public abstract int getJobStatus(Job job, AbstractCred cred);
+	public abstract int getJobStatus(Job job, Cred cred);
 
 	// public String convertJobDescription(Job job) {
 	//
@@ -61,7 +61,7 @@ public abstract class JobSubmitter {
 	 *            kill the job
 	 * @return the new status of the job
 	 */
-	public abstract int killJob(Job job, AbstractCred cred);
+	public abstract int killJob(Job job, Cred cred);
 
 	/**
 	 * Used to submit the job to the specified host.

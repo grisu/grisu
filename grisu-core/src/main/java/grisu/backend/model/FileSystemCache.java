@@ -3,6 +3,7 @@ package grisu.backend.model;
 import grisu.model.MountPoint;
 import grisu.settings.ServerPropertiesManager;
 import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -95,7 +96,7 @@ public class FileSystemCache {
 	}
 
 	private FileSystem createFileSystem(String rootUrl,
-			AbstractCred credToUse)
+			Cred credToUse)
 					throws FileSystemException {
 
 		final FileSystemOptions opts = new FileSystemOptions();
@@ -137,7 +138,7 @@ public class FileSystemCache {
 			throws FileSystemException {
 
 		synchronized (rootUrl) {
-			AbstractCred credToUse = null;
+			Cred credToUse = null;
 
 			MountPoint temp = null;
 			try {

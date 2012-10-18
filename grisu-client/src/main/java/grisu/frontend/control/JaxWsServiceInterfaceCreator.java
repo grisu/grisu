@@ -7,6 +7,7 @@ import grisu.frontend.control.jaxws.CommandLogHandler;
 import grisu.frontend.control.login.LoginManager;
 import grisu.jcommons.constants.GridEnvironment;
 import grisu.settings.Environment;
+import grith.jgrith.cred.Cred;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,8 +27,12 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.MTOMFeature;
 import javax.xml.ws.soap.SOAPBinding;
 
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.ssl.HttpSecureProtocol;
+import org.apache.commons.ssl.TrustMaterial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,10 +79,10 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 		}
 	}
 
-	public ServiceInterface create(String interfaceUrl, String username,
-			char[] password, String myProxyServer, String myProxyPort,
-			Object[] otherOptions) throws ServiceInterfaceException {
+	private ServiceInterface create(String interfaceUrl, String username,
+			char[] password, String myProxyServer, int myproxyPort) throws ServiceInterfaceException {
 
+		
 		try {
 
 			final QName serviceName = new QName("http://api.grisu",
@@ -133,9 +138,9 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 
 			if (StringUtils.isNotBlank(myProxyServer)) {
 				String myproxycontact = username + "@" + myProxyServer;
-				int p = Integer.parseInt(myProxyPort);
+				int p = myproxyPort;
 				if ((p > 0) && (p != GridEnvironment.getDefaultMyProxyPort())) {
-					myproxycontact = myproxycontact + ":" + myProxyPort;
+					myproxycontact = myproxycontact + ":" + Integer.toString(myproxyPort);
 				}
 				bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY,
 						myproxycontact);
@@ -164,7 +169,7 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			Map map = Maps.newHashMap();
 
 			map.put("X-login-host", Collections.singletonList(myProxyServer));
-			map.put("X-login-port", Collections.singletonList(myProxyPort));
+			map.put("X-login-port", Collections.singletonList(Integer.toString(myproxyPort)));
 
 			map.put("X-grisu-client", Collections.singletonList(clientstring));
 
@@ -193,6 +198,54 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 							+ e.getLocalizedMessage(), e);
 		}
 
+	}
+
+	public ServiceInterface create(String interfaceUrl, Cred cred,
+			Object[] otherOptions) throws ServiceInterfaceException {
+		
+		// do the cacert thingy
+		try {
+			final URL cacertURL = LoginManager.class
+					.getResource("/ipsca.pem");
+			final HttpSecureProtocol protocolSocketFactory = new HttpSecureProtocol();
+
+			TrustMaterial trustMaterial = null;
+			trustMaterial = new TrustMaterial(cacertURL);
+
+			// We can use setTrustMaterial() instead of addTrustMaterial()
+			// if we want to remove
+			// HttpSecureProtocol's default trust of TrustMaterial.CACERTS.
+			protocolSocketFactory.addTrustMaterial(trustMaterial);
+
+			// Maybe we want to turn off CN validation (not recommended!):
+			protocolSocketFactory.setCheckHostname(false);
+
+			final Protocol protocol = new Protocol("https",
+					(ProtocolSocketFactory) protocolSocketFactory, 443);
+			Protocol.registerProtocol("https", protocol);
+		} catch (final Exception e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+		}
+		
+		
+		try {
+			cred.saveProxy();
+		} catch (Exception e) {
+			myLogger.error("Can't save proxy to disk", e);
+		}
+
+		try {
+			cred.uploadMyProxy();
+		} catch (Exception e) {
+			throw new ServiceInterfaceException(
+					"Could not upload myproxy credential.", e);
+		}
+		
+		return create(interfaceUrl,
+				cred.getMyProxyUsername(), cred.getMyProxyPassword(),
+				cred.getMyProxyHost(),
+				cred.getMyProxyPort());
+		
 	}
 
 }

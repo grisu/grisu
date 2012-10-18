@@ -4,6 +4,8 @@ import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grith.jgrith.control.LoginParams;
+import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,14 +50,14 @@ public final class ServiceInterfaceFactory {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface couldn't be created
 	 */
-	public static ServiceInterface createInterface(final LoginParams params)
-			throws ServiceInterfaceException {
-		return createInterface(params.getLoginUrl(),
-				params.getMyProxyUsername(), params.getMyProxyPassphrase(),
-				params.getMyProxyServer(), params.getMyProxyPort(),
-				params.getHttpProxy(), params.getHttpProxyPort(),
-				params.getHttpProxyUsername(), params.getMyProxyPassphrase());
-	}
+//	public static ServiceInterface createInterface(final LoginParams params)
+//			throws ServiceInterfaceException {
+//		return createInterface(params.getLoginUrl(),
+//				params.getMyProxyUsername(), params.getMyProxyPassphrase(),
+//				params.getMyProxyServer(), params.getMyProxyPort(),
+//				params.getHttpProxy(), params.getHttpProxyPort(),
+//				params.getHttpProxyUsername(), params.getMyProxyPassphrase());
+//	}
 
 	/**
 	 * Creates a ServiceInterface using the url that is provided. Most likely
@@ -89,18 +91,24 @@ public final class ServiceInterfaceFactory {
 	 * @return the ServiceInterface to use to stage files/submit jobs
 	 * @throws ServiceInterfaceException
 	 */
+//	public static ServiceInterface createInterface(final String interfaceUrl,
+//			final String username, final char[] password,
+//			final String myProxyServer, final String myProxyPort,
+//			final String httpProxy, final int httpProxyPort,
+//			final String httpProxyUsername, final char[] httpProxyPassword)
+//					throws ServiceInterfaceException {
+//		return null;
+//	}
+	
 	public static ServiceInterface createInterface(final String interfaceUrl,
-			final String username, final char[] password,
-			final String myProxyServer, final String myProxyPort,
-			final String httpProxy, final int httpProxyPort,
-			final String httpProxyUsername, final char[] httpProxyPassword)
+			Cred cred, Object[] otherOptions)
 					throws ServiceInterfaceException {
-
-		final Object[] otherOptions = new Object[4];
-		otherOptions[0] = httpProxy;
-		otherOptions[1] = httpProxyPort;
-		otherOptions[2] = httpProxyUsername;
-		otherOptions[3] = httpProxyPassword;
+		
+//		final Object[] otherOptions = new Object[4];
+//		otherOptions[0] = httpProxy;
+//		otherOptions[1] = httpProxyPort;
+//		otherOptions[2] = httpProxyUsername;
+//		otherOptions[3] = httpProxyPassword;
 
 		final Map<String, Exception> failedCreators = new HashMap<String, Exception>();
 
@@ -137,7 +145,7 @@ public final class ServiceInterfaceFactory {
 			ServiceInterface serviceInterface = null;
 			try {
 				serviceInterface = serviceInterfaceCreator.create(interfaceUrl,
-						username, password, myProxyServer, myProxyPort,
+						cred,
 						otherOptions);
 			} catch (final ServiceInterfaceException e) {
 				// e.printStackTrace();
@@ -163,8 +171,7 @@ public final class ServiceInterfaceFactory {
 					+ className);
 
 			try {
-				serviceInterface.login(username, new String(password),
-						myProxyServer, Integer.parseInt(myProxyPort));
+
 				final int backend_version = serviceInterface
 						.getInterfaceVersion();
 

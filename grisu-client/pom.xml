@@ -114,6 +114,12 @@
 			<artifactId>grid-session</artifactId>
 			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>grisu.backend</groupId>
+			<artifactId>grisu-core</artifactId>
+			<version>0.5.8-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

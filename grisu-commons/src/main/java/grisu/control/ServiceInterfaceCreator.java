@@ -1,6 +1,7 @@
 package grisu.control;
 
 import grisu.control.exceptions.ServiceInterfaceException;
+import grith.jgrith.cred.Cred;
 
 /**
  * Interface that must be implemented if you want to provide a different means
@@ -32,14 +33,8 @@ public interface ServiceInterfaceCreator {
 	 * @param interfaceUrl
 	 *            the url of the serviceInterface backend. Can be a real url or
 	 *            a virtual one like "Local" for the LocalServiceInterface.
-	 * @param username
-	 *            the myproxy username
-	 * @param password
-	 *            the myproxy password
-	 * @param myProxyServer
-	 *            the hostname of the myproxy server
-	 * @param myProxyPort
-	 *            the port of the myproxy server
+	 * @param cred
+	 * 			  the credential of the user
 	 * @param otherOptions
 	 *            other (optional) options that may be needed for this
 	 *            serviceInterface to be created
@@ -47,8 +42,6 @@ public interface ServiceInterfaceCreator {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface couldn't be created
 	 */
-	ServiceInterface create(String interfaceUrl, String username,
-			char[] password, String myProxyServer, String myProxyPort,
-			Object[] otherOptions) throws ServiceInterfaceException;
+	ServiceInterface create(String interfaceUrl, Cred cred, Object[] otherOptions) throws ServiceInterfaceException;
 
 }

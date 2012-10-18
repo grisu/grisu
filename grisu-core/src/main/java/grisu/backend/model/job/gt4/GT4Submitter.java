@@ -10,7 +10,7 @@ import grisu.jcommons.utils.JsdlHelpers;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.DebugUtils;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -553,7 +553,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * grisu.credential.model.ProxyCredential)
 	 */
 	@Override
-	public final int getJobStatus(final Job job, final AbstractCred cred) {
+	public final int getJobStatus(final Job job, final Cred cred) {
 
 		String status = null;
 		int grisu_status = Integer.MIN_VALUE;
@@ -579,7 +579,7 @@ public class GT4Submitter extends JobSubmitter {
 	 * grisu.credential.model.ProxyCredential)
 	 */
 	@Override
-	public final int killJob(final Job job, final AbstractCred cred) {
+	public final int killJob(final Job job, final Cred cred) {
 
 		return killJob(job.getJobhandle(), cred.getGSSCredential());
 

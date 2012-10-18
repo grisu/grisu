@@ -8,7 +8,7 @@ import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.DtoProperty;
-import grith.jgrith.cred.AbstractCred;
+import grith.jgrith.cred.Cred;
 
 import java.util.Map;
 import java.util.Set;
@@ -212,7 +212,7 @@ public class VirtualFileSystemInfoPlugin implements FileSystemInfoPlugin {
 	}
 
 	public MountPoint mountFileSystem(String uri, String mountPointName,
-			AbstractCred cred, boolean useHomeDirectory, String site)
+			Cred cred, boolean useHomeDirectory, String site)
 					throws RemoteFileSystemException {
 		throw new RemoteFileSystemException(
 				"Mounting not supported for virtual file system.");
