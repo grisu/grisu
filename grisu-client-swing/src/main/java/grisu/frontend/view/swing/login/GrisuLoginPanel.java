@@ -10,14 +10,19 @@ import grith.jgrith.cred.Cred;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
@@ -94,7 +99,7 @@ public class GrisuLoginPanel extends JPanel implements PropertyChangeListener {
 
 	}
 
-	private Action getAction() {
+	public Action getAction() {
 		if (action == null) {
 			action = new LoginAction();
 		}
@@ -116,7 +121,7 @@ public class GrisuLoginPanel extends JPanel implements PropertyChangeListener {
 		return credCreationPanel;
 	}
 
-	private JButton getLoginButton() {
+	public JButton getLoginButton() {
 		if (loginButton == null) {
 			loginButton = new JButton("Login");
 			loginButton.setAction(getAction());

@@ -319,7 +319,7 @@
 		<dependency>
 			<groupId>nz.nesi</groupId>
 			<artifactId>grin</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.3</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>orika-core</artifactId>

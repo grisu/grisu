@@ -5,10 +5,17 @@ import grisu.settings.ClientPropertiesManager;
 import grith.gridsession.SessionClient;
 
 import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
@@ -51,29 +58,10 @@ public class LoginPanel extends JPanel implements ServiceInterfaceHolder {
 		add(client.getRootPanel(), SWING_CLIENT_PANEL);
 		add(getProgressPanel(), PROGRESS_PANEL);
 
-		// if (tryExistingGridProxy) {
-		// if (LocalProxy.validGridProxyExists()) {
-		//
-		// new Thread() {
-		// @Override
-		// public void run() {
-		//
-		// try {
-		// getProgressPanel().setCreatingServiceInterface();
-		// switchToProgressPanel();
-		// final ServiceInterface si = LoginManager.login();
-		// setServiceInterface(si);
-		// } catch (final LoginException e) {
-		// switchToLoginPanel();
-		// }
-		// }
-		// }.start();
-		//
-		// }
-		// }
+
 	}
 
-	private GrisuLoginPanel getLoginPanel() {
+	public GrisuLoginPanel getLoginPanel() {
 		if (loginPanel == null) {
 			loginPanel = new GrisuLoginPanel(this);
 		}
@@ -87,26 +75,6 @@ public class LoginPanel extends JPanel implements ServiceInterfaceHolder {
 		}
 		return progressPanel;
 	}
-
-	// private JPanel getLoginPanel() {
-	// if (loginPanel == null) {
-	// loginPanel = new JPanel();
-	// loginPanel.setLayout(new FormLayout(new ColumnSpec[] {
-	// FormFactory.RELATED_GAP_COLSPEC,
-	// ColumnSpec.decode("default:grow"), }, new RowSpec[] {
-	// FormFactory.RELATED_GAP_ROWSPEC,
-	// RowSpec.decode("default:grow"), }));
-	// loginPanel.add(getMultiLoginPanel(), "2, 2, fill, fill");
-	// }
-	// return loginPanel;
-	// }
-	//
-	// private MultiLoginPanel getMultiLoginPanel() {
-	// if (multiLoginPanel == null) {
-	// multiLoginPanel = new MultiLoginPanel(this);
-	// }
-	// return multiLoginPanel;
-	// }
 
 	public void setServiceInterface(final ServiceInterface si) {
 

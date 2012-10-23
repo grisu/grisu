@@ -18,6 +18,8 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.HashSet;
@@ -25,8 +27,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -62,7 +70,7 @@ WindowListener, ServiceInterfaceHolder {
 	public GrisuApplicationWindow() throws Exception {
 		this((ServiceInterfacePanel) null);
 	}
-
+	
 	public GrisuApplicationWindow(ServiceInterfacePanel panel) throws Exception {
 		super(new GridLoginParameters());
 		initialize();
@@ -82,7 +90,8 @@ WindowListener, ServiceInterfaceHolder {
 				addSettingsPanel(p.getPanelTitle(), p.getPanel());
 			}
 		}
-		addSettingsPanel("Http proxy settings", httpProxyPanel);
+		addSettingsPanel("Http proxy settings", httpProxyPanel);	
+		
 	}
 
 	/**
@@ -110,9 +119,9 @@ WindowListener, ServiceInterfaceHolder {
 			}
 		}
 		addSettingsPanel("Http proxy settings", httpProxyPanel);
+					
 
 	}
-
 
 	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
 		mainPanel.addGroupFileListPanel(left, right);
@@ -237,6 +246,25 @@ WindowListener, ServiceInterfaceHolder {
 		final LoginPanel lp = new LoginPanel(mainPanel, siHolders);
 		lp.setSessionClient(this);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
+		
+//		  int condition = JComponent.WHEN_FOCUSED;
+////		  InputMap iMap = getFrame().getRootPane().getInputMap(condition);
+//		  InputMap iMap = (InputMap)UIManager.get("Button.focusInputMap");
+//		  iMap.put( KeyStroke.getKeyStroke( "ENTER" ), "pressed" );
+//		  iMap.put( KeyStroke.getKeyStroke( "released ENTER" ), "released" );
+//		  ActionMap aMap = getFrame().getRootPane().getActionMap();
+//
+//		  String enter = "enter";
+//		  iMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), enter);
+//		  aMap.put(enter, lp.getLoginPanel().getAction());		
+		  
+		  getFrame().getRootPane().setDefaultButton(lp.getLoginPanel().getLoginButton());
+		  
+		  JButton button = lp.getLoginPanel().getLoginButton();
+		  InputMap im = button.getInputMap();
+		  im.put( KeyStroke.getKeyStroke( "ENTER" ), "pressed" );
+		  im.put( KeyStroke.getKeyStroke( "released ENTER" ), "released" );
+
 	}
 
 	abstract protected void initOptionalStuff(ServiceInterface si);

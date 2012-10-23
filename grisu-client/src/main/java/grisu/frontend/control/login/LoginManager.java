@@ -10,6 +10,7 @@ import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
 import grisu.jcommons.utils.DefaultGridSecurityProvider;
 import grisu.jcommons.utils.EnvironmentVariableHelpers;
+import grisu.jcommons.utils.HttpProxyManager;
 import grisu.jcommons.utils.JythonHelpers;
 import grisu.jcommons.view.cli.CliHelpers;
 import grisu.model.GrisuRegistryManager;
@@ -24,14 +25,9 @@ import grith.jgrith.utils.CertificateFiles;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Date;
 
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.ssl.HttpSecureProtocol;
-import org.apache.commons.ssl.TrustMaterial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -122,6 +118,8 @@ public class LoginManager {
 	public static synchronized void initEnvironment() {
 
 		if (!environmentInitialized) {
+			
+			HttpProxyManager.setDefaultHttpProxy();
 
 			// make sure tmp dir exists
 			String tmpdir = System.getProperty("java.io.tmpdir");
