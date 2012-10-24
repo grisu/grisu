@@ -132,7 +132,7 @@ public class ResourceInformationImpl implements ResourceInformation {
 
 		if (cachedAllApps == null) {
 			cachedAllApps = serviceInterface.getAllAvailableApplications(null);
-
+			Arrays.sort(cachedAllApps);
 		}
 		return cachedAllApps;
 
