@@ -2,7 +2,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5.9</version>
+		<version>0.5.10-SNAPSHOT</version>
 
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.5.9</version>
+			<version>0.5.10-SNAPSHOT</version>
 
 		</dependency>
 		<dependency>
@@ -117,7 +117,7 @@
 		<dependency>
 			<groupId>grisu.backend</groupId>
 			<artifactId>grisu-core</artifactId>
-			<version>0.5.9</version>
+			<version>0.5.10-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
