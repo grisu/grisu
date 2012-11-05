@@ -19,7 +19,7 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Cpus extends AbstractWidget {
 
 	private static final String[] DEFAULT_CPUS = new String[] { "1", "2", "3",
-		"4", "5", "6", "7", "8", "12", "16", "24", "32", "64" };
+		"4", "5", "6", "7", "8", "12", "16", "24", "32", "64", "128" };
 	private final DefaultComboBoxModel cpuModel = new DefaultComboBoxModel(
 			DEFAULT_CPUS);
 
@@ -43,6 +43,10 @@ public class Cpus extends AbstractWidget {
 				FormFactory.RELATED_GAP_ROWSPEC, }));
 		add(getComboBox(), "2, 2, fill, default");
 
+	}
+	
+	public void setEditableComboBox(boolean editable) {
+		getComboBox().setEditable(editable);
 	}
 
 	private JComboBox getComboBox() {

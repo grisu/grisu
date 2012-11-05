@@ -104,4 +104,9 @@ public class SwingClient extends GrisuApplicationWindow {
 
 	}
 
+	@Override
+	public boolean displayAllJobsMonitoringItem() {
+		return true;
+	}
+
 }

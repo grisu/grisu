@@ -36,12 +36,14 @@ public class Walltime extends AbstractWidget {
 				TitledBorder.TOP, null, null));
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(58dlu;default)"),
+				ColumnSpec.decode("max(35dlu;default)"),
 				FormFactory.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(49dlu;default):grow"),
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, }));
+				ColumnSpec.decode("max(49dlu;default)"),
+				FormFactory.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,}));
 		add(getAmountComboBox(), "2, 2, fill, default");
 		add(getUnitsComboBox(), "4, 2, fill, default");
 

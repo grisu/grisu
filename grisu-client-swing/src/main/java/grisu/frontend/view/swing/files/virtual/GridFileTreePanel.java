@@ -61,7 +61,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class GridFileTreePanel extends JPanel implements GridFileListPanel,
-EventSubscriber {
+		EventSubscriber {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GridFileTreePanel.class.getName());
@@ -81,19 +81,21 @@ EventSubscriber {
 			defaultFileRoots = new LinkedList<GridFile>();
 
 			for (String alias : defaultRoots.keySet()) {
-				if (LOCAL_ALIAS.equals(alias) && (defaultRoots.get(alias) == null)) {
-					final GridFile localRoot = GrisuRegistryManager.getDefault(si)
-							.getFileManager().getLocalRoot();
+				if (LOCAL_ALIAS.equals(alias)
+						&& (defaultRoots.get(alias) == null)) {
+					final GridFile localRoot = GrisuRegistryManager
+							.getDefault(si).getFileManager().getLocalRoot();
 					defaultFileRoots.add(localRoot);
 				} else if (REMOTE_ALIAS.equals(alias)
 						&& (defaultRoots.get(alias) == null)) {
-					final GridFile gridRoot = GrisuRegistryManager.getDefault(si)
-							.getFileManager().getGridRoot();
+					final GridFile gridRoot = GrisuRegistryManager
+							.getDefault(si).getFileManager().getGridRoot();
 					defaultFileRoots.add(gridRoot);
 				} else {
 					GridFile file = null;
 					try {
-						file = GrisuRegistryManager.getDefault(si).getFileManager()
+						file = GrisuRegistryManager.getDefault(si)
+								.getFileManager()
 								.createGridFile(defaultRoots.get(alias));
 						file.setName(alias);
 						defaultFileRoots.add(file);
@@ -253,8 +255,6 @@ EventSubscriber {
 			return;
 		}
 
-
-
 		try {
 			final OutlineModel m = (OutlineModel) getOutline().getModel();
 			for (int i = 0; i < m.getRowCount(); i++) {
@@ -278,7 +278,6 @@ EventSubscriber {
 			myLogger.debug("No outline model yet.");
 			return;
 		}
-
 
 		return;
 	}
@@ -442,24 +441,30 @@ EventSubscriber {
 			return Lists.newArrayList();
 		}
 
-		final OutlineModel m = (OutlineModel) getOutline().getModel();
-
 		List<GridFile> expanded = Lists.newArrayList();
-		for (int i = 0; i < m.getRowCount(); i++) {
+		try {
+			final OutlineModel m = (OutlineModel) getOutline().getModel();
 
-			final Object n = m.getValueAt(i, 0);
+			for (int i = 0; i < m.getRowCount(); i++) {
 
-			if (n instanceof GridFileTreeNode) {
+				final Object n = m.getValueAt(i, 0);
 
-				final GridFileTreeNode node = (GridFileTreeNode) n;
-				if (node.isExpanded()) {
-					final GridFile f = (GridFile) node.getUserObject();
-					expanded.add(f);
-					myLogger.debug("node expanded: " + f.getUrl());
+				if (n instanceof GridFileTreeNode) {
+
+					final GridFileTreeNode node = (GridFileTreeNode) n;
+					if (node.isExpanded()) {
+						final GridFile f = (GridFile) node.getUserObject();
+						expanded.add(f);
+						myLogger.debug("node expanded: " + f.getUrl());
+					}
+
 				}
-
 			}
+		} catch (ClassCastException e) {
+			myLogger.debug("No outline model yet.");
+			return Lists.newArrayList();
 		}
+
 		return expanded;
 
 	}
@@ -548,7 +553,7 @@ EventSubscriber {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
 			scrollPane
-			.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+					.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			scrollPane.setViewportView(getOutline());
 
 		}
@@ -591,7 +596,6 @@ EventSubscriber {
 		});
 
 		try {
-
 
 			isInitializing = true;
 			final GridFileTreeNode rootNode = new GridFileTreeNode(fm,

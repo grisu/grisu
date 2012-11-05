@@ -9,7 +9,10 @@ import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
 
 import java.awt.event.ActionEvent;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,8 +26,28 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+
 public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		EventSubscriber<NewJobEvent> {
+	
+	private class ApplicationComparator implements Comparator<String> {
+
+		public int compare(String arg0, String arg1) {
+			
+			if (Constants.ALLJOBS_KEY.equals(arg0) && Constants.ALLJOBS_KEY.equals(arg1)) {
+				return 0;
+			}
+			if (Constants.ALLJOBS_KEY.equals(arg0) ) {
+				return -1;
+			} 
+			if (Constants.ALLJOBS_KEY.equals(arg1) ) {
+				return 1;
+			} 
+			return arg0.compareToIgnoreCase(arg1);
+		}
+		
+	}
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuMonitorNavigationTaskPane.class.getName());
@@ -55,24 +78,16 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 				.getUserEnvironmentManager();
 		this.applicationsToWatch = applicationsToWatch;
 
+
 		this.navPanel = navPanel;
 		this.displayAllJobsItem = displayAllJobsItem;
 		this.displayApplicationSpecificItems = displayApplicationSpecificItems;
 		setTitle("Monitor jobs");
+		
+		updateApplications();
+		
 
-		if (displayAllJobsItem) {
-			addApplication(Constants.ALLJOBS_KEY);
-		}
 
-		if (displayApplicationSpecificItems) {
-			updateApplications();
-		}
-
-		if ((applicationsToWatch != null) && (applicationsToWatch.size() > 0)) {
-			for (final String app : applicationsToWatch) {
-				addApplication(app);
-			}
-		}
 
 		EventBus.subscribe(NewJobEvent.class, this);
 	}
@@ -84,6 +99,9 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		if (Constants.GENERIC_APPLICATION_NAME
 				.equals(application.toLowerCase())) {
 			myLogger.debug("Not adding monitor generic application to navigation pane. Using all jobs instead...");
+			if (! displayAllJobsItem ) {
+				return;
+			}
 			app = Constants.ALLJOBS_KEY;
 		} else {
 			app = application.toLowerCase();
@@ -143,20 +161,54 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 			if (StringUtils.isBlank(application)) {
 				return;
 			}
-
+			
 			addApplication(application);
+
 		}
 
 	}
-
+	
 	private void updateApplications() {
-
-		for (final String app : em.getCurrentApplications(true)) {
-
-			addApplication(app);
-
+		List<String> applications = Lists.newArrayList();
+		
+		if (displayAllJobsItem) {
+			applications.add(Constants.ALLJOBS_KEY);
 		}
 
+		if ((applicationsToWatch != null) && (applicationsToWatch.size() > 0)) {
+			for (final String app : applicationsToWatch) {
+				applications.add(app);
+			}
+		} else {
+
+		if (displayApplicationSpecificItems || !displayAllJobsItem) {
+			for (final String app : em.getCurrentApplications(true)) {
+
+				if ( ! Constants.GENERIC_APPLICATION_NAME.equals(app) ) {
+					applications.add(app);
+				}
+
+			}
+		}
+		}
+
+		Collections.sort(applications, new ApplicationComparator());
+		
+		for ( String app : applications ) {
+			addApplication(app);
+		}
 	}
+
+//	private void updateApplications() {
+//
+//		for (final String app : em.getCurrentApplications(true)) {
+//
+//			if ( ! Constants.GENERIC_APPLICATION_NAME.equals(app) ) {
+//				addApplication(app);
+//			}
+//
+//		}
+//
+//	}
 
 }

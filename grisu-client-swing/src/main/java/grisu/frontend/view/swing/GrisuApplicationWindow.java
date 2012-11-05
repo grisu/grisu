@@ -132,10 +132,12 @@ WindowListener, ServiceInterfaceHolder {
 	}
 
 	abstract public boolean displayAppSpecificMonitoringItems();
-
+	
 	abstract public boolean displayBatchJobsCreationPane();
 
 	abstract public boolean displaySingleJobsCreationPane();
+	
+	abstract public boolean displayAllJobsMonitoringItem();
 
 	public void exit() {
 		try {
@@ -226,19 +228,16 @@ WindowListener, ServiceInterfaceHolder {
 		frame.getContentPane().setLayout(new BorderLayout());
 
 		final boolean singleJobs = displaySingleJobsCreationPane();
-		final boolean batchJobs = displayBatchJobsCreationPane();
+		//final boolean batchJobs = displayBatchJobsCreationPane();
+		final boolean batchJobs = false;
 
 		final boolean displayAppSpecificMonitoringItems = displayAppSpecificMonitoringItems();
+		final boolean displayAllJobsMontorintItems = displayAllJobsMonitoringItem();
 
-		if (displayAppSpecificMonitoringItems) {
-			mainPanel = new GrisuMainPanel(singleJobs, false, true,
-					getApplicationsToMonitor(), batchJobs, false, true,
+			mainPanel = new GrisuMainPanel(singleJobs, displayAllJobsMontorintItems, displayAppSpecificMonitoringItems,
+					getApplicationsToMonitor(), batchJobs, displayAllJobsMontorintItems, displayAppSpecificMonitoringItems,
 					getApplicationsToMonitor());
-		} else {
-			mainPanel = new GrisuMainPanel(singleJobs, true, false,
-					getApplicationsToMonitor(), batchJobs, true, false,
-					getApplicationsToMonitor());
-		}
+
 
 		final List<ServiceInterfaceHolder> siHolders = ImmutableList
 				.of((ServiceInterfaceHolder) this);
