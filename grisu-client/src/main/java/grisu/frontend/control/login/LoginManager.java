@@ -40,7 +40,7 @@ public class LoginManager {
 
 
 	public static int REQUIRED_BACKEND_API_VERSION = 16;
-	public static final String DEFAULT_BACKEND = "testbed";
+	public static final String DEFAULT_BACKEND = "bestgrid";
 	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
 
 
