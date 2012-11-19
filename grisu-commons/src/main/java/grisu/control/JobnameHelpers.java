@@ -8,7 +8,7 @@ public class JobnameHelpers {
 
 	public static String calculateTimestampedJobname(String baseJobname) {
 		final SimpleDateFormat format = new SimpleDateFormat(
-				"yyyy.MM.dd_HH.mm.SSS");
+				"yyyy.MM.dd_HH.mm.ss.SSS");
 		return calculateTimestampedJobname(baseJobname, format);
 	}
 
