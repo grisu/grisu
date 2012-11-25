@@ -46,6 +46,7 @@ import javax.persistence.Transient;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -391,8 +392,7 @@ Comparable<JobObject> {
 	 * means the backend will not change the jobname you specified -- if there
 	 * is a job with that jobname already the backend will throw an exception).
 	 *
-	 * Also, this method uses the current fqan that the
-	 * {@link UserEnvironmentManager} that is used for this client holds.
+	 * Also, this method uses teh "none" group ({@link Constants.NON_VO_FQAN})
 	 *
 	 * Be aware, that once that is done, you can't change any of the basic job
 	 * parameters anymore. The backend calculates all the (possibly) missing job
@@ -409,9 +409,10 @@ Comparable<JobObject> {
 	 */
 	public final String createJob() throws JobPropertiesException {
 
-		final String fqan = GrisuRegistryManager.getDefault(serviceInterface)
-				.getUserEnvironmentManager().getCurrentFqan();
+//		final String fqan = GrisuRegistryManager.getDefault(serviceInterface)
+//				.getUserEnvironmentManager().getCurrentFqan();
 
+		String fqan = Constants.NON_VO_FQAN;
 		return createJob(fqan);
 
 	}
