@@ -1,10 +1,29 @@
 Changelog
 =========
 
+0.5
+--- 
+
+* new internal information manager interface, move away from mds
+* added method to be able to clear the users session & filesystem cache
+* checking target when archiving jobs to make sure no data is lost before deleting source
+* better client-side file caching
+* fixes for GT4 & GT5 connectors
+* using refactored Credential classes from jgrith
+* integration of grid-session in client library
+* many bugfixes
+
 0.4
 ---
 
-*
+* Refactoring of user session, much cleaner now
+* Refactoring of authentication part in grisu-client, more generic now
+* method for killing jobs in parallel -- performance improvement
+* preparing for GlobusOnline as file transfer backend
+* exporting grisu properties to environment of the job (Prepending with GRISU_)
+* debian * rpm packaging for local backend
+* added support for multipe MyProxy servers
+* many other bugfixes, small features
 
 0.3.7
 -----
