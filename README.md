@@ -55,9 +55,8 @@ Important dependencies
  * [grid-session](https://github.com/grith/grid-session): little daemon-type application that holds authentication tokens and caches them in memory for use by different clients, can auto-renew some types of credentials
  * [grin](https://github.com/makkus/Grin): Grid information manager written in Java/Groovy, trying to be as easy to configure as possible
 
-
- Available Grisu clients
- -------------------------------
+Available _Grisu_ clients
+------------------------------------
 
  * [griclish](https://github.com/grisu/gricli): generic command line client
  * [Grisu template client](https://github.com/grisu/grisu-template): generic GUI client
