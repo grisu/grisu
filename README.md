@@ -53,7 +53,7 @@ Important dependencies
  * [grid_commons](https://github.com/grisu/grid-jcommons): Library containing commonly used code for different types of grid clients
  * [jgrith](https://github.com/grith/jgrith): collection of methods and classes related to grid authentication
  * [grid-session](https://github.com/grith/grid-session): little daemon-type application that holds authentication tokens and caches them in memory for use by different clients, can auto-renew some types of credentials
- * [grin](https://github.com/makkus/Grin): Grid information manager written in Java/Groovy trying to be as easy to configure as possible
+ * [grin](https://github.com/makkus/Grin): Grid information manager written in Java/Groovy, trying to be as easy to configure as possible
 
 
  Available Grisu clients
@@ -68,7 +68,7 @@ Important dependencies
 Other
 --------
 
- * [enunciate-backend[(https://github.com/grisu/enunciate-backend): web service based _Grisu_ backend
+ * [enunciate-backend](https://github.com/grisu/enunciate-backend): web service based _Grisu_ backend
  * [grisu-integration-tests](https://github.com/grisu/grisu-integration-tests): End-to-end tests for the _Grisu_ framework
  * [combined client](https://github.com/grisu/combinedClient): project to combine several _Grisu_ clients in order to make them installable (plus auto-update) via:
  * [nesi-tools-installer](https://github.com/nesi/nesi-tools-installer): izpack based installer to make deployment and auto-updating of client tools easy
