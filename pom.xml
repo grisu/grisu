@@ -87,7 +87,7 @@
 <!-- 					<includeDependencySources>true</includeDependencySources> -->
 <!-- 					<dependencySourceInclude>grisu:*</dependencySourceInclude> -->
 <!-- 					<source>1.5</source> -->
-<!-- <!-- 					<detectLinks>true</detectLinks> --> -->
+<!-- 				<detectLinks>true</detectLinks> -->
 <!-- 					<links> -->
 <!--  						<link>https://code.ceres.auckland.ac.nz/jenkins/job/Grid-Jcommons-SNAPSHOT/javadoc/</link>  -->
 <!-- 					</links> -->
