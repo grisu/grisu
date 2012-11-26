@@ -75,24 +75,24 @@
 
 	<build>
 		<plugins>
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.apache.maven.plugins</groupId> -->
-<!-- 				<artifactId>maven-javadoc-plugin</artifactId> -->
-<!-- 				<version>2.9</version> -->
-<!-- 				<configuration> -->
-<!-- 					<aggregate>true</aggregate> -->
-<!-- 					<linksource>true</linksource> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<linksource>true</linksource>
 <!-- 					<excludePackageNames>org.vpac.grisu.grisuBatch.*:org.vpac.grisu.examples.*:cct.*:org.vpac.grisu.plugins.*:com.swtdesigner.*</excludePackageNames> -->
-<!-- 					<breakiterator>true</breakiterator> -->
-<!-- 					<includeDependencySources>true</includeDependencySources> -->
-<!-- 					<dependencySourceInclude>grisu:*</dependencySourceInclude> -->
-<!-- 					<source>1.5</source> -->
-<!-- 				<detectLinks>true</detectLinks> -->
-<!-- 					<links> -->
-<!--  						<link>https://code.ceres.auckland.ac.nz/jenkins/job/Grid-Jcommons-SNAPSHOT/javadoc/</link>  -->
-<!-- 					</links> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
+					<breakiterator>true</breakiterator>
+					<includeDependencySources>true</includeDependencySources>
+					<dependencySourceInclude>grisu:*</dependencySourceInclude>
+					<source>1.5</source>
+				<detectLinks>true</detectLinks>
+					<links>
+ 						<link>https://code.ceres.auckland.ac.nz/jenkins/job/Grid-Jcommons-SNAPSHOT/javadoc/</link> 
+					</links>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
