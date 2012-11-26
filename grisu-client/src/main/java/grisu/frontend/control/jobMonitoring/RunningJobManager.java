@@ -200,6 +200,12 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
+	public synchronized void createJob(JobObject job)
+			throws JobPropertiesException {
+
+		createJob(job, null);
+	}
+
 	public synchronized void createJob(JobObject job, String fqan)
 			throws JobPropertiesException {
 
