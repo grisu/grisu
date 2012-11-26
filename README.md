@@ -12,7 +12,7 @@ Documentation
 ------------------------
 
 - [Wiki](https://github.com/grisu/grisu/wiki)
-- [Javadoc](https://code.ceres.auckland.ac.nz/jenkins/job/Grisu-SNAPSHOT-Javadoc/)
+- [Javadoc](https://code.ceres.auckland.ac.nz/jenkins/job/Grisu-SNAPSHOT-Javadoc/javadoc/)
 - [SOAP/REST API documentaion for web-service based backend](https://compute.services.bestgrid.org/)
 
 Prerequisites
