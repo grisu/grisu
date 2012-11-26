@@ -18,7 +18,7 @@ Documentation
 Prerequisites
 --------------------
 
-In order to build Grisu from the git sources, you need: 
+In order to build _Grisu_ from the git sources, you need: 
 
 - Java development kit (version 6)
 - [git](http://git-scm.com) 
@@ -69,6 +69,7 @@ Other
 --------
 
  * [enunciate-backend](https://github.com/grisu/enunciate-backend): web service based _Grisu_ backend
+ * [grisu-archetypes](https://github.com/grisu/grisu-archetypes): maven archetypes to assist creating _Grisu_ clients
  * [grisu-integration-tests](https://github.com/grisu/grisu-integration-tests): End-to-end tests for the _Grisu_ framework
  * [combined client](https://github.com/grisu/combinedClient): project to combine several _Grisu_ clients in order to make them installable (plus auto-update) via:
  * [nesi-tools-installer](https://github.com/nesi/nesi-tools-installer): izpack based installer to make deployment and auto-updating of client tools easy
