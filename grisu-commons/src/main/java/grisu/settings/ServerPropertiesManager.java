@@ -908,4 +908,24 @@ public final class ServerPropertiesManager {
 		return useFScache;
 	}
 
+	public static boolean isUseStatistics() {
+		
+		boolean stats = true;
+
+		try {
+			try {
+				stats = getServerConfiguration().getBoolean("General.statistics");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				myLogger.debug(e.getLocalizedMessage());
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e.getLocalizedMessage());
+		}
+		return stats;
+
+	}
+
 }

@@ -1,6 +1,7 @@
 package grisu.backend.model.job;
 
 import grisu.backend.hibernate.JobDAO;
+import grisu.backend.hibernate.JobStatDAO;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.backend.model.fs.GrisuInputStream;
@@ -90,6 +91,7 @@ public class UserJobManager {
 	private final User user;
 
 	protected final JobDAO jobdao = new JobDAO();
+	protected final JobStatDAO jobstatdao = new JobStatDAO();
 
 
 	public final static boolean INCLUDE_MULTIPARTJOBS_IN_PS_COMMAND = false;
@@ -535,7 +537,9 @@ public class UserJobManager {
 		job.setStatus(JobConstants.READY_TO_SUBMIT);
 		job.addLogMessage("Job " + jobname + " ready to submit.");
 
+		jobstatdao.saveOrUpdate(job, true);
 		jobdao.saveOrUpdate(job);
+		
 		return jobname;
 	}
 
@@ -889,6 +893,7 @@ public class UserJobManager {
 			}
 		}
 		job.setLastStatusCheck(new Date());
+		jobstatdao.saveOrUpdate(job, true);
 		jobdao.saveOrUpdate(job);
 
 		// myLogger.debug("Status of job: " + job.getJobname() + " is: " +
@@ -987,6 +992,7 @@ public class UserJobManager {
 				"Job: " + job.getJobname() + " killed, new status: "
 						+ JobConstants.translateStatus(new_status));
 		jobdao.saveOrUpdate(job);
+		jobstatdao.saveOrUpdate(job, true);
 		// myLogger.debug("Status of job: " + job.getJobname() + " is: "
 		// + new_status);
 
@@ -1069,6 +1075,7 @@ public class UserJobManager {
 						status.addLogMessage("Removing job from db...");
 						myLogger.debug("Removing job " + job.getJobname()
 								+ " from db.");
+						jobstatdao.saveOrUpdate(job, false);
 						jobdao.delete(job);
 						myLogger.debug("Removing job " + job.getJobname()
 								+ " from db finished.");
@@ -2514,6 +2521,7 @@ public class UserJobManager {
 		myLogger.info("Submitting job: " + job.getJobname() + " for user "
 				+ getUser().getDn());
 		job.addLogMessage("Starting re-submission...");
+		jobstatdao.saveOrUpdate(job, true);
 		jobdao.saveOrUpdate(job);
 		try {
 			submitJob(job, false, status);
@@ -2870,6 +2878,7 @@ public class UserJobManager {
 					job,
 					"Job submission for job: " + job.getJobname()
 					+ " finished successful.");
+			jobstatdao.saveOrUpdate(job, true);
 			jobdao.saveOrUpdate(job);
 			myLogger.debug(debug_token + " wrapping up finished");
 			myLogger.info("Jobsubmission for job " + job.getJobname()

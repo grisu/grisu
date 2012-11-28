@@ -3,7 +3,6 @@ package grisu.backend.model.job;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.utils.SeveralXMLHelpers;
-import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.cred.Cred;
 
 import java.io.IOException;
@@ -264,7 +263,7 @@ public class Job implements Comparable<Job> {
 	// hibernate
 	@Id
 	@GeneratedValue
-	private Long getId() {
+	public Long getId() {
 		return id;
 	}
 
