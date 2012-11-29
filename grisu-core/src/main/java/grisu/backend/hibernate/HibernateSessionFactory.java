@@ -3,6 +3,7 @@ package grisu.backend.hibernate;
 import grisu.backend.model.User;
 import grisu.backend.model.job.BatchJob;
 import grisu.backend.model.job.Job;
+import grisu.backend.model.job.JobStat;
 import grisu.model.MountPoint;
 import grisu.model.job.JobSubmissionObjectImpl;
 import grisu.settings.Environment;
@@ -252,6 +253,7 @@ public final class HibernateSessionFactory {
 
 			configuration.addAnnotatedClass(User.class);
 			configuration.addAnnotatedClass(Job.class);
+			configuration.addAnnotatedClass(JobStat.class);
 			configuration.addAnnotatedClass(BatchJob.class);
 			configuration.addAnnotatedClass(MountPoint.class);
 			configuration.addAnnotatedClass(JobSubmissionObjectImpl.class);

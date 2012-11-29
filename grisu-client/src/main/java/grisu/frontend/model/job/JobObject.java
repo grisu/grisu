@@ -474,8 +474,10 @@ Comparable<JobObject> {
 		myLogger.debug("Adding grisu client information to environment.");
 		String client = LoginManager.getClientName();
 		String version = LoginManager.getClientVersion();
-		addEnvironmentVariable("GRISU_CLIENT", client);
-		addEnvironmentVariable("GRISU_CLIENT_VERSION", version);
+		addJobProperty("client", client);
+		addJobProperty("client_version", version);
+		//addEnvironmentVariable("GRISU_CLIENT", client);
+		//addEnvironmentVariable("GRISU_CLIENT_VERSION", version);
 
 		try {
 			setJobname(serviceInterface.createJob(

@@ -9,11 +9,11 @@ import grisu.settings.ServerPropertiesManager;
 
 import java.util.List;
 
-import javax.sql.rowset.serial.SerialArray;
-
 import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Maps;
 
 /**
  * Class to make it easier to persist (and find {@link JobStat} objects to/from the
@@ -77,14 +77,14 @@ public class JobStatDAO extends BaseHibernateDAO {
 	public final JobStat findJobByHibernateId(Long id)
 			throws NoSuchJobException {
 
-		final String queryString = "from grisu.backend.model.job.JobStat as job where job.id = ?";
+		final String queryString = "from grisu.backend.model.job.JobStat as job where job.jobHibernateId = :hibId";
 
 		try {
 			getCurrentSession().beginTransaction();
 
 			final Query queryObject = getCurrentSession().createQuery(
 					queryString);
-			queryObject.setParameter(0, id.toString());
+			queryObject.setParameter("hibId", id);
 
 			final JobStat job = (JobStat) (queryObject.uniqueResult());
 
@@ -375,7 +375,7 @@ public class JobStatDAO extends BaseHibernateDAO {
 			instance.setDn(job.getDn());
 			instance.setBatchJob(job.isBatchJob());
 			instance.setJobname(job.getJobname());
-			instance.setFqan(job.getDn());
+			instance.setFqan(job.getFqan());
 			instance.setSubmissionType(job.getSubmissionType());
 		}
 		
@@ -384,8 +384,8 @@ public class JobStatDAO extends BaseHibernateDAO {
 		}
 		
 		instance.setStatus(job.getStatus());
-		instance.setProperties(job.getJobProperties());
-		instance.setLogMessages(job.getLogMessages());
+		instance.setProperties(Maps.newHashMap(job.getJobProperties()));
+		instance.setLogMessages(Maps.newHashMap(job.getLogMessages()));
 		
 		instance.setActive(active);
 		
@@ -434,6 +434,36 @@ public class JobStatDAO extends BaseHibernateDAO {
 		} finally {
 			getCurrentSession().close();
 			// System.out.println("CLOSED. VALUE: "+instance.getStatus());
+		}
+	}
+
+	public List<JobStat> findAllJobs() {
+		// TODO Auto-generated method stub
+		String queryString;
+			queryString = "from grisu.backend.model.job.JobStat as job";
+
+
+		try {
+			getCurrentSession().beginTransaction();
+
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
+
+			final List<JobStat> jobs = (queryObject.list());
+
+			getCurrentSession().getTransaction().commit();
+
+			return jobs;
+
+		} catch (final RuntimeException e) {
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (final Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
 		}
 	}
 

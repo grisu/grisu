@@ -52,6 +52,8 @@ import javax.persistence.Transient;
 import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.lang.StringUtils;
+import org.globus.rsl.Binding;
+import org.globus.rsl.Bindings;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
@@ -59,6 +61,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
 /**
@@ -2383,6 +2386,15 @@ public class UserJobManager {
 		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);
 		job.addJobProperty(Constants.SUBMISSIONBACKEND_KEY,
 				AbstractServiceInterface.getBackendInfo());
+		
+		final Map<String, String> env = JsdlHelpers
+				.getPosixApplicationEnvironment(jsdl);
+		if ((env != null) && (env.size() > 0)) {
+			String envVars = Joiner.on("|").withKeyValueSeparator("=").join(env);
+			job.addJobProperty(Constants.ENVIRONMENT_VARIABLES_KEY, envVars);
+		}
+		
+
 
 		myLogger.debug("Preparing job done.");
 	}
@@ -2758,6 +2770,7 @@ public class UserJobManager {
 		myLogger.debug(debug_token
 				+ " adding job properties as env variables to jsdl..");
 		Document oldJsdl = job.getJobDescription();
+
 		for (String key : job.getJobProperties().keySet()) {
 			String value = job.getJobProperty(key);
 			key = "GRISU_" + key.toUpperCase();
@@ -2768,7 +2781,7 @@ public class UserJobManager {
 				e.setTextContent(value);
 			}
 		}
-
+		
 		job.setJobDescription(oldJsdl);
 
 		String handle = null;

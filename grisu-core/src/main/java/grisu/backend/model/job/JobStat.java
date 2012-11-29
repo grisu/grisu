@@ -89,6 +89,7 @@ public class JobStat {
 		return jobname;
 	}
 
+	@ElementCollection(fetch = FetchType.EAGER)
 	public Map<Long, String> getLogMessages() {
 		return logMessages;
 	}
