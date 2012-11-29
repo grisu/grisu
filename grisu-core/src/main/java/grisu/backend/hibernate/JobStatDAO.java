@@ -9,6 +9,8 @@ import grisu.settings.ServerPropertiesManager;
 
 import java.util.List;
 
+import javax.xml.transform.TransformerException;
+
 import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -377,6 +379,11 @@ public class JobStatDAO extends BaseHibernateDAO {
 			instance.setJobname(job.getJobname());
 			instance.setFqan(job.getFqan());
 			instance.setSubmissionType(job.getSubmissionType());
+			try {
+				instance.setJsdl(job.getJsdl());
+			} catch (Exception e1) {
+				instance.setJsdl("Could not get jsdl: "+e.getLocalizedMessage());
+			}
 		}
 		
 		if ( instance.isActive() ) {
@@ -386,6 +393,7 @@ public class JobStatDAO extends BaseHibernateDAO {
 		instance.setStatus(job.getStatus());
 		instance.setProperties(Maps.newHashMap(job.getJobProperties()));
 		instance.setLogMessages(Maps.newHashMap(job.getLogMessages()));
+		instance.setSubmittedJobDescription(job.getSubmittedJobDescription());
 		
 		instance.setActive(active);
 		

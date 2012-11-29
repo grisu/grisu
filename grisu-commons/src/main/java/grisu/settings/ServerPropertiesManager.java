@@ -910,7 +910,7 @@ public final class ServerPropertiesManager {
 
 	public static boolean isUseStatistics() {
 		
-		boolean stats = true;
+		boolean stats = false;
 
 		try {
 			try {

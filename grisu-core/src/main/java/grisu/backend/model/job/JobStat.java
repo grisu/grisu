@@ -18,56 +18,40 @@ import org.simpleframework.xml.Root;
 @Entity
 @Table(name = "job_statistics")
 public class JobStat {
-	
+
 	// for hibernate
 	private Long id;
-	
+
 	private Long jobHibernateId;
-	
+
 	private String jobname;
-	
+
 	private String dn;
-	
+
+	private String jsdl;
+
 	private String fqan;
-	
+
 	private boolean active = true;
-	
-//	private int cpus;
-//	private long memory;
-//	private long virtMemory;
-	
-	
-	public boolean isActive() {
-		return active;
-	}
 
-
-	public void setActive(boolean active) {
-		this.active = active;
-	}
-
-
-	// for hibernate
-	private void setId(Long id) {
-		this.id = id;
-	}
+	private String submittedJobDescription;
 
 	private int status = -1000;
-	
+
 	private String submissionType = null;
-	
+
 	private Map<String, String> properties = Collections
-	.synchronizedMap(new HashMap<String, String>());
-	
+			.synchronizedMap(new HashMap<String, String>());
+
 	private boolean isBatchJob = false;
-	
+
+
 	private Map<Long, String> logMessages = Collections
 			.synchronizedMap(new TreeMap<Long, String>());
-	
+
 	public String getDn() {
 		return dn;
 	}
-
 
 	public String getFqan() {
 		return fqan;
@@ -79,7 +63,7 @@ public class JobStat {
 	private Long getId() {
 		return id;
 	}
-	
+
 	@Column(nullable = false)
 	public Long getJobHibernateId() {
 		return jobHibernateId;
@@ -87,6 +71,11 @@ public class JobStat {
 
 	public String getJobname() {
 		return jobname;
+	}
+
+	@Column(length = 15000)
+	public String getJsdl() {
+		return jsdl;
 	}
 
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -108,8 +97,26 @@ public class JobStat {
 		return submissionType;
 	}
 
+	/**
+	 * Returns the (JobSubmitter-specific) job description (like rsl for gt4).
+	 * 
+	 * @return the job description or null if the job was not submitted yet
+	 */
+	@Column(length = 2550)
+	public String getSubmittedJobDescription() {
+		return submittedJobDescription;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
 	public boolean isBatchJob() {
 		return isBatchJob;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	public void setBatchJob(boolean isBatchJob) {
@@ -124,12 +131,21 @@ public class JobStat {
 		this.fqan = fqan;
 	}
 
+	// for hibernate
+	private void setId(Long id) {
+		this.id = id;
+	}
+
 	public void setJobHibernateId(Long jobHibernateId) {
 		this.jobHibernateId = jobHibernateId;
 	}
 
 	public void setJobname(String jobname) {
 		this.jobname = jobname;
+	}
+
+	public void setJsdl(final String jsdl_string) {
+		this.jsdl = jsdl_string;
 	}
 
 	public void setLogMessages(Map<Long, String> logMessages) {
@@ -147,6 +163,9 @@ public class JobStat {
 	public void setSubmissionType(String submissionType) {
 		this.submissionType = submissionType;
 	}
-	
+
+	public void setSubmittedJobDescription(final String desc) {
+		this.submittedJobDescription = desc;
+	}
 
 }

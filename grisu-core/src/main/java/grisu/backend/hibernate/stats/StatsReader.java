@@ -26,6 +26,9 @@ public class StatsReader {
 			for ( String msg : j.getLogMessages().values() ) {
 				System.out.println("\t"+msg);
 			}
+			
+			System.out.println("\t"+j.getSubmittedJobDescription());
+			System.out.println("\t"+j.getJsdl());
 		}
 		
 		

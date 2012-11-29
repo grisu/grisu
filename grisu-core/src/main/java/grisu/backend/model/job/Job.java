@@ -348,7 +348,7 @@ public class Job implements Comparable<Job> {
 	 * @throws TransformerException
 	 */
 	@Column(length = 15000)
-	private String getJsdl() throws TransformerException {
+	public String getJsdl() throws TransformerException {
 		return SeveralXMLHelpers.toString(jobDescription);
 	}
 
