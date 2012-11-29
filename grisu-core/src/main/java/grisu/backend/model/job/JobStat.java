@@ -16,7 +16,7 @@ import javax.persistence.Table;
 import org.simpleframework.xml.Root;
 
 @Entity
-@Table(name = "job_statistics")
+@Table
 public class JobStat {
 
 	// for hibernate
