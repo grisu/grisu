@@ -10,7 +10,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 public class FirstItemPromptItemRenderer extends DefaultListCellRenderer
-		implements ListCellRenderer {
+		 {
 
 	/**
 	 * 

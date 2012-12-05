@@ -11,8 +11,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-public class FileSystemItemRenderer extends DefaultListCellRenderer implements
-		ListCellRenderer {
+public class FileSystemItemRenderer extends DefaultListCellRenderer {
 
 	@Override
 	public Component getListCellRendererComponent(JList arg0, Object arg1,
