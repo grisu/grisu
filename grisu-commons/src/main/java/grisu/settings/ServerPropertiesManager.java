@@ -890,7 +890,7 @@ public final class ServerPropertiesManager {
 	 * @return true if debug is enabled, false if not
 	 */
 	public static boolean useFileSystemCache() {
-		boolean useFScache = true;
+		boolean useFScache = false;
 
 		try {
 			try {
