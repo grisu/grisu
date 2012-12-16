@@ -91,7 +91,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 		add(getScrollPane(), "2, 2, 7, 1, fill, fill");
 		add(getCredPanel(), "2, 4, 7, 1, fill, fill");
 		add(getLblStatus(), "2, 8, default, bottom");
-		if (!GridSshKey.gridsshkeyExists()) {
+		if (!GridSshKey.defaultGridsshkeyExists()) {
 			add(getLblSshKeyPassword(), "4, 6, right, default");
 			add(getPasswordField(), "6, 6, fill, default");
 			add(getLblConfirmPassword(), "4, 8, right, top");
@@ -107,7 +107,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 			}
 		});
 
-		if (GridSshKey.gridsshkeyExists()) {
+		if (GridSshKey.defaultGridsshkeyExists()) {
 			addLogMessage("SSH key already exists in "
 					+ CommonGridProperties.getDefault().getGridSSHKey()
 					+ ". (Re-)using that...");
@@ -196,7 +196,7 @@ public class PanSSHKeyCopyPanel extends JPanel {
 			StringBuffer text = new StringBuffer(
 					"<h3>Enable ssh access to the Pan cluster</h3>");
 			text.append("<p>This application helps you to setup ssh access to the Pan login node. In order to start the process, provide your institution credentials and click the button below.</p>");
-			if (GridSshKey.gridsshkeyExists()) {
+			if (GridSshKey.defaultGridsshkeyExists()) {
 				text.append("<p>You already seem to have a ssh private key in "
 						+ CommonGridProperties.getDefault().getGridSSHKey()
 						+ ". The associated public key will be copied to the authorized_keys file on the Pan login node. If you want to create a new one, please close this application, delete the key and restart.");
@@ -290,18 +290,18 @@ public class PanSSHKeyCopyPanel extends JPanel {
 					Cred cred = AbstractCred.loadFromConfig(config);
 					addLogMessage("Logged in. Identity: " + cred.getDN());
 
-					if (GridSshKey.gridsshkeyExists()) {
+					if (GridSshKey.defaultGridsshkeyExists()) {
 						addLogMessage("Skipping creation of ssh key, re-using existing one...");
 					} else {
 						addLogMessage("Creating ssh key...");
 						char[] pw = getPasswordField().getPassword();
 						try {
-							GridSshKey.createGridsshkey(pw, cred.getDN());
+							GridSshKey.getDefaultGridsshkey(pw, cred.getDN());
 						} catch (Exception e) {
 							e.printStackTrace();
 							return;
 						}
-						if (GridSshKey.gridsshkeyExists()) {
+						if (GridSshKey.defaultGridsshkeyExists()) {
 							// TODO something
 							System.out.println("SSH KEY DOES STILL NOT EXIST");
 						}

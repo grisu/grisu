@@ -1547,13 +1547,13 @@ public class FileManager {
 		} else {
 
 			try {
+				synchronized (url.intern()) {
 				if (!forceRefresh) {
 					GridFile cache = FileCache.getFileList(url);
 					if (cache != null) {
 						return cache;
 					}
 				}
-				synchronized (url) {
 					final GridFile result = serviceInterface
 							.ls(url, recursionLevel);
 					FileCache.putFileList(url, result);
@@ -2267,6 +2267,14 @@ public class FileManager {
 			} else {
 				return false;
 			}
+		}
+	}
+
+	public String getFileContent(String url) throws RemoteFileSystemException {
+		try {
+			return FileUtils.readFileToString(downloadFile(url));
+		} catch (Exception e) {
+			throw new RemoteFileSystemException(e);
 		}
 	}
 }

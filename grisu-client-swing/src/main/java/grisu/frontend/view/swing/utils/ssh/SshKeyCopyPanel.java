@@ -65,8 +65,8 @@ public class SshKeyCopyPanel extends JPanel {
 						public void run() {
 
 							try {
-								if (!GridSshKey.gridsshkeyExists()) {
-									GridSshKey.createGridsshkey("myPassword".toCharArray(),
+								if (!GridSshKey.defaultGridsshkeyExists()) {
+									GridSshKey.getDefaultGridsshkey("myPassword".toCharArray(),
 											"testid");
 								}
 
@@ -77,7 +77,7 @@ public class SshKeyCopyPanel extends JPanel {
 
 									String target = mp.getRootUrl()
 											+ "/testfolderforsshcert/"
-											+ CommonGridProperties.CERT_NAME;
+											+ CommonGridProperties.KEY_NAME+CommonGridProperties.CERT_EXTENSION;
 
 									System.out
 									.println("Copying key from "
