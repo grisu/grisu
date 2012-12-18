@@ -147,7 +147,7 @@ public class FileSystemCache {
 				temp = user.getResponsibleMountpointForAbsoluteFile(rootUrl);
 			} catch (final IllegalStateException e) {
 				 e.printStackTrace();
-				 myLogger.debug("Can't get mountpoint.",e);
+				 myLogger.debug("Can't get mountpoint, mountpoints not set yet.");
 			}
 			if ((fqan == null) && (temp != null) && (temp.getFqan() != null)) {
 				fqan = temp.getFqan();
