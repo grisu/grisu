@@ -21,10 +21,12 @@ public class Gram5JobListener implements GramJobListener {
 	private final Map<String, Integer> statuses;
 
 	private final Map<String, Integer> errors;
+	private final Map<String, Integer> exitCodes;
 
 	private Gram5JobListener() {
 		statuses = new ConcurrentHashMap<String, Integer>();
 		errors = new ConcurrentHashMap<String, Integer>();
+		exitCodes = new ConcurrentHashMap<String, Integer>();
 	}
 
 	public Integer getError(String handle) {
@@ -34,10 +36,15 @@ public class Gram5JobListener implements GramJobListener {
 	public Integer getStatus(String handle) {
 		return statuses.remove(handle);
 	}
+	
+	public Integer getExitCode(String handle) {
+		return statuses.remove(handle);
+	}
 
 	public void statusChanged(GramJob job) {
                 int jobStatus = job.getStatus();
                 String jobId = job.getIDAsString();
+                int exitCode = job.getExitCode();
                 myLogger.debug("job status changed to " + jobStatus);
                 try {
                     if ((jobStatus == GramJob.STATUS_DONE) || (jobStatus == GramJob.STATUS_FAILED)){
@@ -47,6 +54,7 @@ public class Gram5JobListener implements GramJobListener {
                     // so that GT5Submitter goes to Gram in an attempt to get job status
                     statuses.put(jobId, jobStatus);
                     errors.put(jobId, job.getError());
+                    exitCodes.put(jobId, exitCode);
                 } catch (Exception e) {
                     String state = job.getStatusAsString();
                     myLogger.warn("Failed to send COMMIT_END to job " + jobId + " in state " + state, e);

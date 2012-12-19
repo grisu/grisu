@@ -59,10 +59,11 @@ public class GT5Submitter extends JobSubmitter {
 		// try to get the state from the notification listener cache
 		Integer jobStatus = l.getStatus(handle);
 		Integer error = l.getError(handle);
+		Integer exitCode = l.getExitCode(handle);
 		if ((jobStatus != null) &&
 				((jobStatus == GRAMConstants.STATUS_DONE) ||
 						(jobStatus == GRAMConstants.STATUS_FAILED))) {
-			return translateToGrisuStatus(jobStatus, error, error);
+			return translateToGrisuStatus(jobStatus, error, exitCode);
 		}
 
 		try {
@@ -89,7 +90,7 @@ public class GT5Submitter extends JobSubmitter {
 				job.signal(GRAMConstants.SIGNAL_COMMIT_END);
 			}
 			return translateToGrisuStatus(jobStatus, job.getError(),
-					job.getError());
+					job.getExitCode());
 
 		} catch (final GramException ex) {
 			myLogger.debug("ok, normal method of getting exit status is not working. need to restart job.");
