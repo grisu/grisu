@@ -84,7 +84,7 @@
 					<linksource>true</linksource>
 <!-- 					<excludePackageNames>org.vpac.grisu.grisuBatch.*:org.vpac.grisu.examples.*:cct.*:org.vpac.grisu.plugins.*:com.swtdesigner.*</excludePackageNames> -->
 					<breakiterator>true</breakiterator>
-					<includeDependencySources>true</includeDependencySources>
+					<includeDependencySources>false</includeDependencySources>
 					<dependencySourceInclude>grisu:*</dependencySourceInclude>
 					<source>1.5</source>
 				<detectLinks>true</detectLinks>
