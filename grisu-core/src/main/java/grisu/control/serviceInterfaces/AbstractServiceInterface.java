@@ -105,7 +105,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public static final InformationManager informationManager = new GrinformationManagerDozer(
 			ServerPropertiesManager.getInformationManagerConf());
 
-	private final static AdminInterface admin = new AdminInterface(null,
+	public final static AdminInterface admin = new AdminInterface(null,
 			informationManager,
 			User.userdao);
 

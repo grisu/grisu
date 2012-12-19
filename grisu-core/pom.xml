@@ -243,7 +243,7 @@
 		<dependency>
 			<groupId>external.jglobus</groupId>
 			<artifactId>cog-jglobus</artifactId>
-			<version>1.8.2-nesi</version>
+			<version>1.8.4-nesi</version>
 		</dependency>
 
 

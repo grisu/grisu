@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 public final class ClientPropertiesManager {
 
 	public static final String[] DEFAULT_HELPDESK_CLASSES = new String[] {
-		"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
-	"org.vpac.helpDesk.model.trac.TracHelpDesk" };
+			"org.vpac.helpDesk.model.anonymousRT.AnonymousRTHelpDesk",
+			"org.vpac.helpDesk.model.trac.TracHelpDesk" };
 	public static final String HELPDESK_CONFIG = "support.properties";
 
 	public static final int CONCURRENT_THREADS_DEFAULT = 5;
@@ -87,7 +87,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 		}
 	}
@@ -115,7 +115,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 		}
 	}
@@ -135,13 +135,36 @@ public final class ClientPropertiesManager {
 		return autoLogin;
 
 	}
-	
+
+	public static String getImpersonationDN() {
+
+		String impersonate = null;
+
+		impersonate = System.getenv("GRISU_IMPERSONATE");
+		if (StringUtils.isBlank(impersonate)) {
+
+			impersonate = System.getProperty("grisu.impersonate");
+
+			if (StringUtils.isBlank(impersonate)) {
+				try {
+					impersonate = (String) (getClientConfiguration()
+							.getProperty("impersonate"));
+				} catch (final ConfigurationException e) {
+					myLogger.debug("Problem with config file: "
+							+ e.getMessage());
+				}
+			}
+		}
+		
+		return impersonate;
+	}
+
 	public static boolean isAdmin() {
 
 		boolean admin = false;
 		try {
-			admin = Boolean.parseBoolean(getClientConfiguration()
-					.getString(ADMIN_KEY));
+			admin = Boolean.parseBoolean(getClientConfiguration().getString(
+					ADMIN_KEY));
 
 		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
@@ -614,7 +637,7 @@ public final class ClientPropertiesManager {
 			myLogger.debug("No server templates found.");
 			addServerTemplate("generic");
 			setProperty("lastCreatePanel", "Generic");
-			templates = new String[] {"generic"};
+			templates = new String[] { "generic" };
 		}
 		return templates;
 	}
@@ -643,7 +666,7 @@ public final class ClientPropertiesManager {
 				config.save();
 			} catch (final ConfigurationException e) {
 				ClientPropertiesManager.myLogger
-				.debug("Could not write config file: " + e.getMessage());
+						.debug("Could not write config file: " + e.getMessage());
 			}
 			return new String[] { DEFAULT_SERVICE_INTERFACE };
 		}
@@ -688,7 +711,7 @@ public final class ClientPropertiesManager {
 			config.save();
 		} catch (final ConfigurationException e) {
 			ClientPropertiesManager.myLogger
-			.debug("Could not write config file: " + e.getMessage());
+					.debug("Could not write config file: " + e.getMessage());
 		}
 	}
 
@@ -824,7 +847,7 @@ public final class ClientPropertiesManager {
 	public static void saveShibbolethUsername(final String username) {
 		try {
 			getClientConfiguration()
-			.setProperty("shibbolethUsername", username);
+					.setProperty("shibbolethUsername", username);
 			getClientConfiguration().save();
 		} catch (final ConfigurationException e) {
 			myLogger.debug("Problem with config file: " + e.getMessage());

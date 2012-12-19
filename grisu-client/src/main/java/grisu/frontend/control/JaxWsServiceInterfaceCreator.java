@@ -6,6 +6,7 @@ import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.frontend.control.jaxws.CommandLogHandler;
 import grisu.frontend.control.login.LoginManager;
 import grisu.jcommons.constants.GridEnvironment;
+import grisu.settings.ClientPropertiesManager;
 import grisu.settings.Environment;
 import grith.jgrith.cred.Cred;
 
@@ -40,6 +41,9 @@ import com.google.common.collect.Maps;
 import com.sun.xml.ws.developer.JAXWSProperties;
 
 public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
+	
+	static final String IMPERSONATE_STRING = "=impersonate=";
+
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(JaxWsServiceInterfaceCreator.class.getName());
@@ -135,6 +139,12 @@ public class JaxWsServiceInterfaceCreator implements ServiceInterfaceCreator {
 			bp.getRequestContext()
 			.put("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size",
 					new Integer(4096));
+			
+			// check whether to impersonate a user
+			String impersonateDn = ClientPropertiesManager.getImpersonationDN();
+			if (StringUtils.isNotBlank(impersonateDn)) {
+				username = username+IMPERSONATE_STRING+impersonateDn;
+			}
 
 			if (StringUtils.isNotBlank(myProxyServer)) {
 				String myproxycontact = username + "@" + myProxyServer;
