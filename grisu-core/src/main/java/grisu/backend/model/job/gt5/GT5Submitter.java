@@ -239,8 +239,12 @@ public class GT5Submitter extends JobSubmitter {
 
 	}
 
-	private int translateToGrisuStatus(int status, int failureCode, int exitCode) {
+	private int translateToGrisuStatus(int status, int failureCode, Integer exitCode) {
 
+		if ( exitCode == null ) {
+			exitCode = 0;
+		}
+		
 		int grisu_status = Integer.MIN_VALUE;
 		if (status == GRAMConstants.STATUS_DONE) {
 			grisu_status = JobConstants.DONE + exitCode;

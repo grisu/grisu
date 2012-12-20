@@ -4,6 +4,7 @@ import grisu.frontend.model.job.JobObject;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.Arrays;
 
 import javax.swing.JTable;
 import javax.swing.UIManager;
@@ -12,6 +13,8 @@ import javax.swing.table.TableCellRenderer;
 
 public class JobNameCellRenderer extends DefaultTableCellRenderer implements
 		TableCellRenderer {
+	
+	private int[] disabledRows = new int[]{};
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
@@ -42,9 +45,16 @@ public class JobNameCellRenderer extends DefaultTableCellRenderer implements
 			c.setEnabled(true);
 			setText(j.getJobname());
 		}
+		
 
 		return this;
 
+	}
+
+	public void disableRows(int[] selectedRows) {
+		
+		this.disabledRows = selectedRows;
+		
 	}
 
 }

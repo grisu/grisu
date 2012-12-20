@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -35,6 +36,8 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
+
+import com.beust.jcommander.internal.Lists;
 
 public class SimpleSingleJobsGrid extends JPanel {
 
@@ -77,6 +80,8 @@ public class SimpleSingleJobsGrid extends JPanel {
 	private JPopupMenu popupMenu;
 
 	private boolean enableSingleMouseClick = false;
+	
+	private final JobNameCellRenderer renderer = new JobNameCellRenderer();
 
 	// ---------------------------------------------------------------------------------------
 	// Event stuff
@@ -125,6 +130,15 @@ public class SimpleSingleJobsGrid extends JPanel {
 	}
 
 	private void fireJobSelected(JobObject j) {
+		
+
+		if ( j.isBeingCleaned() ) {
+			myLogger.debug("Selected job is being cleaned, not opening it.");
+			return;
+		}
+		
+
+		
 		// if we have no mountPointsListeners, do nothing...
 		if ((listeners != null) && !listeners.isEmpty()) {
 
@@ -229,7 +243,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 			table.setAutoCreateRowSorter(false);
 			table.setRowSorter(null);
 
-			table.setDefaultRenderer(JobObject.class, new JobNameCellRenderer());
+			table.setDefaultRenderer(JobObject.class, renderer);
 
 			// name
 			int vColIndex = 0;
@@ -314,6 +328,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		if (selRow >= 0) {
 
 			final JobObject sel = (JobObject) jobModel.getValueAt(selRow, 0);
+			
 			fireJobSelected(sel);
 		}
 
@@ -340,24 +355,22 @@ public class SimpleSingleJobsGrid extends JPanel {
 		scrollPane.setPreferredSize(new Dimension(320, 240));
 
 		final int n = JOptionPane.showConfirmDialog(getRootPane(), scrollPane,
-				"Kill and clean job(s)",
+				"Kill / clean job(s)",
 				JOptionPane.YES_NO_OPTION);
 
 		if (n == JOptionPane.YES_OPTION) {
 
-			lockUI(true);
+//			lockUI(true);
+			renderer.disableRows(table.getSelectedRows());
 
-
+			List<JobObject> jobs = Lists.newArrayList();
 			for (final JobObject job : getSelectedJobs()) {
-				// getTable().getSelectionModel().clearSelection();
-				try {
-					job.kill(clean);
-				} catch (final Exception e) {
-
-				}
+				jobs.add(job);
 			}
+			
+			RunningJobManager.getDefault(si).killJobs(jobs, clean);
 
-			lockUI(false);
+			//lockUI(false);
 
 		}
 

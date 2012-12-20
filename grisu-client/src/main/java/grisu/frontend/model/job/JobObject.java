@@ -1633,4 +1633,15 @@ Comparable<JobObject> {
 		waitForJobToReachState(JobConstants.translateStatusBack(state), checkIntervalSeconds);
 	}
 
+	/**
+	 * This is for internal display control, dont' set it manually.
+	 * 
+	 * @param whether the job is about to be cleaned or not.
+	 */
+	public void setBeingCleaned(boolean b) {
+
+		this.isBeingCleaned = true;
+		
+	}
+
 }

@@ -49,6 +49,12 @@ public class StatusObject implements Comparable<StatusObject> {
 
 		return temp;
 	}
+	
+	public boolean isFinished() {
+		
+		return getStatus().isFinished();
+		
+	}
 
 	private final ServiceInterface si;
 	private final String handle;
