@@ -12,14 +12,13 @@ import grisu.jcommons.utils.HttpProxyPanel;
 import grisu.model.dto.GridFile;
 import grisu.settings.ClientPropertiesManager;
 import grith.gridsession.GridClient;
+import grith.gridsession.GridSessionCred;
 import grith.jgrith.cred.GridLoginParameters;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.HashSet;
@@ -27,11 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
@@ -139,6 +135,23 @@ WindowListener, ServiceInterfaceHolder {
 	
 	abstract public boolean displayAllJobsMonitoringItem();
 
+	public void exit(boolean deleteSession) {
+		
+		if ( deleteSession ) {
+			
+			try {
+				GridSessionCred cred = new GridSessionCred(this);
+				cred.destroy();
+			} catch (Exception e) {
+				myLogger.error("Could not destroy session.", e);
+			}
+			
+			
+		}
+		
+		exit();
+	}
+	
 	public void exit() {
 		try {
 

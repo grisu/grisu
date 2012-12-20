@@ -46,6 +46,7 @@ public class GrisuMenu extends JMenuBar {
 	private JMenu helpMenu;
 
 	private JMenuItem exitItem;
+	private JMenuItem exitItemDeleteSession;
 	private JMenuItem versionItem;
 
 	private JLabel warningLabel;
@@ -119,11 +120,27 @@ public class GrisuMenu extends JMenuBar {
 		}
 		return exitItem;
 	}
+	private JMenuItem getExitDeleteSessionItem() {
+		if (exitItemDeleteSession == null) {
+			exitItemDeleteSession = new JMenuItem("Exit (and delete session)");
+			exitItemDeleteSession.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent arg0) {
+
+					
+					parent.exit(true);
+					System.exit(0);
+				}
+			});
+		}
+		return exitItemDeleteSession;
+	}
 
 	public JMenu getFileMenu() {
 		if (fileMenu == null) {
 			fileMenu = new JMenu("File");
 			fileMenu.add(getExitItem());
+			fileMenu.add(getExitDeleteSessionItem());
 		}
 		return fileMenu;
 	}
