@@ -90,7 +90,7 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 
 				public void actionPerformed(ActionEvent e) {
 
-					RunningJobManager.getDefault(si).updateJobnameList(null);
+					RunningJobManager.getDefault(si).updateJobnameList(null, true);
 
 				}
 			});

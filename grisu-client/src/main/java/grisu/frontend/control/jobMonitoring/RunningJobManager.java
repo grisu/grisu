@@ -23,6 +23,7 @@ import grisu.model.status.StatusObject;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -37,14 +38,13 @@ import java.util.TreeSet;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
-import org.python.modules.synchronize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+
+import com.google.common.collect.Sets;
 
 public class RunningJobManager implements EventSubscriber {
 
@@ -58,7 +58,7 @@ public class RunningJobManager implements EventSubscriber {
 				// update single jobs
 				for (final String application : cachedSingleJobsPerApplication
 						.keySet()) {
-					updateJobnameList(application);
+					updateJobnameList(application, false);
 				}
 
 				for (final String application : cachedBatchJobsPerApplication
@@ -148,6 +148,8 @@ public class RunningJobManager implements EventSubscriber {
 
 		return cachedRegistries.get(si);
 	}
+	
+	public static final Long MIN_WAIT_TIME_SEC = 5L;
 
 	private final UserEnvironmentManager em;
 	private final FileManager fm;
@@ -168,6 +170,8 @@ public class RunningJobManager implements EventSubscriber {
 	private final Map<String, EventList<BatchJobObject>> cachedBatchJobsPerApplication = Collections
 			.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());
 
+	private final Map<String, Long> jobListAccessTime = Collections.synchronizedMap(new HashMap<String, Long>());
+	
 	private final Timer updateTimer = new Timer();;
 
 	// private final boolean checkForNewApplicationsForSingleJobs = false;
@@ -435,7 +439,7 @@ public class RunningJobManager implements EventSubscriber {
 				@Override
 				public void run() {
 
-					updateJobnameList(ev.getJob().getApplication());
+					updateJobnameList(ev.getJob().getApplication(), true);
 				}
 			}.start();
 
@@ -445,7 +449,7 @@ public class RunningJobManager implements EventSubscriber {
 				@Override
 				public void run() {
 
-					updateJobnameList(ev.getJob().getApplication());
+					updateJobnameList(ev.getJob().getApplication(), true);
 				}
 			}.start();
 		}
@@ -533,16 +537,25 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
-	public Thread updateJobnameList(String application) {
+	public Thread updateJobnameList(String app, boolean force) {
 
-		if (StringUtils.isBlank(application)) {
-			application = Constants.ALLJOBS_KEY;
+		if (StringUtils.isBlank(app)) {
+			app = Constants.ALLJOBS_KEY;
 		}
+		
+		final String application = app.toLowerCase();
 		
 		synchronized (application.intern()) {
 
-
-			application = application.toLowerCase();
+			Long lastAccess = jobListAccessTime.get(application);
+			
+			Long now = new Date().getTime();
+			
+			if ( lastAccess != null && now-lastAccess < MIN_WAIT_TIME_SEC  && ! force) {
+				return null;
+			} else {
+				jobListAccessTime.put(application, new Date().getTime());
+			}
 
 			final EventList<JobObject> list = getJobs(application);
 
@@ -599,7 +612,7 @@ public class RunningJobManager implements EventSubscriber {
 			for (final JobObject j : toRemove) {
 				cachedAllSingleJobs.remove(j.getJobname());
 			}
-
+			
 			// do the rest in the background
 			final Thread t = new Thread() {
 				@Override
@@ -611,6 +624,8 @@ public class RunningJobManager implements EventSubscriber {
 						myLogger.debug("Refreshing job: " + job.getJobname());
 						job.getStatus(true);
 					}
+					jobListAccessTime.put(application, new Date().getTime());
+
 				}
 			};
 			t.start();
@@ -644,15 +659,15 @@ public class RunningJobManager implements EventSubscriber {
 				try {
 					StatusObject so = new StatusObject(si, handle);
 					while (!so.isFinished()) {
-						updateJobnameList(null);
-						Thread.sleep(3000);
+						updateJobnameList(null, false);
+						Thread.sleep(2000);
 					}
 				} catch (Exception e) {
 					myLogger.debug(
 							"Error when waiting for multiple job cleaning to finish: "
 									+ e.getLocalizedMessage(), e);
 				} finally {
-					updateJobnameList(null);
+					updateJobnameList(null, true);
 				}
 			}
 		};
