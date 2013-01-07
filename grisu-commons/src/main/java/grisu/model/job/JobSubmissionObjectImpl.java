@@ -5,6 +5,7 @@ import grisu.control.exceptions.JobPropertiesException;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.utils.JsdlHelpers;
+import grisu.jcommons.utils.MemoryUtils;
 import grisu.model.FileManager;
 import grisu.utils.SeveralXMLHelpers;
 import grisu.utils.SimpleJsdlBuilder;
@@ -1126,6 +1127,12 @@ public class JobSubmissionObjectImpl {
 		final long oldValue = this.memory_in_bytes;
 		this.memory_in_bytes = memory;
 		pcs.firePropertyChange("memory", oldValue, this.memory_in_bytes);
+	}
+	
+	@Transient
+	public void setMemory(final String memoryString) {
+		Long m = MemoryUtils.fromStringToMegaBytes(memoryString);
+		setMemory(m*1024*1024);
 	}
 
 	/**
