@@ -180,7 +180,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.9</version>
+			<version>0.10-SNAPSHOT</version>
 
 		</dependency>
 
