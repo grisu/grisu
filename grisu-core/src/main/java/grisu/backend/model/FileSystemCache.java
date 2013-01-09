@@ -143,11 +143,11 @@ public class FileSystemCache {
 			MountPoint temp = null;
 			try {
 				String tmp = fqan;
-//				System.out.println(tmp);
 				temp = user.getResponsibleMountpointForAbsoluteFile(rootUrl);
 			} catch (final IllegalStateException e) {
-//				 e.printStackTrace();
 				 myLogger.debug("Can't get mountpoint, mountpoints not set yet.");
+			} catch (final Exception e) {
+				 myLogger.debug("Can't get mountpoint, unknown reason.");
 			}
 			if ((fqan == null) && (temp != null) && (temp.getFqan() != null)) {
 				fqan = temp.getFqan();
