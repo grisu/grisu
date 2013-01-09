@@ -724,8 +724,11 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		FileObject target = null;
 
 		try {
+//			final String parent = filename.substring(0,
+//					filename.lastIndexOf(File.separator));
+			
 			final String parent = filename.substring(0,
-					filename.lastIndexOf(File.separator));
+					filename.lastIndexOf("/"));
 
 			createFolder(parent);
 

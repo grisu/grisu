@@ -52,8 +52,15 @@ public class FileSystemCache {
 
 			myLogger.debug(user.getDn() + ": Creating FS manager for user...");
 
+//			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
+//					true, true, "/tmp");
+			
+			//Added for windows support
+			String tempDir=System.getProperty("java.io.tmpdir");
+			
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
-					true, true, "/tmp");
+					true, true, tempDir);
+			
 		} catch (final FileSystemException e) {
 			throw new RuntimeException(e);
 		}

@@ -116,7 +116,8 @@
 		<module>grisu-client</module>
 		<module>grisu-client-swing</module>
 		<!-- <module>client-side-mds</module> -->
-	</modules>
+    <module>testLocal</module>
+  </modules>
 	<reporting>
 		<plugins>
 			<plugin>
