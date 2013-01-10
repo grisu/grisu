@@ -61,6 +61,9 @@ public class FileSystemCache {
 			
 			if ( StringUtils.isBlank(tempDir) ) {
 				tempDir = "/tmp";
+				System.out.println("TEMPORARY DIR was empty");
+			} else {
+				System.out.println("TEMPORARY DIR"+tempDir);
 			}
 			
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
