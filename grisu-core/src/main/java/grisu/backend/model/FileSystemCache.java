@@ -2,16 +2,15 @@ package grisu.backend.model;
 
 import grisu.model.MountPoint;
 import grisu.settings.ServerPropertiesManager;
-import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.cred.Cred;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
@@ -59,11 +58,21 @@ public class FileSystemCache {
 			//Added for windows support
 			String tempDir=System.getProperty("java.io.tmpdir");
 			
-			if ( StringUtils.isBlank(tempDir) ) {
-				tempDir = "/tmp";
-				System.out.println("TEMPORARY DIR was empty");
+			File td = new File(tempDir);
+			
+			if ( td.exists() ) {
+				if ( ! td.isDirectory() ) {
+					myLogger.error("Temporary directory is not directory: "+tempDir);
+				}
+				if ( ! td.canWrite() ) {
+					myLogger.error("Can't write to temporary directory: "+tempDir);
+				}
 			} else {
-				System.out.println("TEMPORARY DIR"+tempDir);
+				td.mkdirs();
+				if ( td.exists() ) {
+					myLogger.error("Could not create temporary directory: "+tempDir);
+				}
+				
 			}
 			
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
