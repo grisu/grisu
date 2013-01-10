@@ -203,7 +203,10 @@ public class GT5Submitter extends JobSubmitter {
 			throw new ServerJobSubmissionException(rex);
 		}
 
-		myLogger.debug("RSL is ... " + rsl);
+		
+		String rsl_pretty = rsl.replace(") (", ")\n\t(");
+		rsl_pretty = rsl_pretty.replace(")(", ")\n\t(");
+		myLogger.debug("RSL is:\n" + rsl_pretty);
 		GSSCredential credential = null;
 
 		try {
