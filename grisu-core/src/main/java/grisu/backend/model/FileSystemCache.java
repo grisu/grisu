@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystem;
 import org.apache.commons.vfs.FileSystemException;
@@ -57,6 +58,10 @@ public class FileSystemCache {
 			
 			//Added for windows support
 			String tempDir=System.getProperty("java.io.tmpdir");
+			
+			if ( StringUtils.isBlank(tempDir) ) {
+				tempDir = "/tmp";
+			}
 			
 			fsm = VFSUtil.createNewFsManager(false, false, true, true, true,
 					true, true, tempDir);
