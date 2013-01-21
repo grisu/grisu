@@ -311,6 +311,8 @@ WindowListener, ServiceInterfaceHolder {
 			String[] command = lastPanel.split(",");
 			this.mainPanel.getGrisuNavigationPanel().setNavigationCommand(command);
 		}
+		
+		getFrame().getRootPane().setDefaultButton(null);
 
 	}
 
@@ -325,6 +327,8 @@ WindowListener, ServiceInterfaceHolder {
 		}
 		// this.si = si;
 		lp.setServiceInterface(si);
+		
+		getFrame().getRootPane().setDefaultButton(null);
 
 	}
 
