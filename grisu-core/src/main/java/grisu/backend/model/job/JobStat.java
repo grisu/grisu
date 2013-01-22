@@ -79,12 +79,12 @@ public class JobStat {
 		return jsdl;
 	}
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.LAZY)
 	public Map<Long, String> getLogMessages() {
 		return logMessages;
 	}
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.LAZY)
 	@Column(length = 1000)
 	public Map<String, String> getProperties() {
 		return properties;

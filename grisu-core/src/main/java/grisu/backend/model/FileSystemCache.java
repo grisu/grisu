@@ -69,7 +69,7 @@ public class FileSystemCache {
 				}
 			} else {
 				td.mkdirs();
-				if ( td.exists() ) {
+				if (! td.exists() ) {
 					myLogger.error("Could not create temporary directory: "+tempDir);
 				}
 				
