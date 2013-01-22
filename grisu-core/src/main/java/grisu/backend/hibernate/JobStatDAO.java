@@ -7,11 +7,13 @@ import grisu.control.exceptions.NoSuchJobException;
 import grisu.jcommons.constants.Constants;
 import grisu.settings.ServerPropertiesManager;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import javax.xml.transform.TransformerException;
 
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -448,7 +450,7 @@ public class JobStatDAO extends BaseHibernateDAO {
 	public List<JobStat> findAllJobs() {
 		// TODO Auto-generated method stub
 		String queryString;
-			queryString = "from grisu.backend.model.job.JobStat as job";
+			queryString = "from grisu.backend.model.job.JobStat as job where jobname like 'gromacs%'";
 
 
 		try {
@@ -473,6 +475,35 @@ public class JobStatDAO extends BaseHibernateDAO {
 		} finally {
 			getCurrentSession().close();
 		}
+	}
+	
+	public int findActiveJobCount(String dn){
+		getCurrentSession().beginTransaction();
+		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from jobstat where active in (binary true) and dn=?");
+		queryObject.setParameter(0, dn);
+		Integer res = ((BigInteger)queryObject.list().get(0)).intValue();
+		return res;
+	}
+	
+	public int findInactiveJobCount(String dn){
+		getCurrentSession().beginTransaction();
+		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from jobstat where active in (binary false) and dn=?");
+		queryObject.setParameter(0, dn);
+		Integer res = ((BigInteger)queryObject.list().get(0)).intValue();
+		return res;
+	}
+	
+	public int findJobCount(String dn){
+		getCurrentSession().beginTransaction();
+		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*) from jobstat where dn=?");
+		queryObject.setParameter(0, dn);
+		int res = ((BigInteger) queryObject.list().get(0)).intValue();
+		return res;
+	}
+	
+	public static void main(String[] args){
+		JobStatDAO j=new JobStatDAO();
+		j.findAllJobs();
 	}
 
 }
