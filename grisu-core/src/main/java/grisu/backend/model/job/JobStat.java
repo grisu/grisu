@@ -12,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.simpleframework.xml.Root;
 
@@ -87,6 +88,11 @@ public class JobStat {
 	@Column(length = 1000)
 	public Map<String, String> getProperties() {
 		return properties;
+	}
+	
+	@Transient
+	public String getProperty(String key) {
+		return getProperty(key);
 	}
 
 	public int getStatus() {
