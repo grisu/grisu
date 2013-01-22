@@ -450,7 +450,7 @@ public class JobStatDAO extends BaseHibernateDAO {
 	public List<JobStat> findAllJobs() {
 		// TODO Auto-generated method stub
 		String queryString;
-			queryString = "from grisu.backend.model.job.JobStat as job where jobname like 'gromacs%'";
+			queryString = "from grisu.backend.model.job.JobStat as job";
 
 
 		try {
