@@ -479,7 +479,9 @@ public class JobStatDAO extends BaseHibernateDAO {
 	
 	public int findActiveJobCount(String dn){
 		getCurrentSession().beginTransaction();
-		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from jobstat where active in (binary true) and dn=?");
+
+		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from JobStat where active in (binary true) and dn=?");
+
 		queryObject.setParameter(0, dn);
 		Integer res = ((BigInteger)queryObject.list().get(0)).intValue();
 		return res;
@@ -487,7 +489,9 @@ public class JobStatDAO extends BaseHibernateDAO {
 	
 	public int findInactiveJobCount(String dn){
 		getCurrentSession().beginTransaction();
-		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from jobstat where active in (binary false) and dn=?");
+
+		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from JobStat where active in (binary false) and dn=?");
+
 		queryObject.setParameter(0, dn);
 		Integer res = ((BigInteger)queryObject.list().get(0)).intValue();
 		return res;
@@ -495,7 +499,8 @@ public class JobStatDAO extends BaseHibernateDAO {
 	
 	public int findJobCount(String dn){
 		getCurrentSession().beginTransaction();
-		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*) from jobstat where dn=?");
+
+		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*) from JobStat where dn=?");
 		queryObject.setParameter(0, dn);
 		int res = ((BigInteger) queryObject.list().get(0)).intValue();
 		return res;
