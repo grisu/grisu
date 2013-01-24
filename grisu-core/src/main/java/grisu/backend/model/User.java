@@ -2,6 +2,7 @@ package grisu.backend.model;
 
 import grisu.backend.hibernate.BatchJobDAO;
 import grisu.backend.hibernate.JobDAO;
+import grisu.backend.hibernate.JobStatDAO;
 import grisu.backend.hibernate.UserDAO;
 import grisu.backend.model.fs.UserFileManager;
 import grisu.backend.model.job.Job;
@@ -119,6 +120,8 @@ public class User {
 		// try to look up user in the database
 		user = userdao.findUserByDN(cred.getDN());
 		Date time2 = new Date();
+		
+
 
 		myLogger.debug("Login benchmark - db lookup: "
 				+ new Long((time2.getTime() - time1.getTime())).toString()
@@ -191,6 +194,17 @@ public class User {
 	private UserJobManager jobmanager;
 	// the (default) credentials dn
 	private String dn = null;
+	
+	
+	
+
+	
+
+	
+	
+
+	
+
 
 	// the mountpoints of a user
 	private Set<MountPoint> mountPoints = new HashSet<MountPoint>();
@@ -1209,6 +1223,7 @@ public class User {
 
 
 
+
 	// public GridFile getFolderListing(final String url, int recursionLevel)
 	// throws RemoteFileSystemException, FileSystemException {
 	//
@@ -1633,8 +1648,16 @@ public class User {
 	 */
 	private void setDn(final String dn) {
 		this.dn = dn;
+		
+		String usrName = dn.substring(dn.indexOf("CN=")+3, dn.length());
+		if(usrName.contains(" ")){
+			usrName=usrName.substring(0, usrName.lastIndexOf(" "));
+		}
+		
+		JobStatDAO jsDao = new JobStatDAO();
+//		tblUser.addContainerProperty("", type, defaultValue)
 	}
-
+	
 	/**
 	 * Setter for the users' fqans.
 	 * 

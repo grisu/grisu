@@ -24,7 +24,7 @@
 
 	<appender name="file" class="org.apache.log4j.FileAppender">
 		<param name="File" value="${user.home}/.grisu.beta/grisu-core.tests.debug" />
-		<param name="Threshold" value="debug" />
+		<param name="Threshold" value="info" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%-4r [%t] %-5p %c %x - %m%n" />
 		</layout>
