@@ -2125,10 +2125,12 @@ public class UserJobManager {
 		String applicationName = jobSubmissionObject.getApplication();
 		if ( StringUtils.isBlank(applicationName)) {
 			applicationName = Constants.GENERIC_APPLICATION_NAME;
+			jobSubmissionObject.setApplication(applicationName);
 		}
 		String applicationVersion = jobSubmissionObject.getApplicationVersion();
 		if ( StringUtils.isBlank(applicationVersion)) {
 			applicationVersion= Constants.NO_VERSION_INDICATOR_STRING;
+			jobSubmissionObject.setApplicationVersion(applicationVersion);
 		}
 		String subLoc = jobSubmissionObject.getSubmissionLocation();
 		if (StringUtils.isBlank(subLoc)) {
