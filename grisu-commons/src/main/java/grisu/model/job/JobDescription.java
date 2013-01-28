@@ -11,9 +11,11 @@ import grisu.model.FileManager;
 import grisu.utils.SeveralXMLHelpers;
 import grisu.utils.SimpleJsdlBuilder;
 import grisu.utils.StringHelpers;
+import groovy.util.ConfigSlurper;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -162,6 +164,10 @@ public class JobDescription {
 
 		initWithDocument(jsdl);
 
+	}
+	
+	public JobDescription(final File jobPropertiesFile) throws Exception {
+		this(new ConfigSlurper().parse(jobPropertiesFile.toURL()).flatten());
 	}
 
 	/**
