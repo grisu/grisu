@@ -6,6 +6,7 @@ import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.jcommons.utils.MemoryUtils;
+import grisu.jcommons.utils.OutputHelpers;
 import grisu.model.FileManager;
 import grisu.utils.SeveralXMLHelpers;
 import grisu.utils.SimpleJsdlBuilder;
@@ -615,6 +616,13 @@ public class JobDescription {
 		return stringPropertyMap;
 	}
 
+	@Transient
+	public final String getJobPropertyMapAsString() {
+		
+		Map<String, String> map = getStringJobSubmissionPropertyMap();
+		return OutputHelpers.getTable(map);
+		
+	}
 	/**
 	 * Returns the currently set submission location.
 	 * 

@@ -2123,7 +2123,13 @@ public class UserJobManager {
 		// calculating the package
 		final String executable = jobSubmissionObject.extractExecutable();
 		String applicationName = jobSubmissionObject.getApplication();
+		if ( StringUtils.isBlank(applicationName)) {
+			applicationName = Constants.GENERIC_APPLICATION_NAME;
+		}
 		String applicationVersion = jobSubmissionObject.getApplicationVersion();
+		if ( StringUtils.isBlank(applicationVersion)) {
+			applicationVersion= Constants.NO_VERSION_INDICATOR_STRING;
+		}
 		String subLoc = jobSubmissionObject.getSubmissionLocation();
 		if (StringUtils.isBlank(subLoc)) {
 			subLoc = Constants.NO_SUBMISSION_LOCATION_INDICATOR_STRING;
