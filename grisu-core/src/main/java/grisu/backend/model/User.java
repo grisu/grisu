@@ -21,7 +21,7 @@ import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.Directory;
 import grisu.model.info.dto.VO;
-import grisu.model.job.JobSubmissionObjectImpl;
+import grisu.model.job.JobDescription;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.cred.AbstractCred;
@@ -215,7 +215,7 @@ public class User {
 	private Map<String, String> bookmarks = new HashMap<String, String>();
 
 	private Map<String, String> archiveLocations = null;
-	private Map<String, JobSubmissionObjectImpl> jobTemplates = new HashMap<String, JobSubmissionObjectImpl>();
+	private Map<String, JobDescription> jobTemplates = new HashMap<String, JobDescription>();
 	private UserFileManager fsm;
 
 	// private final InformationManager infoManager;
@@ -1240,7 +1240,7 @@ public class User {
 	}
 
 	@ElementCollection
-	public Map<String, JobSubmissionObjectImpl> getJobTemplates() {
+	public Map<String, JobDescription> getJobTemplates() {
 		return jobTemplates;
 	}
 
@@ -1650,7 +1650,7 @@ public class User {
 	}
 
 	public void setJobTemplates(
-			final Map<String, JobSubmissionObjectImpl> jobTemplates) {
+			final Map<String, JobDescription> jobTemplates) {
 		this.jobTemplates = jobTemplates;
 	}
 

@@ -45,10 +45,10 @@ import org.w3c.dom.Document;
  * @author Markus Binsteiner
  */
 @Entity
-public class JobSubmissionObjectImpl {
+public class JobDescription {
 
 	static final Logger myLogger = LoggerFactory
-			.getLogger(JobSubmissionObjectImpl.class);
+			.getLogger(JobDescription.class);
 
 	/**
 	 * Extracts the executable (first string) from a commandline.
@@ -74,7 +74,7 @@ public class JobSubmissionObjectImpl {
 
 	public static void main(final String[] args) throws JobPropertiesException {
 
-		final JobSubmissionObjectImpl jso = new JobSubmissionObjectImpl();
+		final JobDescription jso = new JobDescription();
 
 		jso.setJobname("testJobName");
 		jso.setApplication("testApplication");
@@ -147,7 +147,7 @@ public class JobSubmissionObjectImpl {
 	 * Default constructor.
 	 * 
 	 */
-	public JobSubmissionObjectImpl() {
+	public JobDescription() {
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class JobSubmissionObjectImpl {
 	 * @param jsdl
 	 *            a (valid) jsdl document
 	 */
-	public JobSubmissionObjectImpl(final Document jsdl) {
+	public JobDescription(final Document jsdl) {
 
 		initWithDocument(jsdl);
 
@@ -170,20 +170,20 @@ public class JobSubmissionObjectImpl {
 	 * @param jobProperties
 	 *            the properties
 	 */
-	public JobSubmissionObjectImpl(final Map<String, String> jobProperties) {
+	public JobDescription(final Map<String, String> jobProperties) {
 		initWithMap(jobProperties);
 	}
 
 	/**
 	 * Wrapper constructor that calls either
-	 * {@link JobSubmissionObjectImpl#JobSubmissionObjectImpl(Document)} or
-	 * {@link JobSubmissionObjectImpl#JobSubmissionObjectImpl(Map)}, depending
+	 * {@link JobDescription#JobSubmissionObjectImpl(Document)} or
+	 * {@link JobDescription#JobSubmissionObjectImpl(Map)}, depending
 	 * on the type of Object you provide.
 	 * 
 	 * @param o
 	 *            either a jsdl document or a Map of job properties
 	 */
-	public JobSubmissionObjectImpl(final Object o) {
+	public JobDescription(final Object o) {
 		if (o instanceof Document) {
 			initWithDocument((Document) o);
 		} else if (o instanceof Map<?, ?>) {
@@ -303,8 +303,8 @@ public class JobSubmissionObjectImpl {
 	@Override
 	public boolean equals(Object other) {
 
-		if (other instanceof JobSubmissionObjectImpl) {
-			final JobSubmissionObjectImpl otherJob = (JobSubmissionObjectImpl) other;
+		if (other instanceof JobDescription) {
+			final JobDescription otherJob = (JobDescription) other;
 			return getJobname().equals(otherJob.getJobname());
 		} else {
 			return false;
@@ -912,7 +912,7 @@ public class JobSubmissionObjectImpl {
 		final String oldValue = this.application;
 		this.application = app;
 		pcs.firePropertyChange("application", oldValue,
-				JobSubmissionObjectImpl.this.application);
+				JobDescription.this.application);
 	}
 
 	/**
@@ -1093,7 +1093,7 @@ public class JobSubmissionObjectImpl {
 	 * Sets all input files in one go.
 	 * 
 	 * Keys are the source urls/paths, values are the target paths. You can also
-	 * use the {@link JobSubmissionObjectImpl#addInputFileUrl(String)} or
+	 * use the {@link JobDescription#addInputFileUrl(String)} or
 	 * {@link #addInputFileUrl(String, String)} methods.
 	 * 
 	 * @param inputfiles

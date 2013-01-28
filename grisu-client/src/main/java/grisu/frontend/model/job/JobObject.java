@@ -24,7 +24,7 @@ import grisu.model.UserEnvironmentManager;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.GridFile;
 import grisu.model.job.JobCreatedProperty;
-import grisu.model.job.JobSubmissionObjectImpl;
+import grisu.model.job.JobDescription;
 import grisu.model.status.StatusObject;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
@@ -56,20 +56,20 @@ import com.google.common.collect.Maps;
 /**
  * A model class that hides all the complexity of creating and submitting a job.
  *
- * It extends the {@link JobSubmissionObjectImpl} class which is used to create
+ * It extends the {@link JobDescription} class which is used to create
  * the job using the basic {@link JobSubmissionProperty}s. It adds methods to
  * create the job on the backend, submit it and also to monitor/control it.
  *
  * @author Markus Binsteiner
  */
-public class JobObject extends JobSubmissionObjectImpl implements
+public class JobObject extends JobDescription implements
 Comparable<JobObject> {
 
 	static final Logger myLogger = LoggerFactory.getLogger(JobObject.class
 			.getName());
 
 	public static JobObject createJobObject(ServiceInterface si,
-			JobSubmissionObjectImpl jobsubmissionObject)
+			JobDescription jobsubmissionObject)
 					throws JobPropertiesException {
 
 		final JobObject job = new JobObject(si,

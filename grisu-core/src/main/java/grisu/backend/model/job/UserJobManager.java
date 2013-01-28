@@ -26,7 +26,7 @@ import grisu.model.info.dto.Directory;
 import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.Queue;
 import grisu.model.info.dto.Version;
-import grisu.model.job.JobSubmissionObjectImpl;
+import grisu.model.job.JobDescription;
 import grisu.model.status.StatusObject;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.ServiceInterfaceUtils;
@@ -2102,7 +2102,7 @@ public class UserJobManager {
 			oldJobDir = null;
 		}
 
-		final JobSubmissionObjectImpl jobSubmissionObject = new JobSubmissionObjectImpl(
+		final JobDescription jobSubmissionObject = new JobDescription(
 				jsdl);
 
 		// at least we need a commandline, otherwise there is no point...

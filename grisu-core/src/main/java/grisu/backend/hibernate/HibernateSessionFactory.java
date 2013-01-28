@@ -5,7 +5,7 @@ import grisu.backend.model.job.BatchJob;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobStat;
 import grisu.model.MountPoint;
-import grisu.model.job.JobSubmissionObjectImpl;
+import grisu.model.job.JobDescription;
 import grisu.settings.Environment;
 import grisu.settings.ServerPropertiesManager;
 
@@ -256,7 +256,7 @@ public final class HibernateSessionFactory {
 			configuration.addAnnotatedClass(JobStat.class);
 			configuration.addAnnotatedClass(BatchJob.class);
 			configuration.addAnnotatedClass(MountPoint.class);
-			configuration.addAnnotatedClass(JobSubmissionObjectImpl.class);
+			configuration.addAnnotatedClass(JobDescription.class);
 			// configuration.addAnnotatedClass(DtoActionStatus.class);
 
 			sessionFactory = configuration.buildSessionFactory();
