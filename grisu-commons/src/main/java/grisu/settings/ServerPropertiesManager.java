@@ -97,6 +97,8 @@ public final class ServerPropertiesManager {
 
 	private static final long DEFAULT_PROXY_RETRIEVAL_WAIT_TIME = 300;
 
+	private static final int DEFAULT_DATABASE_REFRESH = 30000;
+
 	// public static boolean getCheckConnectionToMountPoint() {
 	//
 	// boolean check = false;
@@ -319,6 +321,27 @@ public final class ServerPropertiesManager {
 		return concurrentThreads;
 	}
 
+	/**
+	 * Returns the number of milliseconds that should be elapsed before the next refresh commences
+	 * 
+	 * @return the number of milliseconds
+	 */
+	public static int getDatabaseRefresh() {
+		int databaseRefresh = -1;
+		try {
+			databaseRefresh = Integer.parseInt(getServerConfiguration()
+					.getString("ConcurrentThreadSettings.databaseRefresh"));
+
+		} catch (final Exception e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			return DEFAULT_DATABASE_REFRESH;
+		}
+		if (databaseRefresh == -1) {
+			return DEFAULT_DATABASE_REFRESH;
+		}
+		return databaseRefresh;
+	}	
+	
 	/**
 	 * The url to connect to the database.
 	 * 
