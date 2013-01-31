@@ -169,8 +169,8 @@ public class UserDAO extends BaseHibernateDAO {
 	
 	
 	public List<String> findAllUserDNs(){
-		//final String queryString = "select dn from users";
-		final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
+		final String queryString = "select dn from users";
+		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
 		try {
 			getCurrentSession().beginTransaction();
 
