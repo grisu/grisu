@@ -2,10 +2,12 @@ package grisu.backend.hibernate;
 
 import grisu.backend.model.User;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.QueryException;
+import org.hibernate.SQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,12 +65,15 @@ public class UserDAO extends BaseHibernateDAO {
 	public final List<User> findAllUsers() {
 		// myLogger.debug("Loading user with dn: " + dn + " from db.");
 		final String queryString = "from grisu.backend.model.User as user";
+//		final String queryString = "select * from users";
 
 		try {
 			getCurrentSession().beginTransaction();
 
 			final Query queryObject = getCurrentSession().createQuery(
 					queryString);
+			
+//			final Query queryObject = getCurrentSession().createSQLQuery(queryString);
 
 			try {
 				final List<User> users = (queryObject.list());
@@ -161,5 +166,44 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().close();
 		}
 	}
+	
+	
+	public List<String> findAllUserDNs(){
+		final String queryString = "select dn from users";
 
+		try {
+			getCurrentSession().beginTransaction();
+
+			final Query queryObject = getCurrentSession().createSQLQuery(queryString);
+
+			try {
+				final List<String> userDNs = (queryObject.list());
+				getCurrentSession().getTransaction().commit();
+				return userDNs;
+
+			} catch (final QueryException qe) {
+				// means user not in db yet.
+				myLogger.debug(qe.getLocalizedMessage());
+				return null;
+			}
+
+		} catch (final RuntimeException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+	}
+
+	public static void main(String[] args){
+		UserDAO u = new UserDAO();
+		System.out.println("start:"+System.currentTimeMillis());
+		long start = System.currentTimeMillis();
+		List<String> userdns = u.findAllUserDNs();
+		//u.findAllUsers();
+		System.out.println("end:" + (System.currentTimeMillis()-start));
+		
+		
+	}
+	
 }
