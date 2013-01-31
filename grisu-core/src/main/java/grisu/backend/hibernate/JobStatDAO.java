@@ -52,12 +52,12 @@ public class JobStatDAO extends BaseHibernateDAO {
 		} else {
 			queryString = "from grisu.backend.model.job.JobStat as job where job.dn = ? and job.batchJob = false";
 		}
-
 		try {
 			getCurrentSession().beginTransaction();
 
 			final Query queryObject = getCurrentSession().createQuery(
 					queryString);
+			
 			queryObject.setParameter(0, dn);
 
 			final List<JobStat> jobs = (queryObject.list());
@@ -503,6 +503,16 @@ public class JobStatDAO extends BaseHibernateDAO {
 		queryObject.setParameter(0, dn);
 		int res = ((BigInteger) queryObject.list().get(0)).intValue();
 		return res;
+	}
+	
+	public boolean isJobPresent(String dn)
+	{
+		getCurrentSession().beginTransaction();
+		SQLQuery queryObject = getCurrentSession().createSQLQuery("select 1 from JobStat where dn = ? limit 1");
+		queryObject.setParameter(0, dn);
+		if(queryObject.list().size()>0)
+			return true;
+		return false;
 	}
 	
 	public int findPendingJobCount(String dn){
