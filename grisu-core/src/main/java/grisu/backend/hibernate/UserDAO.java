@@ -194,6 +194,33 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().close();
 		}
 	}
+	
+	public List<String> findUserDNsFromJobStat(){
+		final String queryString = "select distinct dn from JobStat";
+		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
+		try {
+			getCurrentSession().beginTransaction();
+
+			final Query queryObject = getCurrentSession().createSQLQuery(queryString);
+
+			try {
+				final List<String> userDNs = (queryObject.list());
+				getCurrentSession().getTransaction().commit();
+				return userDNs;
+
+			} catch (final QueryException qe) {
+				// means user not in db yet.
+				myLogger.debug(qe.getLocalizedMessage());
+				return null;
+			}
+
+		} catch (final RuntimeException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+	}	
 
 	public static void main(String[] args){
 		UserDAO u = new UserDAO();
