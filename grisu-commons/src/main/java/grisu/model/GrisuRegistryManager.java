@@ -31,6 +31,14 @@ public class GrisuRegistryManager {
 	public static Cred getCredential(ServiceInterface si) {
 		return getDefault(si).getCredential();
 	}
+	
+	public static ServiceInterface getDefaultServiceInterface() {
+		if ( cachedRegistries == null || cachedRegistries.size() == 0 ) {
+			return null;
+		} else {
+			return cachedRegistries.keySet().iterator().next();
+		}
+	}
 
 	public static GrisuRegistry getDefault(
 			final ServiceInterface serviceInterface) {

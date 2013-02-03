@@ -144,7 +144,7 @@ public class GT5Submitter extends JobSubmitter {
 			} else {
 				myLogger.error("something else is wrong. error code is "
 						+ ex.getErrorCode());
-				myLogger.error(ex.getLocalizedMessage(), ex);
+				myLogger.error(ex.getLocalizedMessage());
 				return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED,
 						0, 0);
 			}
