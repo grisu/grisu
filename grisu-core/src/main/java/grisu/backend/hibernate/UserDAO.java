@@ -222,6 +222,45 @@ public class UserDAO extends BaseHibernateDAO {
 		}
 	}	
 
+	public List<String> findDNSortedOnId(){
+		//final String queryString = "select dn, max(id) from JobStat group by dn order by id";
+		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
+		final String queryString = "select distinct dn from JobStat order by id";
+		try {
+			getCurrentSession().beginTransaction();
+
+			final Query queryObject = getCurrentSession().createSQLQuery(queryString);
+
+			try {
+				final List<String> userDNs = (queryObject.list());
+				getCurrentSession().getTransaction().commit();
+				return userDNs;
+
+			} catch (final QueryException qe) {
+				// means user not in db yet.
+				myLogger.debug(qe.getLocalizedMessage());
+				return null;
+			}
+
+		} catch (final RuntimeException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+	}	
+
+	
+	public Integer findDNCountfromJobStat(){
+		//final String queryString = "select dn, max(id) from JobStat group by dn order by id";
+		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
+		getCurrentSession().beginTransaction();
+
+		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(distinct dn) from JobStat");
+		int res = ((BigInteger) queryObject.list().get(0)).intValue();
+		return res;
+	}	
+
 	public static void main(String[] args){
 		UserDAO u = new UserDAO();
 		System.out.println("start:"+System.currentTimeMillis());
