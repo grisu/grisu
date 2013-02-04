@@ -478,58 +478,96 @@ public class JobStatDAO extends BaseHibernateDAO {
 	}
 	
 	public int findActiveJobCount(String dn){
+		Integer res;
+		try{
 		getCurrentSession().beginTransaction();
 
 		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from JobStat where active in (binary true) and dn=?");
 		queryObject.setParameter(0, dn);
-		Integer res = ((BigInteger)queryObject.list().get(0)).intValue();
+		res = ((BigInteger)queryObject.list().get(0)).intValue();
+		}
+		finally{
+			getCurrentSession().close();
+		}
 		return res;
 	}
 	
 	public int findInactiveJobCount(String dn){
+		Integer res;
+		try{
 		getCurrentSession().beginTransaction();
 
 		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from JobStat where active in (binary false) and dn=?");
 		
 		queryObject.setParameter(0, dn);
-		Integer res = ((BigInteger)queryObject.list().get(0)).intValue();
+		res = ((BigInteger)queryObject.list().get(0)).intValue();
+		}
+		finally{
+			getCurrentSession().close();
+		}
 		return res;
 	}
 	
 	public int findJobCount(String dn){
+		int res;
+		try{
 		getCurrentSession().beginTransaction();
 
 		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*) from JobStat where dn=?");
 		queryObject.setParameter(0, dn);
-		int res = ((BigInteger) queryObject.list().get(0)).intValue();
+		res = ((BigInteger) queryObject.list().get(0)).intValue();
+		}
+		finally{
+			getCurrentSession().close();
+		}
 		return res;
 	}
 	
 	public boolean isJobPresent(String dn)
 	{
+		int size;
+		try{
 		getCurrentSession().beginTransaction();
 		SQLQuery queryObject = getCurrentSession().createSQLQuery("select 1 from JobStat where dn = ? limit 1");
 		queryObject.setParameter(0, dn);
-		if(queryObject.list().size()>0)
+		size= queryObject.list().size();
+		}
+		finally{
+			getCurrentSession().close();
+		}
+		if(size>0)
 			return true;
 		return false;
 	}
 	
 	public int findPendingJobCount(String dn){
+		Integer res;
+		try{
 		getCurrentSession().beginTransaction();
 
 		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*)  from JobStat where status<=0  and active in (binary true) and dn=?");
 		queryObject.setParameter(0, dn);
-		Integer res = ((BigInteger)queryObject.list().get(0)).intValue();
+		res = ((BigInteger)queryObject.list().get(0)).intValue();
+		}
+		finally{
+			getCurrentSession().close();
+		}
 		return res;
 	}	
 	
 	public int findRunningJobCount(String dn){
+		int res;
+		try{
+			
 		getCurrentSession().beginTransaction();
 
 		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(*) from JobStat where status=1 and active in (binary true) and dn=?");
 		queryObject.setParameter(0, dn);
-		int res = ((BigInteger) queryObject.list().get(0)).intValue();
+		res = ((BigInteger) queryObject.list().get(0)).intValue();
+		}
+		finally{
+			getCurrentSession().close();
+		}
 		return res;
 	}
 	
