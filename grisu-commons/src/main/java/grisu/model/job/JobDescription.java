@@ -211,6 +211,15 @@ public class JobDescription {
 		envVariables.put(key, value);
 		pcs.firePropertyChange("environmentVariables", null, this.envVariables);
 	}
+	
+	/** 
+	 * Adds a local input file to this job.
+	 * 
+	 * @param file the file to add
+	 */
+	public void addInputFile(File file) {
+		addInputFileUrl(file.getAbsolutePath());
+	}
 
 	/**
 	 * Adds an input file to this job.
