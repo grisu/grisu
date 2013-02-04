@@ -7,6 +7,7 @@ import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.jcommons.utils.MemoryUtils;
 import grisu.jcommons.utils.OutputHelpers;
+import grisu.jcommons.utils.WalltimeUtils;
 import grisu.model.FileManager;
 import grisu.utils.SeveralXMLHelpers;
 import grisu.utils.SimpleJsdlBuilder;
@@ -1312,6 +1313,20 @@ public class JobDescription {
 	public void setWalltime(final Integer walltimeInSeconds) {
 		setWalltimeInSeconds(walltimeInSeconds);
 	}
+	
+	/**
+	 * Set walltime as a short string.
+	 * 
+	 * Examples: 2d10h30m, 20d, 10h
+	 * 
+	 * @param walltime the walltime string
+	 * @throws Exception if the string can't be parsed
+	 */
+	@Transient
+	public void setWalltime(final String walltime) throws Exception {
+		int wt = WalltimeUtils.fromShortStringToSeconds(walltime);
+		setWalltimeInSeconds(wt);
+	}	
 
 	/**
 	 * Sets the walltime for the job (in seconds).
