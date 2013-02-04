@@ -254,10 +254,16 @@ public class UserDAO extends BaseHibernateDAO {
 	public Integer findDNCountfromJobStat(){
 		//final String queryString = "select dn, max(id) from JobStat group by dn order by id";
 		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
+		int res;
+		try{
 		getCurrentSession().beginTransaction();
 
 		SQLQuery queryObject =  getCurrentSession().createSQLQuery("select count(distinct dn) from JobStat");
-		int res = ((BigInteger) queryObject.list().get(0)).intValue();
+		res = ((BigInteger) queryObject.list().get(0)).intValue();
+		}
+		finally{
+			getCurrentSession().close();
+		}
 		return res;
 	}	
 
@@ -268,8 +274,6 @@ public class UserDAO extends BaseHibernateDAO {
 		List<String> userdns = u.findAllUserDNs();
 		//u.findAllUsers();
 		System.out.println("end:" + (System.currentTimeMillis()-start));
-		
-		
 	}
 	
 }
