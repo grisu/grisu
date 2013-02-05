@@ -20,7 +20,6 @@ import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
-import grisu.model.UserEnvironmentManager;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.GridFile;
 import grisu.model.job.JobCreatedProperty;
@@ -43,10 +42,10 @@ import java.util.concurrent.ExecutionException;
 
 import javax.persistence.Transient;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
-import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -76,6 +75,7 @@ Comparable<JobObject> {
 				jobsubmissionObject.getJobDescriptionDocument());
 
 		job.setInputFiles(jobsubmissionObject.getInputFiles());
+		job.setEnvironmentVariables(jobsubmissionObject.getEnvironmentVariables());
 
 		return job;
 	}
@@ -498,6 +498,7 @@ Comparable<JobObject> {
 			Thread t = new Thread() {
 				@Override
 				public void run() {
+					
 					getAllJobProperties(true);
 					addJobLogMessage("Submission site is: "
 							+ getJobProperty(Constants.SUBMISSION_SITE_KEY,
