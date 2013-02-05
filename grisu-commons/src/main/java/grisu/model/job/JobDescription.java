@@ -166,7 +166,7 @@ public class JobDescription {
 		initWithDocument(jsdl);
 
 	}
-	
+
 	public JobDescription(final File jobPropertiesFile) throws Exception {
 		this(new ConfigSlurper().parse(jobPropertiesFile.toURL()).flatten());
 	}
@@ -185,8 +185,8 @@ public class JobDescription {
 	/**
 	 * Wrapper constructor that calls either
 	 * {@link JobDescription#JobSubmissionObjectImpl(Document)} or
-	 * {@link JobDescription#JobSubmissionObjectImpl(Map)}, depending
-	 * on the type of Object you provide.
+	 * {@link JobDescription#JobSubmissionObjectImpl(Map)}, depending on the
+	 * type of Object you provide.
 	 * 
 	 * @param o
 	 *            either a jsdl document or a Map of job properties
@@ -212,11 +212,12 @@ public class JobDescription {
 		envVariables.put(key, value);
 		pcs.firePropertyChange("environmentVariables", null, this.envVariables);
 	}
-	
-	/** 
+
+	/**
 	 * Adds a local input file to this job.
 	 * 
-	 * @param file the file to add
+	 * @param file
+	 *            the file to add
 	 */
 	public void addInputFile(File file) {
 		addInputFileUrl(file.getAbsolutePath());
@@ -634,11 +635,12 @@ public class JobDescription {
 
 	@Transient
 	public final String getJobPropertyMapAsString() {
-		
+
 		Map<String, String> map = getStringJobSubmissionPropertyMap();
 		return OutputHelpers.getTable(map);
-		
+
 	}
+
 	/**
 	 * Returns the currently set submission location.
 	 * 
@@ -695,14 +697,14 @@ public class JobDescription {
 		if (jobTypeString != null) {
 			if (jobTypeString.toLowerCase().equals(
 					JobSubmissionProperty
-					.getPrettyName(JobSubmissionProperty.FORCE_SINGLE
-							.toString()))) {
+							.getPrettyName(JobSubmissionProperty.FORCE_SINGLE
+									.toString()))) {
 				force_single = true;
 				force_mpi = false;
 			} else if (jobTypeString.toLowerCase().equals(
 					JobSubmissionProperty
-					.getPrettyName(JobSubmissionProperty.FORCE_MPI
-							.toString()))) {
+							.getPrettyName(JobSubmissionProperty.FORCE_MPI
+									.toString()))) {
 				force_single = false;
 				force_mpi = true;
 			} else {
@@ -772,6 +774,7 @@ public class JobDescription {
 		} catch (final Exception e) {
 			this.hostcount = 1;
 		}
+
 		try {
 			this.force_single = checkForBoolean(jobProperties
 					.get(JobSubmissionProperty.FORCE_SINGLE.toString()));
@@ -784,17 +787,24 @@ public class JobDescription {
 		} catch (final Exception e) {
 			this.force_mpi = false;
 		}
+
 		try {
 			this.memory_in_bytes = Integer.parseInt(jobProperties
 					.get(JobSubmissionProperty.MEMORY_IN_B.toString()));
 		} catch (final NumberFormatException e) {
 			this.memory_in_bytes = 0;
 		}
+		String temp_walltime = jobProperties.get(JobSubmissionProperty.WALLTIME_IN_MINUTES.toString());
 		try {
-			this.walltime_in_seconds = Integer.parseInt(jobProperties
-					.get(JobSubmissionProperty.WALLTIME_IN_MINUTES.toString())) * 60;
+			this.walltime_in_seconds = Integer.parseInt(temp_walltime) * 60;
 		} catch (final NumberFormatException e) {
-			this.walltime_in_seconds = 0;
+			try {
+			// try walltimeUtils
+				this.walltime_in_seconds = WalltimeUtils.fromShortStringToSeconds(temp_walltime);
+			} catch (Exception e2) {
+				this.walltime_in_seconds = 0;				
+			}
+
 		}
 
 		String temp = jobProperties.get(JobSubmissionProperty.INPUT_FILE_URLS
@@ -837,6 +847,7 @@ public class JobDescription {
 
 		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG
 				.toString());
+		
 	}
 
 	/**
@@ -1152,11 +1163,11 @@ public class JobDescription {
 		this.memory_in_bytes = memory;
 		pcs.firePropertyChange("memory", oldValue, this.memory_in_bytes);
 	}
-	
+
 	@Transient
 	public void setMemory(final String memoryString) {
 		Long m = MemoryUtils.fromStringToMegaBytes(memoryString);
-		setMemory(m*1024*1024);
+		setMemory(m * 1024 * 1024);
 	}
 
 	/**
@@ -1298,7 +1309,8 @@ public class JobDescription {
 	public void setVirtualMemory(final Long memory) {
 		final long oldValue = this.virtual_memory_in_bytes;
 		this.virtual_memory_in_bytes = memory;
-		pcs.firePropertyChange("virtualMemory", oldValue, this.virtual_memory_in_bytes);
+		pcs.firePropertyChange("virtualMemory", oldValue,
+				this.virtual_memory_in_bytes);
 	}
 
 	/**
@@ -1313,20 +1325,22 @@ public class JobDescription {
 	public void setWalltime(final Integer walltimeInSeconds) {
 		setWalltimeInSeconds(walltimeInSeconds);
 	}
-	
+
 	/**
 	 * Set walltime as a short string.
 	 * 
 	 * Examples: 2d10h30m, 20d, 10h
 	 * 
-	 * @param walltime the walltime string
-	 * @throws Exception if the string can't be parsed
+	 * @param walltime
+	 *            the walltime string
+	 * @throws Exception
+	 *             if the string can't be parsed
 	 */
 	@Transient
 	public void setWalltime(final String walltime) throws Exception {
 		int wt = WalltimeUtils.fromShortStringToSeconds(walltime);
 		setWalltimeInSeconds(wt);
-	}	
+	}
 
 	/**
 	 * Sets the walltime for the job (in seconds).
