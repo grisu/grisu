@@ -1,9 +1,9 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 public interface SingleJobSelectionListener {
 
-	public void jobSelected(JobObject job);
+	public void jobSelected(GrisuJob job);
 
 }

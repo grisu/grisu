@@ -500,7 +500,7 @@ public class MpiBlastExampleJobCreationPanel extends JPanel {
 	// throw new BatchJobException(e);
 	// }
 	//
-	// final JobObject tempJob = new JobObject(si);
+	// final GrisuJob tempJob = new GrisuJob(si);
 	// tempJob.setJobname(uem.calculateUniqueJobname(jobname + "_"
 	// + currentBatchJob.getJobname()));
 	// tempJob.addInputFileUrl(tempFile.toURI().toString());

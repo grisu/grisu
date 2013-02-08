@@ -3,7 +3,7 @@ package grisu.frontend.control.fileTransfers;
 import grisu.control.events.FileDeletedEvent;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.model.FileManager;
 import grisu.model.dto.GridFile;
 
@@ -33,7 +33,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 	private final FileManager fm;
 	private final Set<String> sourceUrls;
 	private final String targetDirUrl;
-	private final JobObject job;
+	private final GrisuJob job;
 	private final boolean overwrite;
 
 	private FileTransactionException possibleException;
@@ -63,7 +63,7 @@ public class FileTransaction implements Comparable<FileTransaction> {
 		this(fm, GridFile.extractUrls(sources), target.getUrl(), overwrite);
 	}
 
-	public FileTransaction(FileManager fm, Set<String> sources, JobObject job,
+	public FileTransaction(FileManager fm, Set<String> sources, GrisuJob job,
 			String targetPath) {
 
 		this.fm = fm;

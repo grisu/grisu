@@ -105,10 +105,10 @@ Comparable<BatchJobObject>, Listener {
 
 	private String submissionFqan;
 
-	private final EventList<JobObject> jobs = new BasicEventList<JobObject>();
+	private final EventList<GrisuJob> jobs = new BasicEventList<GrisuJob>();
 
-	private final List<JobObject> newlyAddedJobs = Collections
-			.synchronizedList(new LinkedList<JobObject>());
+	private final List<GrisuJob> newlyAddedJobs = Collections
+			.synchronizedList(new LinkedList<GrisuJob>());
 
 	private final Map<String, String> inputFiles = new HashMap<String, String>();
 
@@ -332,7 +332,7 @@ Comparable<BatchJobObject>, Listener {
 	 * @param job
 	 *            the new job object
 	 */
-	public void addJob(JobObject job) throws IllegalArgumentException {
+	public void addJob(GrisuJob job) throws IllegalArgumentException {
 
 		if (StringUtils.isBlank(job.getJobname())
 				|| Constants.NO_JOBNAME_INDICATOR_STRING.equals(job
@@ -523,7 +523,7 @@ Comparable<BatchJobObject>, Listener {
 				"Checking and possibly downloading output files for batchjob: "
 						+ batchJobname + ". This might take a while..."));
 
-		for (final JobObject job : getJobs()) {
+		for (final GrisuJob job : getJobs()) {
 
 			if (onlyDownloadWhenFinished && !job.isFinished(false)) {
 				continue;
@@ -886,7 +886,7 @@ Comparable<BatchJobObject>, Listener {
 	 * 
 	 * @return all jobs
 	 */
-	public EventList<JobObject> getJobs() {
+	public EventList<GrisuJob> getJobs() {
 
 		return this.jobs;
 	}
@@ -896,7 +896,7 @@ Comparable<BatchJobObject>, Listener {
 
 		final List<String> files = new LinkedList<String>();
 
-		for (final JobObject job : getJobs()) {
+		for (final GrisuJob job : getJobs()) {
 
 			if (onlyWhenSubJobFinished && !job.isFinished(false)) {
 				continue;
@@ -947,7 +947,7 @@ Comparable<BatchJobObject>, Listener {
 		return maxWalltimeInSecondsAcrossJobs;
 	}
 
-	private List<JobObject> getNewlyAddedJobs() {
+	private List<GrisuJob> getNewlyAddedJobs() {
 
 		return newlyAddedJobs;
 
@@ -1516,10 +1516,10 @@ Comparable<BatchJobObject>, Listener {
 				.newFixedThreadPool(
 						getConcurrentJobCreationThreads(), tf);
 
-		final Map<JobObject, Exception> failedSubmissions = Collections
-				.synchronizedMap(new HashMap<JobObject, Exception>());
+		final Map<GrisuJob, Exception> failedSubmissions = Collections
+				.synchronizedMap(new HashMap<GrisuJob, Exception>());
 
-		for (final JobObject job : ImmutableList.copyOf(getNewlyAddedJobs())) {
+		for (final GrisuJob job : ImmutableList.copyOf(getNewlyAddedJobs())) {
 
 			if (Thread.interrupted()) {
 				executor.shutdownNow();
@@ -1680,7 +1680,7 @@ Comparable<BatchJobObject>, Listener {
 					throw new RuntimeException(e);
 				}
 
-				for (final JobObject job : getNewlyAddedJobs()) {
+				for (final GrisuJob job : getNewlyAddedJobs()) {
 					job.updateJobDirectory();
 				}
 
@@ -1735,7 +1735,7 @@ Comparable<BatchJobObject>, Listener {
 	// if (restarter == null) {
 	// restarter = new FailedJobRestarter() {
 	//
-	// public void restartJob(JobObject job)
+	// public void restartJob(GrisuJob job)
 	// throws JobSubmissionException {
 	// try {
 	// job.restartJob();
@@ -1750,9 +1750,9 @@ Comparable<BatchJobObject>, Listener {
 	// for (DtoJob dtoJob : getMultiPartJob(true).getFailedJobs().getAllJobs())
 	// {
 	//
-	// JobObject failedJob = null;
+	// GrisuJob failedJob = null;
 	// try {
-	// failedJob = new JobObject(serviceInterface, dtoJob.jobname());
+	// failedJob = new GrisuJob(serviceInterface, dtoJob.jobname());
 	// EventBus.publish(this.batchJobname, new BatchJobEvent(this,
 	// "Restarting job " + failedJob.getJobname())
 	// + "...");
@@ -1943,7 +1943,7 @@ Comparable<BatchJobObject>, Listener {
 		waitThread.start();
 
 		// to update all the jobdirectories
-		for (final JobObject job : getJobs()) {
+		for (final GrisuJob job : getJobs()) {
 			job.getAllJobProperties(true);
 		}
 
@@ -2037,7 +2037,7 @@ Comparable<BatchJobObject>, Listener {
 			throw new RuntimeException(e);
 		}
 
-		for (final JobObject job : this.getJobs()) {
+		for (final GrisuJob job : this.getJobs()) {
 			job.setApplication(defaultApplication);
 		}
 	}
@@ -2066,7 +2066,7 @@ Comparable<BatchJobObject>, Listener {
 			throw new RuntimeException(e);
 		}
 
-		for (final JobObject job : this.getJobs()) {
+		for (final GrisuJob job : this.getJobs()) {
 			job.setCpus(defaultNoCpus);
 		}
 
@@ -2087,7 +2087,7 @@ Comparable<BatchJobObject>, Listener {
 			throw new RuntimeException(e);
 		}
 
-		for (final JobObject job : this.getJobs()) {
+		for (final GrisuJob job : this.getJobs()) {
 			job.setApplicationVersion(defaultVersion);
 		}
 
@@ -2111,7 +2111,7 @@ Comparable<BatchJobObject>, Listener {
 			throw new RuntimeException(e);
 		}
 
-		for (final JobObject job : this.getJobs()) {
+		for (final GrisuJob job : this.getJobs()) {
 			job.setWalltimeInSeconds(walltimeInSeconds);
 		}
 	}
@@ -2432,8 +2432,8 @@ Comparable<BatchJobObject>, Listener {
 				messagex));
 		addJobLogMessage(messagex);
 
-		// for (final JobObject job : getJobs()) {
-		for (final JobObject job : getNewlyAddedJobs()) {
+		// for (final GrisuJob job : getJobs()) {
+		for (final GrisuJob job : getNewlyAddedJobs()) {
 
 			checkInterruptedStatus(executor, tasks);
 

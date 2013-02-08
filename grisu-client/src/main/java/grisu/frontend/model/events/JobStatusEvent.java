@@ -1,22 +1,22 @@
 package grisu.frontend.model.events;
 
 import grisu.control.JobConstants;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 public class JobStatusEvent {
 
 	private final int oldStatus;
 	private final int newStatus;
 
-	private final JobObject job;
+	private final GrisuJob job;
 
-	public JobStatusEvent(JobObject job, int oldStatus, int newStatus) {
+	public JobStatusEvent(GrisuJob job, int oldStatus, int newStatus) {
 		this.job = job;
 		this.oldStatus = oldStatus;
 		this.newStatus = newStatus;
 	}
 
-	public JobObject getJob() {
+	public GrisuJob getJob() {
 		return this.job;
 	}
 

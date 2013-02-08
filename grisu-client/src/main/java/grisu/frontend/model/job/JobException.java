@@ -8,20 +8,20 @@ package grisu.frontend.model.job;
  */
 public class JobException extends RuntimeException {
 
-	private final JobObject jo;
+	private final GrisuJob jo;
 
-	public JobException(final JobObject jo, final String message) {
+	public JobException(final GrisuJob jo, final String message) {
 		super(message);
 		this.jo = jo;
 	}
 
-	public JobException(final JobObject jobObject, final String string,
+	public JobException(final GrisuJob grisuJob, final String string,
 			final Exception e) {
 		super(string, e);
-		this.jo = jobObject;
+		this.jo = grisuJob;
 	}
 
-	public final JobObject getJobObject() {
+	public final GrisuJob getJobObject() {
 		return this.jo;
 	}
 

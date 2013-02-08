@@ -2,7 +2,7 @@ package examples;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.model.job.JobDescription;
 
 import java.io.File;
@@ -20,7 +20,7 @@ public class SimpleJobPropertiesFile {
 		
 		JobDescription jd = new JobDescription(jp);
 		
-		JobObject j = JobObject.createJobObject(si, jd);
+		GrisuJob j = GrisuJob.createJobObject(si, jd);
 		
 		j.createJob("/nz/nesi");
 

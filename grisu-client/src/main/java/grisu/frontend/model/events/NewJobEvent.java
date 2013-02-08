@@ -1,16 +1,16 @@
 package grisu.frontend.model.events;
 
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 public class NewJobEvent {
 
-	private final JobObject job;
+	private final GrisuJob job;
 
-	public NewJobEvent(JobObject job) {
+	public NewJobEvent(GrisuJob job) {
 		this.job = job;
 	}
 
-	public JobObject getJob() {
+	public GrisuJob getJob() {
 		return this.job;
 	}
 

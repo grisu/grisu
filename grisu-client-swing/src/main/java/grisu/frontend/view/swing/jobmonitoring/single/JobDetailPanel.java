@@ -1,6 +1,6 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 import javax.swing.JPanel;
 
@@ -8,6 +8,6 @@ public interface JobDetailPanel {
 
 	public JPanel getPanel();
 
-	public void setJob(JobObject job);
+	public void setJob(GrisuJob job);
 
 }

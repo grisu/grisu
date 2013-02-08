@@ -2,7 +2,7 @@ package grisu.frontend.view.swing.jobmonitoring.single.appSpecific;
 
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanel;
 import grisu.jcommons.constants.Constants;
 import grisu.model.FileManager;
@@ -39,7 +39,7 @@ JobDetailPanel, PropertyChangeListener {
 			.getLogger(AppSpecificViewerPanel.class.getName());
 
 	public static AppSpecificViewerPanel create(ServiceInterface si,
-			JobObject job) {
+			GrisuJob job) {
 
 		String appName = null;
 		try {
@@ -73,7 +73,7 @@ JobDetailPanel, PropertyChangeListener {
 
 	private Timer timer;
 
-	private JobObject job = null;
+	private GrisuJob job = null;
 	protected final ServiceInterface si;
 	protected final FileManager fm;
 
@@ -101,7 +101,7 @@ JobDetailPanel, PropertyChangeListener {
 
 	}
 
-	public JobObject getJob() {
+	public GrisuJob getJob() {
 		return this.job;
 	}
 
@@ -126,14 +126,14 @@ JobDetailPanel, PropertyChangeListener {
 	abstract public void jobStarted();
 
 	/**
-	 * This method gets called if some property of the JobObject changes.
+	 * This method gets called if some property of the GrisuJob changes.
 	 * 
 	 * This method does get all the job events, except for the events that
 	 * concern the jobs status.
 	 * 
 	 * 
 	 * @param evt
-	 *            the property event that is fired from the JobObject
+	 *            the property event that is fired from the GrisuJob
 	 */
 	abstract public void jobUpdated(PropertyChangeEvent evt);
 
@@ -172,7 +172,7 @@ JobDetailPanel, PropertyChangeListener {
 
 	}
 
-	public void setJob(JobObject job) {
+	public void setJob(GrisuJob job) {
 		if (this.job != null) {
 			this.job.removePropertyChangeListener(this);
 		}

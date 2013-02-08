@@ -4,6 +4,6 @@ import grisu.control.exceptions.JobSubmissionException;
 
 public interface FailedJobRestarter {
 
-	public void restartJob(JobObject job) throws JobSubmissionException;
+	public void restartJob(GrisuJob job) throws JobSubmissionException;
 
 }

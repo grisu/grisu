@@ -1,6 +1,6 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.jcommons.constants.Constants;
 
 import java.util.Comparator;
@@ -10,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 
-public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
+public class SingleJobTableFormat implements AdvancedTableFormat<GrisuJob> {
 
 	private static final SingleJobObjectComparator comp = new SingleJobObjectComparator();
 
@@ -18,7 +18,7 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 
 		switch (column) {
 		case 0:
-			return JobObject.class;
+			return GrisuJob.class;
 		case 1:
 			return String.class;
 		case 2:
@@ -85,7 +85,7 @@ public class SingleJobTableFormat implements AdvancedTableFormat<JobObject> {
 
 	}
 
-	public Object getColumnValue(JobObject baseObject, int column) {
+	public Object getColumnValue(GrisuJob baseObject, int column) {
 
 		switch (column) {
 		case 0:

@@ -2,7 +2,7 @@ package grisu.frontend.view.swing.jobmonitoring.batch;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.model.job.BatchJobObject;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.frontend.view.swing.jobmonitoring.single.SimpleSingleJobsGrid;
 
 import java.awt.event.ActionEvent;
@@ -51,7 +51,7 @@ public class BatchJobSubJobsGrid extends SimpleSingleJobsGrid implements
 
 					final Set<String> selectedJobs = new HashSet<String>();
 
-					for (final JobObject job : getSelectedJobs()) {
+					for (final GrisuJob job : getSelectedJobs()) {
 						selectedJobs.add(job.getJobname());
 					}
 

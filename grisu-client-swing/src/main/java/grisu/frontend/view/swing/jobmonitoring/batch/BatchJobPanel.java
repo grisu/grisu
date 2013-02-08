@@ -2,7 +2,7 @@ package grisu.frontend.view.swing.jobmonitoring.batch;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.model.job.BatchJobObject;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanel;
 import grisu.frontend.view.swing.jobmonitoring.single.SingleJobSelectionListener;
 
@@ -85,7 +85,7 @@ public class BatchJobPanel extends JPanel implements SingleJobSelectionListener 
 		return splitPane;
 	}
 
-	public void jobSelected(JobObject job) {
+	public void jobSelected(GrisuJob job) {
 
 		getJobDetailPanel().setJob(job);
 

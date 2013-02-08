@@ -10,7 +10,7 @@ import grisu.frontend.model.events.JobCleanedEvent;
 import grisu.frontend.model.events.NewBatchJobEvent;
 import grisu.frontend.model.events.NewJobEvent;
 import grisu.frontend.model.job.BatchJobObject;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.jcommons.constants.Constants;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
@@ -93,13 +93,13 @@ public class RunningJobManager implements EventSubscriber {
 			.getLogger(RunningJobManager.class.getName());
 
 	public static void updateJobList(ServiceInterface si,
-			EventList<JobObject> jobObjectList, DtoJobs newJobs) {
+			EventList<GrisuJob> jobObjectList, DtoJobs newJobs) {
 
-		final Set<JobObject> toRemove = new HashSet<JobObject>();
+		final Set<GrisuJob> toRemove = new HashSet<GrisuJob>();
 		final Set<DtoJob> newJobsCopy = new HashSet<DtoJob>(
 				newJobs.getAllJobs());
 
-		for (final JobObject jo : jobObjectList) {
+		for (final GrisuJob jo : jobObjectList) {
 			boolean inList = false;
 
 			for (final DtoJob job : newJobs.getAllJobs()) {
@@ -119,7 +119,7 @@ public class RunningJobManager implements EventSubscriber {
 
 		for (final DtoJob newJob : newJobsCopy) {
 			try {
-				final JobObject jo = new JobObject(si, newJob);
+				final GrisuJob jo = new GrisuJob(si, newJob);
 				jobObjectList.add(jo);
 			} catch (final NoSuchJobException e) {
 				myLogger.error(e.getLocalizedMessage(), e);
@@ -158,11 +158,11 @@ public class RunningJobManager implements EventSubscriber {
 	private boolean watchingAllSingleJobs = false;
 	private boolean watchingAllBatchJobs = false;
 
-	private final Map<String, JobObject> cachedAllSingleJobs = Collections
-			.synchronizedMap(new HashMap<String, JobObject>());
+	private final Map<String, GrisuJob> cachedAllSingleJobs = Collections
+			.synchronizedMap(new HashMap<String, GrisuJob>());
 
-	private final Map<String, EventList<JobObject>> cachedSingleJobsPerApplication = Collections
-			.synchronizedMap(new HashMap<String, EventList<JobObject>>());
+	private final Map<String, EventList<GrisuJob>> cachedSingleJobsPerApplication = Collections
+			.synchronizedMap(new HashMap<String, EventList<GrisuJob>>());
 
 	private final Map<String, BatchJobObject> cachedAllBatchJobs = Collections
 			.synchronizedMap(new HashMap<String, BatchJobObject>());
@@ -209,13 +209,13 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
-	public synchronized void createJob(JobObject job)
+	public synchronized void createJob(GrisuJob job)
 			throws JobPropertiesException {
 
 		createJob(job, null);
 	}
 
-	public synchronized void createJob(JobObject job, String fqan)
+	public synchronized void createJob(GrisuJob job, String fqan)
 			throws JobPropertiesException {
 
 		if (StringUtils.isBlank(fqan)) {
@@ -241,12 +241,12 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
-	private synchronized Collection<JobObject> getAllCurrentlyWatchedSingleJobs() {
+	private synchronized Collection<GrisuJob> getAllCurrentlyWatchedSingleJobs() {
 
 		return cachedAllSingleJobs.values();
 	}
 
-	public EventList<JobObject> getAllJobs() {
+	public EventList<GrisuJob> getAllJobs() {
 		return getJobs(Constants.ALLJOBS_KEY);
 	}
 
@@ -331,7 +331,7 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
-	public JobObject getJob(String jobname, boolean refreshOnBackend)
+	public GrisuJob getJob(String jobname, boolean refreshOnBackend)
 			throws NoSuchJobException {
 
 		synchronized (jobname) {
@@ -339,7 +339,7 @@ public class RunningJobManager implements EventSubscriber {
 			if (cachedAllSingleJobs.get(jobname) == null) {
 
 				try {
-					final JobObject temp = new JobObject(si, jobname,
+					final GrisuJob temp = new GrisuJob(si, jobname,
 							refreshOnBackend);
 					cachedAllSingleJobs.put(jobname, temp);
 				} catch (final RuntimeException e) {
@@ -354,7 +354,7 @@ public class RunningJobManager implements EventSubscriber {
 		return cachedAllSingleJobs.get(jobname);
 	}
 
-	public synchronized EventList<JobObject> getJobs(String application) {
+	public synchronized EventList<GrisuJob> getJobs(String application) {
 
 		if (StringUtils.isBlank(application)) {
 			application = Constants.ALLJOBS_KEY;
@@ -366,7 +366,7 @@ public class RunningJobManager implements EventSubscriber {
 
 		if (cachedSingleJobsPerApplication.get(application) == null) {
 
-			final EventList<JobObject> temp = new BasicEventList<JobObject>();
+			final EventList<GrisuJob> temp = new BasicEventList<GrisuJob>();
 
 			// we can load this in the background, since it's an eventlist,
 			// can't we?
@@ -379,7 +379,7 @@ public class RunningJobManager implements EventSubscriber {
 							false)) {
 
 						try {
-							final JobObject j = getJob(jobname, false);
+							final GrisuJob j = getJob(jobname, false);
 							temp.getReadWriteLock().writeLock().lock();
 							if (j != null) {
 								if (!temp.contains(j)) {
@@ -557,13 +557,13 @@ public class RunningJobManager implements EventSubscriber {
 				jobListAccessTime.put(application, new Date().getTime());
 			}
 
-			final EventList<JobObject> list = getJobs(application);
+			final EventList<GrisuJob> list = getJobs(application);
 
 			final SortedSet<String> jobnames = em.getCurrentJobnames(
 					application, true);
 			final SortedSet<String> jobnamesNew = new TreeSet<String>(jobnames);
 
-			for (final JobObject j : list) {
+			for (final GrisuJob j : list) {
 				final String jobname = j.getJobname();
 				jobnamesNew.remove(jobname);
 			}
@@ -572,7 +572,7 @@ public class RunningJobManager implements EventSubscriber {
 					if (StringUtils.isBlank(name)) {
 						continue;
 					}
-					final JobObject temp = getJob(name, false);
+					final GrisuJob temp = getJob(name, false);
 					if (temp == null) {
 						continue;
 					}
@@ -594,8 +594,8 @@ public class RunningJobManager implements EventSubscriber {
 				}
 			}
 
-			final Set<JobObject> toRemove = new HashSet<JobObject>();
-			for (final JobObject j : list) {
+			final Set<GrisuJob> toRemove = new HashSet<GrisuJob>();
+			for (final GrisuJob j : list) {
 				final String jobname = j.getJobname();
 				if (!jobnames.contains(jobname)) {
 					toRemove.add(j);
@@ -609,7 +609,7 @@ public class RunningJobManager implements EventSubscriber {
 			}
 
 			list.removeAll(toRemove);
-			for (final JobObject j : toRemove) {
+			for (final GrisuJob j : toRemove) {
 				cachedAllSingleJobs.remove(j.getJobname());
 			}
 			
@@ -618,9 +618,9 @@ public class RunningJobManager implements EventSubscriber {
 				@Override
 				public void run() {
 
-					final Set<JobObject> tempList = new HashSet<JobObject>(
+					final Set<GrisuJob> tempList = new HashSet<GrisuJob>(
 							getAllCurrentlyWatchedSingleJobs());
-					for (final JobObject job : tempList) {
+					for (final GrisuJob job : tempList) {
 						myLogger.debug("Refreshing job: " + job.getJobname());
 						job.getStatus(true);
 					}
@@ -633,20 +633,20 @@ public class RunningJobManager implements EventSubscriber {
 		}
 	}
 
-	public void killJobs(List<JobObject> jobs, boolean clean) {
+	public void killJobs(List<GrisuJob> jobs, boolean clean) {
 
 		if (jobs == null || jobs.size() == 0) {
 			return;
 		}
 
 		if (clean) {
-			for (JobObject job : jobs) {
+			for (GrisuJob job : jobs) {
 				job.setBeingCleaned(true);
 			}
 		}
 
 		Set<String> list = Sets.newTreeSet();
-		for (JobObject job : jobs) {
+		for (GrisuJob job : jobs) {
 			list.add(job.getJobname());
 		}
 

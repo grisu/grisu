@@ -4,7 +4,7 @@ import grisu.control.ServiceInterface;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.model.events.JobCleanedEvent;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -98,7 +98,7 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 		return updateButton;
 	}
 
-	public void jobSelected(final JobObject bj) {
+	public void jobSelected(final GrisuJob bj) {
 
 		new Thread() {
 			@Override
@@ -137,7 +137,7 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 	public void onEvent(JobCleanedEvent arg0) {
 
 		// System.out.println("Removing panel...");
-		final JobObject bj = arg0.getJob();
+		final GrisuJob bj = arg0.getJob();
 		final JobDetailPanel temp = panels.get(bj.getJobname());
 		if (panels.get(bj.getJobname()) != null) {
 			getJideTabbedPane().setSelectedIndex(0);

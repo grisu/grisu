@@ -11,7 +11,7 @@ public class DoubleWalltimeJobRestarter implements FailedJobRestarter {
 	static final Logger myLogger = LoggerFactory.getLogger(BatchJobObject.class
 			.getName());
 
-	public void restartJob(JobObject failedJob) throws JobSubmissionException {
+	public void restartJob(GrisuJob failedJob) throws JobSubmissionException {
 
 		final int walltime = failedJob.getWalltimeInSeconds();
 

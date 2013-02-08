@@ -6,7 +6,7 @@ public class JobDetailPanelSmall extends JPanel {
 	// private JLabel lblStatus;
 	// private JTextField textField_1;
 	//
-	// private JobObject job;
+	// private GrisuJob job;
 	// private JideTabbedPane jideTabbedPane;
 	// private JScrollPane scrollPane;
 	// private JTextArea propertiesTextArea;
@@ -43,7 +43,7 @@ public class JobDetailPanelSmall extends JPanel {
 	//
 	// }
 	//
-	// public JobDetailPanelSmall(ServiceInterface si, JobObject job) {
+	// public JobDetailPanelSmall(ServiceInterface si, GrisuJob job) {
 	// this(si);
 	// setJob(job);
 	// }
@@ -128,7 +128,7 @@ public class JobDetailPanelSmall extends JPanel {
 	// }
 	// }
 	//
-	// public void setJob(JobObject job) {
+	// public void setJob(GrisuJob job) {
 	//
 	// this.job = job;
 	//

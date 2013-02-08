@@ -2,7 +2,7 @@ package examples;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 public class SimpleJob {
 
@@ -13,7 +13,7 @@ public class SimpleJob {
 
 		ServiceInterface si = LoginManager.loginCommandline("nesi");
 		
-		JobObject j = new JobObject(si);
+		GrisuJob j = new GrisuJob(si);
 		
 		j.setCommandline("R --version");
 		j.createJob("/nz/nesi");

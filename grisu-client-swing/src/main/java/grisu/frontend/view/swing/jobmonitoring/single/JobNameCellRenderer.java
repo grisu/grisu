@@ -1,6 +1,6 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -26,7 +26,7 @@ public class JobNameCellRenderer extends DefaultTableCellRenderer implements
 			setBackground(table.getBackground());
 		}
 
-		final JobObject j = (JobObject) value;
+		final GrisuJob j = (GrisuJob) value;
 
 		if (j == null) {
 			final Component c = super.getTableCellRendererComponent(table,

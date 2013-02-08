@@ -3,7 +3,7 @@ package grisu.frontend.view.swing.jobmonitoring.single;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
 import grisu.frontend.model.job.JobException;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 import grisu.frontend.view.swing.jobmonitoring.single.appSpecific.AppSpecificViewerPanel;
 import grisu.frontend.view.swing.utils.BackgroundActionProgressDialogSmall;
@@ -106,7 +106,7 @@ PropertyChangeListener, JobDetailPanel {
 					"refresh.png"));
 
 	private JTextField txtNa;
-	private JobObject job;
+	private GrisuJob job;
 	private JideTabbedPane jideTabbedPane;
 	private JScrollPane scrollPane;
 	private JScrollPane scrollPane_1;
@@ -182,7 +182,7 @@ PropertyChangeListener, JobDetailPanel {
 
 	}
 
-	public JobDetailPanelDefault(ServiceInterface si, JobObject job) {
+	public JobDetailPanelDefault(ServiceInterface si, GrisuJob job) {
 		this(si);
 		setJob(job);
 	}
@@ -573,7 +573,7 @@ PropertyChangeListener, JobDetailPanel {
 		}
 	}
 
-	public void setJob(JobObject job) {
+	public void setJob(GrisuJob job) {
 
 		this.job = job;
 

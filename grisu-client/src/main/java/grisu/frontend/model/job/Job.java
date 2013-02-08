@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.w3c.dom.Document;
 
-public class Job extends JobObject {
+public class Job extends GrisuJob {
 
 	public Job(ServiceInterface si) {
 		super(si);

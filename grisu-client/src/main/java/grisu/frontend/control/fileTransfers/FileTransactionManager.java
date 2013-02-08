@@ -2,7 +2,7 @@ package grisu.frontend.control.fileTransfers;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.model.events.FileTransactionFailedEvent;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
@@ -107,7 +107,7 @@ public class FileTransactionManager implements PropertyChangeListener {
 	}
 
 	public FileTransaction addJobInputFileTransfer(Set<String> sources,
-			JobObject job, String targetPath) {
+			GrisuJob job, String targetPath) {
 		final FileTransaction ft = new FileTransaction(fm, sources, job,
 				targetPath);
 		return addFileTransfer(ft);

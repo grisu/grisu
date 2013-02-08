@@ -1,7 +1,7 @@
 package grisu.frontend.view.swing;
 
 import grisu.frontend.model.job.BatchJobObject;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -27,7 +27,7 @@ public class JobSubmissionLogPanel extends JPanel implements
 
 	private BatchJobObject batchJob;
 
-	private JobObject singleJob;
+	private GrisuJob singleJob;
 
 	/**
 	 * Create the panel.
@@ -112,7 +112,7 @@ public class JobSubmissionLogPanel extends JPanel implements
 		return scrollPane;
 	}
 
-	public JobObject getSingleJob() {
+	public GrisuJob getSingleJob() {
 		return singleJob;
 	}
 
@@ -151,7 +151,7 @@ public class JobSubmissionLogPanel extends JPanel implements
 
 	}
 
-	public void setSingleJob(JobObject singleJob) {
+	public void setSingleJob(GrisuJob singleJob) {
 		if (this.batchJob != null) {
 			this.batchJob.removePropertyChangeListener(this);
 			this.batchJob = null;

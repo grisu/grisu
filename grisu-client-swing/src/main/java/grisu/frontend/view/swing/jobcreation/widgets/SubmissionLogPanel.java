@@ -1,7 +1,7 @@
 package grisu.frontend.view.swing.jobcreation.widgets;
 
 import grisu.frontend.model.job.BatchJobObject;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.jcommons.constants.Constants;
 
 import java.awt.BorderLayout;
@@ -30,7 +30,7 @@ PropertyChangeListener {
 	private JScrollPane scrollPane;
 	private JTextArea textArea;
 
-	private JobObject currentJob = null;
+	private GrisuJob currentJob = null;
 	private BatchJobObject currentBatchJobObject = null;
 
 	/**
@@ -142,7 +142,7 @@ PropertyChangeListener {
 		currentBatchJobObject.addPropertyChangeListener(this);
 	}
 
-	public void setJobObject(JobObject jobObject) {
+	public void setJobObject(GrisuJob grisuJob) {
 
 		if (currentJob != null) {
 			currentJob.removePropertyChangeListener(this);
@@ -153,7 +153,7 @@ PropertyChangeListener {
 		}
 		currentBatchJobObject = null;
 
-		currentJob = jobObject;
+		currentJob = grisuJob;
 		setText("");
 		currentJob.addPropertyChangeListener(this);
 

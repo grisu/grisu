@@ -2,7 +2,7 @@ package grisu.frontend.view.swing.jobmonitoring.single;
 
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -70,12 +70,12 @@ public class SimpleSingleJobsGrid extends JPanel {
 	private JXTable table;
 
 	private final ServiceInterface si;
-	private final EventList<JobObject> jobList;
+	private final EventList<GrisuJob> jobList;
 
-	private final EventTableModel<JobObject> jobModel;
+	private final EventTableModel<GrisuJob> jobModel;
 
-	private final SortedList<JobObject> sortedJobList;
-	private final EventList<JobObject> observedJobs;
+	private final SortedList<GrisuJob> sortedJobList;
+	private final EventList<GrisuJob> observedJobs;
 
 	private JPopupMenu popupMenu;
 
@@ -93,18 +93,18 @@ public class SimpleSingleJobsGrid extends JPanel {
 	 * @wbp.parser.constructor
 	 */
 	public SimpleSingleJobsGrid(ServiceInterface si,
-			EventList<JobObject> jobList) {
+			EventList<GrisuJob> jobList) {
 		this.si = si;
 		this.jobList = jobList;
 
-		final ObservableElementList.Connector<JobObject> joConnector = GlazedLists
-				.beanConnector(JobObject.class);
-		observedJobs = new ObservableElementList<JobObject>(jobList,
+		final ObservableElementList.Connector<GrisuJob> joConnector = GlazedLists
+				.beanConnector(GrisuJob.class);
+		observedJobs = new ObservableElementList<GrisuJob>(jobList,
 				joConnector);
 
-		sortedJobList = new SortedList<JobObject>(observedJobs,
+		sortedJobList = new SortedList<GrisuJob>(observedJobs,
 				new SingleJobObjectComparator());
-		jobModel = new EventTableModel<JobObject>(sortedJobList,
+		jobModel = new EventTableModel<GrisuJob>(sortedJobList,
 				new SingleJobTableFormat());
 
 		setLayout(new BorderLayout(0, 0));
@@ -129,7 +129,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		listeners.addElement(l);
 	}
 
-	private void fireJobSelected(JobObject j) {
+	private void fireJobSelected(GrisuJob j) {
 		
 
 		if ( j.isBeingCleaned() ) {
@@ -219,13 +219,13 @@ public class SimpleSingleJobsGrid extends JPanel {
 		return scrollPane;
 	}
 
-	public Set<JobObject> getSelectedJobs() {
+	public Set<GrisuJob> getSelectedJobs() {
 
-		final Set<JobObject> selected = new HashSet<JobObject>();
+		final Set<GrisuJob> selected = new HashSet<GrisuJob>();
 		for (final int r : table.getSelectedRows()) {
 
 			if (r >= 0) {
-				final JobObject sel = (JobObject) jobModel.getValueAt(r, 0);
+				final GrisuJob sel = (GrisuJob) jobModel.getValueAt(r, 0);
 				selected.add(sel);
 			}
 		}
@@ -243,7 +243,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 			table.setAutoCreateRowSorter(false);
 			table.setRowSorter(null);
 
-			table.setDefaultRenderer(JobObject.class, renderer);
+			table.setDefaultRenderer(GrisuJob.class, renderer);
 
 			// name
 			int vColIndex = 0;
@@ -327,7 +327,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		final int selRow = table.getSelectedRow();
 		if (selRow >= 0) {
 
-			final JobObject sel = (JobObject) jobModel.getValueAt(selRow, 0);
+			final GrisuJob sel = (GrisuJob) jobModel.getValueAt(selRow, 0);
 			
 			fireJobSelected(sel);
 		}
@@ -343,7 +343,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		}
 		message.append("the following job(s)?\n\n");
 
-		for (final JobObject job : getSelectedJobs()) {
+		for (final GrisuJob job : getSelectedJobs()) {
 			message.append(job.getJobname() + "\n");
 		}
 
@@ -363,8 +363,8 @@ public class SimpleSingleJobsGrid extends JPanel {
 //			lockUI(true);
 			renderer.disableRows(table.getSelectedRows());
 
-			List<JobObject> jobs = Lists.newArrayList();
-			for (final JobObject job : getSelectedJobs()) {
+			List<GrisuJob> jobs = Lists.newArrayList();
+			for (final GrisuJob job : getSelectedJobs()) {
 				jobs.add(job);
 			}
 			

@@ -3,7 +3,7 @@ package grisu.frontend.view.swing.jobcreation;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
 import grisu.frontend.model.events.JobStatusEvent;
-import grisu.frontend.model.job.JobObject;
+import grisu.frontend.model.job.GrisuJob;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
 import grisu.model.status.ActionStatusEvent;
@@ -176,7 +176,7 @@ public class ExampleJobCreationPanel extends JPanel implements
 						EventBus.unsubscribe(currentJobname, this);
 					}
 
-					final JobObject job = new JobObject(si);
+					final GrisuJob job = new GrisuJob(si);
 					job.setTimestampJobname("helloworldJob");
 
 					currentJobname = job.getJobname();

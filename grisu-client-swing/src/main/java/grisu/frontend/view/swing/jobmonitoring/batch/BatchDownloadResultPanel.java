@@ -334,7 +334,7 @@ public class BatchDownloadResultPanel extends JPanel {
 	// final List<GlazedFile> files;
 	// try {
 	//
-	// for (final JobObject job : batchJob.getJobs()) {
+	// for (final GrisuJob job : batchJob.getJobs()) {
 	//
 	// if (!job.isFinished(false)) {
 	// continue;
