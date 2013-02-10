@@ -1,6 +1,7 @@
 package grisu.backend.hibernate;
 
 import grisu.backend.model.User;
+import grisu.jcommons.constants.Constants;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -127,6 +128,51 @@ public class UserDAO extends BaseHibernateDAO {
 				// means user not in db yet.
 				myLogger.debug("User " + dn + " not found in database...");
 				return null;
+			}
+
+		} catch (final RuntimeException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+			try {
+				getCurrentSession().getTransaction().rollback();
+			} catch (final Exception er) {
+				myLogger.debug("Rollback failed.", er);
+			}
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+
+	}
+	
+	/**
+	 * Looks up the database whether a user with the specified dn is already
+	 * persisted.
+	 * 
+	 * @param dn
+	 *            the dn of the user
+	 * @return the {@link User} or null if not found
+	 */
+	public final boolean isUserAllowsRemoteAccess(final String dn) {
+		// myLogger.debug("Loading user with dn: " + dn + " from db.");
+		final String queryString = "from grisu.backend.model.User as user where user.dn = ? and lower(user.userProperties['"
+					+ Constants.ALLOW_REMOTE_SUPPORT
+					+ "']) = true";
+
+		try {
+			getCurrentSession().beginTransaction();
+
+			final Query queryObject = getCurrentSession().createQuery(
+					queryString);
+			queryObject.setParameter(0, dn);
+			try {
+				final User user = (User) queryObject.uniqueResult();
+				getCurrentSession().getTransaction().commit();
+				return true;
+
+			} catch (final QueryException qe) {
+				// means user not in db yet.
+				myLogger.debug("User (allowing remote access) " + dn + " not found in database...");
+				return false;
 			}
 
 		} catch (final RuntimeException e) {

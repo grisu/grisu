@@ -24,7 +24,6 @@ import grisu.model.info.dto.VO;
 import grisu.model.job.JobDescription;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
-import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.cred.Cred;
 import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.vomsProxy.VomsException;
@@ -66,7 +65,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-//import grith.jgrith.credential.Credential;
+
 
 /**
  * The User class holds all the relevant data a job could want to know from the
@@ -99,6 +98,10 @@ public class User {
 	private static final String NOT_ACCESSIBLE = "Not accessible";
 
 	private static final String ACCESSIBLE = "Accessible";
+
+	public static boolean isRemoteAccessAllowed(String dn) {
+		return userdao.isUserAllowsRemoteAccess(dn);
+	}
 
 	public static User createUser(Cred cred,
 			AbstractServiceInterface si) {
@@ -1685,6 +1688,8 @@ public class User {
 			}
 			addArchiveLocation(alias, url);
 			return;
+		} else if (Constants.ALLOW_REMOTE_SUPPORT.equals(key)) {
+			myLogger.debug("Setting remote support for user: "+getDn());
 		}
 
 		addProperty(key, value);
