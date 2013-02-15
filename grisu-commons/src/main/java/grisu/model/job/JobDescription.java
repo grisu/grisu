@@ -7,6 +7,7 @@ import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.utils.JsdlHelpers;
 import grisu.jcommons.utils.MemoryUtils;
 import grisu.jcommons.utils.OutputHelpers;
+import grisu.jcommons.utils.PackageFileHelper;
 import grisu.jcommons.utils.WalltimeUtils;
 import grisu.model.FileManager;
 import grisu.utils.SeveralXMLHelpers;
@@ -16,7 +17,10 @@ import groovy.util.ConfigSlurper;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,6 +42,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+
+import com.Ostermiller.util.LineEnds;
 
 /**
  * A class that helps creating a job.
@@ -211,6 +217,20 @@ public class JobDescription {
 
 		envVariables.put(key, value);
 		pcs.firePropertyChange("environmentVariables", null, this.envVariables);
+	}
+	
+	/**
+	 * Creates a temporary text file from the text content and adds it to the job.
+	 * 
+	 * @param content the content
+	 * @param filename the filename
+	 */
+	public void addInputTextFile(String content, String filename) {
+		
+		File tempFile = PackageFileHelper.createTempFile(content, filename);
+		
+		addInputFile(tempFile);
+		
 	}
 
 	/**
@@ -772,7 +792,7 @@ public class JobDescription {
 			this.hostcount = Integer.parseInt(jobProperties
 					.get(JobSubmissionProperty.HOSTCOUNT.toString()));
 		} catch (final Exception e) {
-			this.hostcount = 1;
+			this.hostcount = 0;
 		}
 
 		try {
@@ -1067,13 +1087,13 @@ public class JobDescription {
 	public void setForce_mpi(final Boolean force_mpi) {
 		final boolean oldValue = this.force_mpi;
 		final boolean oldValue1 = this.force_single;
-		final int oldHostCount = this.hostcount;
+//		final int oldHostCount = this.hostcount;
 		this.force_mpi = force_mpi;
 		this.force_single = !force_mpi;
-		this.hostcount = -1;
+//		this.hostcount = -1;
 		pcs.firePropertyChange("force_mpi", oldValue, this.force_mpi);
 		pcs.firePropertyChange("force_single", oldValue1, this.force_single);
-		pcs.firePropertyChange("hostCount", oldHostCount, this.hostcount);
+//		pcs.firePropertyChange("hostCount", oldHostCount, this.hostcount);
 	}
 
 	/**

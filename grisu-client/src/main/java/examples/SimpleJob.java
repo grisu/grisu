@@ -14,8 +14,9 @@ public class SimpleJob {
 		ServiceInterface si = LoginManager.loginCommandline("nesi");
 		
 		GrisuJob j = new GrisuJob(si);
+
 		
-		j.setCommandline("R --version");
+		j.setCommandline("env");
 		j.createJob("/nz/nesi");
 
 		j.submitJob();
