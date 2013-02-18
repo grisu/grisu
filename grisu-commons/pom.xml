@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5.18-SNAPSHOT</version>
+		<version>0.5.18</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>grisu-commons</artifactId>
@@ -187,7 +187,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>2.5-SNAPSHOT</version>
+			<version>2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
