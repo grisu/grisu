@@ -196,6 +196,8 @@ public class LoginManager {
 		
 		initEnvironment();
 
+		System.out.println("PATH: "+System.getenv("X509_USER_PROXY"));
+		
 		Cred c = null;
 		try {
 			c = new ProxyCred();

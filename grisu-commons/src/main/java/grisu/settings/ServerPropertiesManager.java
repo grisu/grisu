@@ -951,4 +951,23 @@ public final class ServerPropertiesManager {
 
 	}
 
+	public static boolean allowRemoteAccessForEveryone() {
+
+		boolean allow = false;
+
+		try {
+			try {
+				allow = getServerConfiguration().getBoolean("General.allowRemoteAccessAsDefault");
+			} catch (final NoSuchElementException e) {
+				// doesn't matter
+				myLogger.debug(e.getLocalizedMessage());
+			}
+
+		} catch (final ConfigurationException e) {
+			// myLogger.error("Problem with config file: " + e.getMessage());
+			myLogger.debug(e.getLocalizedMessage());
+		}
+		return allow;
+	}
+
 }

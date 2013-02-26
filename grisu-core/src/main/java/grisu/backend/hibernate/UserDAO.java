@@ -156,7 +156,7 @@ public class UserDAO extends BaseHibernateDAO {
 		// myLogger.debug("Loading user with dn: " + dn + " from db.");
 		final String queryString = "from grisu.backend.model.User as user where user.dn = ? and lower(user.userProperties['"
 					+ Constants.ALLOW_REMOTE_SUPPORT
-					+ "']) = true";
+					+ "']) = "+Boolean.TRUE.toString();
 
 		try {
 			getCurrentSession().beginTransaction();

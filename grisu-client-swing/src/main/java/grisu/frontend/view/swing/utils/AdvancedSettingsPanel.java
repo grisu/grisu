@@ -17,14 +17,23 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.apache.commons.lang.StringUtils;
+import org.globus.myproxy.MyProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import javax.swing.JCheckBox;
+import javax.swing.SwingConstants;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 public class AdvancedSettingsPanel extends JPanel implements
 ServiceInterfacePanel {
+	
+	public static final Logger myLogger = LoggerFactory.getLogger(AdvancedSettingsPanel.class);
 
 	private JLabel lblClearFilesystemCache;
 	private JButton btnClear;
@@ -33,6 +42,8 @@ ServiceInterfacePanel {
 	private JLabel lblNewLabel;
 	private JTextField textField;
 	private JButton btnApply;
+	private JCheckBox chckbxAllowRemoteSupport;
+	private JLabel lblNewLabel_1;
 
 	/**
 	 * Create the panel.
@@ -47,14 +58,21 @@ ServiceInterfacePanel {
 				ColumnSpec.decode("default:grow"),
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
-		add(getLblClearFilesystemCache(), "2, 2, 3, 1");
-		add(getBtnClear(), "8, 2, fill, default");
-		add(getLblNewLabel(), "2, 4, left, default");
-		add(getTextField(), "4, 4, 3, 1, fill, default");
-		add(getBtnApply(), "8, 4, fill, default");
+				FormFactory.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,}));
+		add(getLblNewLabel_1(), "2, 2, 5, 1");
+		add(getChckbxAllowRemoteSupport(), "8, 2, center, default");
+		add(getLblClearFilesystemCache(), "2, 4, 3, 1");
+		add(getBtnClear(), "8, 4, fill, default");
+		add(getLblNewLabel(), "2, 6, left, default");
+		add(getTextField(), "4, 6, 3, 1, fill, default");
+		add(getBtnApply(), "8, 6, fill, default");
 	}
 
 	private JButton getBtnApply() {
@@ -79,6 +97,7 @@ ServiceInterfacePanel {
 				public void actionPerformed(ActionEvent e) {
 
 					if (si == null) {
+						myLogger.debug("No serviceinterface set, not clearing cache.");
 						return;
 					}
 
@@ -145,12 +164,52 @@ ServiceInterfacePanel {
 
 	public void setServiceInterface(ServiceInterface si) {
 
-		this.si = si;
 		if (si != null) {
 			getBtnClear().setEnabled(true);
+			getChckbxAllowRemoteSupport().setEnabled(true);
+			
+			String enableRemoteAccess = si.getUserProperty(Constants.ALLOW_REMOTE_SUPPORT);
+			
+			if ( Boolean.TRUE.toString().equals(enableRemoteAccess) ) {
+				getChckbxAllowRemoteSupport().setSelected(true);
+			}
+			
 		} else {
 			getBtnClear().setEnabled(false);
+			getChckbxAllowRemoteSupport().setEnabled(false);
 		}
+		this.si = si;
 
+	}
+	private JCheckBox getChckbxAllowRemoteSupport() {
+		if (chckbxAllowRemoteSupport == null) {
+			chckbxAllowRemoteSupport = new JCheckBox("");
+			chckbxAllowRemoteSupport.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					
+					if (si == null) {
+						myLogger.debug("No serviceinterface set, not enabling/disabling remote access.");
+						return;
+					}
+					
+					if (ItemEvent.SELECTED == e.getStateChange()) {
+						si.setUserProperty(Constants.ALLOW_REMOTE_SUPPORT, Boolean.TRUE.toString());
+					} else {
+						si.setUserProperty(Constants.ALLOW_REMOTE_SUPPORT, Boolean.FALSE.toString());
+					}
+					
+				}
+			});
+			chckbxAllowRemoteSupport.setEnabled(false);
+			chckbxAllowRemoteSupport.setToolTipText("Allows support staff to impersonate you using your login session");
+			chckbxAllowRemoteSupport.setHorizontalAlignment(SwingConstants.TRAILING);
+		}
+		return chckbxAllowRemoteSupport;
+	}
+	private JLabel getLblNewLabel_1() {
+		if (lblNewLabel_1 == null) {
+			lblNewLabel_1 = new JLabel("Allow remote support");
+		}
+		return lblNewLabel_1;
 	}
 }
