@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5.34-SNAPSHOT</version>
+		<version>0.6-SNAPSHOT</version>
 	</parent>
 	<groupId>grisu.frontend</groupId>
 	<artifactId>grisu-client-swing</artifactId>
