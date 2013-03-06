@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5.19</version>
+		<version>0.5.34-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.backend</groupId>
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
-			<version>0.5.19</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cryptix32</artifactId>
@@ -335,6 +335,7 @@
 
 
 	<build>
+		<finalName>grisu-backend-local</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -408,7 +409,19 @@
 				</executions>
 			</plugin>
 
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.4</version>
+				<!-- <inherited>false</inherited> -->
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<pushChanges>true</pushChanges>
+					<localCheckout>true</localCheckout>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+					<releaseProfiles>deb,rpm</releaseProfiles>
+				</configuration>
+			</plugin>
 
 		</plugins>
 	</build>
@@ -537,6 +550,7 @@
 							<distribution>Grisu</distribution>
 							<group>Application/Other</group>
 							<!-- <icon>src/main/resources/icon.gif</icon> -->
+							<name>grisu-backend-local</name>
 							<packager>Markus Binsteiner</packager>
 <!-- 							<prefix>/usr/local</prefix> -->
 							<version>${project.version}</version>

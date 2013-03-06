@@ -1357,8 +1357,13 @@ public class JobDescription {
 	 *             if the string can't be parsed
 	 */
 	@Transient
-	public void setWalltime(final String walltime) throws Exception {
-		int wt = WalltimeUtils.fromShortStringToSeconds(walltime);
+	public void setWalltime(final String walltime)  {
+		int wt;
+		try {
+			wt = WalltimeUtils.fromShortStringToSeconds(walltime);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		setWalltimeInSeconds(wt);
 	}
 
