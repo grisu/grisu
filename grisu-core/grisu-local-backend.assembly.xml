@@ -11,9 +11,6 @@
 			<useTransitiveFiltering>true</useTransitiveFiltering>
 			<useProjectArtifact>true</useProjectArtifact>
 			<outputDirectory>/</outputDirectory>
-			<includes>
-				<include>grisu.backend:grisu-core</include>
-			</includes>
 			<excludes>
 				<exclude>junit:junit</exclude>
 				<exclude>bouncycastle:bcprov-jdk15</exclude>
@@ -36,7 +33,7 @@
 					<exclude>ARCS.RSA</exclude>
 					<exclude>log4j.properties</exclude>
 					<exclude>log4j.xml</exclude>
-					
+					<exclude>org/python/**</exclude>
 				</excludes>
 			</unpackOptions>
 		</dependencySet>
