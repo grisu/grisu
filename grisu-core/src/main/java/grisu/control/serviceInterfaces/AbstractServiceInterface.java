@@ -1093,7 +1093,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} else if ("API_VERSION".equalsIgnoreCase(key)) {
 			return Integer.toString(ServiceInterface.API_VERSION);
 		} else if ("TYPE".equalsIgnoreCase(key)) {
-			return "Webservice (REST/SOAP) interface";
+			return getInterfaceType();
 		} else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
 			return BACKEND_VERSION;
 		}

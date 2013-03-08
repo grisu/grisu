@@ -3,10 +3,10 @@ package grisu.frontend.control.login;
 import grisu.control.ServiceInterface;
 import grisu.control.ServiceInterfaceCreator;
 import grisu.control.exceptions.ServiceInterfaceException;
-import grith.jgrith.control.LoginParams;
-import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.cred.Cred;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,6 +111,21 @@ public final class ServiceInterfaceFactory {
 //		otherOptions[3] = httpProxyPassword;
 
 		final Map<String, Exception> failedCreators = new HashMap<String, Exception>();
+		
+		
+		if ( "Local".equalsIgnoreCase(interfaceUrl) ) {
+			String getdown = System.getenv("GETDOWN_DIR");
+			File getdownDir = new File(getdown);
+			if ( getdownDir.exists() && getdownDir.isDirectory() ) {
+				File localBackendDatFile = new File(getdownDir, "local-backend.dat");
+				try {
+					localBackendDatFile.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 
 		for (final String className : KNOWN_SERVICE_INTERFACE_CREATORS) {
 
