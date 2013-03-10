@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +32,13 @@ public final class ServiceInterfaceFactory {
 	public static final String DEFAULT_SERVICE_INTERFACE = "BeSTGRID";
 
 	public static final String[] KNOWN_SERVICE_INTERFACE_CREATORS = new String[] {
-		"LocalServiceInterfaceCreator",
-		// "DummyServiceInterfaceCreator",
-		"JaxWsServiceInterfaceCreator",
-		// "XfireServiceInterfaceCreator",
-		// the old xfire client...
-		// "XFireServiceInterfaceCreator"
+			"LocalServiceInterfaceCreator",
+			// "DummyServiceInterfaceCreator",
+			"JaxWsServiceInterfaceCreator",
+	// "XfireServiceInterfaceCreator",
+	// the old xfire client...
+	// "XFireServiceInterfaceCreator"
 	};
-	
-
 
 	/**
 	 * Creates a serviceInterface from a {@link LoginParams} object.
@@ -50,14 +49,14 @@ public final class ServiceInterfaceFactory {
 	 * @throws ServiceInterfaceException
 	 *             if the serviceInterface couldn't be created
 	 */
-//	public static ServiceInterface createInterface(final LoginParams params)
-//			throws ServiceInterfaceException {
-//		return createInterface(params.getLoginUrl(),
-//				params.getMyProxyUsername(), params.getMyProxyPassphrase(),
-//				params.getMyProxyServer(), params.getMyProxyPort(),
-//				params.getHttpProxy(), params.getHttpProxyPort(),
-//				params.getHttpProxyUsername(), params.getMyProxyPassphrase());
-//	}
+	// public static ServiceInterface createInterface(final LoginParams params)
+	// throws ServiceInterfaceException {
+	// return createInterface(params.getLoginUrl(),
+	// params.getMyProxyUsername(), params.getMyProxyPassphrase(),
+	// params.getMyProxyServer(), params.getMyProxyPort(),
+	// params.getHttpProxy(), params.getHttpProxyPort(),
+	// params.getHttpProxyUsername(), params.getMyProxyPassphrase());
+	// }
 
 	/**
 	 * Creates a ServiceInterface using the url that is provided. Most likely
@@ -91,41 +90,41 @@ public final class ServiceInterfaceFactory {
 	 * @return the ServiceInterface to use to stage files/submit jobs
 	 * @throws ServiceInterfaceException
 	 */
-//	public static ServiceInterface createInterface(final String interfaceUrl,
-//			final String username, final char[] password,
-//			final String myProxyServer, final String myProxyPort,
-//			final String httpProxy, final int httpProxyPort,
-//			final String httpProxyUsername, final char[] httpProxyPassword)
-//					throws ServiceInterfaceException {
-//		return null;
-//	}
-	
+	// public static ServiceInterface createInterface(final String interfaceUrl,
+	// final String username, final char[] password,
+	// final String myProxyServer, final String myProxyPort,
+	// final String httpProxy, final int httpProxyPort,
+	// final String httpProxyUsername, final char[] httpProxyPassword)
+	// throws ServiceInterfaceException {
+	// return null;
+	// }
+
 	public static ServiceInterface createInterface(final String interfaceUrl,
-			Cred cred, Object[] otherOptions)
-					throws ServiceInterfaceException {
-		
-//		final Object[] otherOptions = new Object[4];
-//		otherOptions[0] = httpProxy;
-//		otherOptions[1] = httpProxyPort;
-//		otherOptions[2] = httpProxyUsername;
-//		otherOptions[3] = httpProxyPassword;
+			Cred cred, Object[] otherOptions) throws ServiceInterfaceException {
+
+		// final Object[] otherOptions = new Object[4];
+		// otherOptions[0] = httpProxy;
+		// otherOptions[1] = httpProxyPort;
+		// otherOptions[2] = httpProxyUsername;
+		// otherOptions[3] = httpProxyPassword;
 
 		final Map<String, Exception> failedCreators = new HashMap<String, Exception>();
-		
-		
-		if ( "Local".equalsIgnoreCase(interfaceUrl) ) {
+
+		if ("Local".equalsIgnoreCase(interfaceUrl)) {
 			String getdown = System.getenv("GETDOWN_DIR");
-			File getdownDir = new File(getdown);
-			if ( getdownDir.exists() && getdownDir.isDirectory() ) {
-				File localBackendDatFile = new File(getdownDir, "local-backend.dat");
-				try {
-					localBackendDatFile.createNewFile();
-				} catch (IOException e) {
-					e.printStackTrace();
+			if (StringUtils.isNotBlank(getdown)) {
+				File getdownDir = new File(getdown);
+				if (getdownDir.exists() && getdownDir.isDirectory()) {
+					File localBackendDatFile = new File(getdownDir,
+							"local-backend.dat");
+					try {
+						localBackendDatFile.createNewFile();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
-		
 
 		for (final String className : KNOWN_SERVICE_INTERFACE_CREATORS) {
 
@@ -160,8 +159,7 @@ public final class ServiceInterfaceFactory {
 			ServiceInterface serviceInterface = null;
 			try {
 				serviceInterface = serviceInterfaceCreator.create(interfaceUrl,
-						cred,
-						otherOptions);
+						cred, otherOptions);
 			} catch (final ServiceInterfaceException e) {
 				// e.printStackTrace();
 				myLogger.debug("Couldn't connect to url " + interfaceUrl
