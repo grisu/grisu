@@ -12,6 +12,7 @@ Documentation
 ------------------------
 
 - [Wiki](https://github.com/grisu/grisu/wiki)
+- [Getting started](https://github.com/grisu/grisu/wiki/SneakPeek)
 - [Javadoc](https://code.ceres.auckland.ac.nz/jenkins/job/Grisu-SNAPSHOT-Javadoc/javadoc/)
 - [SOAP/REST API documentaion for web-service based backend](https://compute.services.bestgrid.org/)
 
