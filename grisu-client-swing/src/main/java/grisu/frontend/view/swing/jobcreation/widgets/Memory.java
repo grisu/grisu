@@ -18,8 +18,8 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class Memory extends AbstractWidget {
 
-	private static final String[] DEFAULT_MEMORY = new String[] { "1024",
-		"2048", "4096", "8192", "16384" };
+	private static final String[] DEFAULT_MEMORY = new String[] { "1",
+		"2", "4", "8", "16", "32", "64" };
 
 	private final DefaultComboBoxModel memoryModel = new DefaultComboBoxModel(
 			DEFAULT_MEMORY);
@@ -66,7 +66,7 @@ public class Memory extends AbstractWidget {
 	public Long getMemory() {
 		final String integerString = (String) getComboBox().getSelectedItem();
 		try {
-			final Long result = Long.parseLong(integerString);
+			final Long result = Long.parseLong(integerString) * 1024L;
 			return result;
 		} catch (final Exception e) {
 			myLogger.error(e.getLocalizedMessage(), e);
@@ -87,6 +87,7 @@ public class Memory extends AbstractWidget {
 	}
 
 	private void setMemory(Long memory) {
+		memory = memory / 1024L;
 		if (memoryModel.getIndexOf(memory.toString()) < 0) {
 			memoryModel.addElement(memory.toString());
 		}
