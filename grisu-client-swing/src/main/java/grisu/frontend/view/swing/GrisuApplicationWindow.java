@@ -13,6 +13,7 @@ import grisu.model.dto.GridFile;
 import grisu.settings.ClientPropertiesManager;
 import grith.gridsession.GridClient;
 import grith.gridsession.GridSessionCred;
+import grith.jgrith.Environment;
 import grith.jgrith.cred.GridLoginParameters;
 
 import java.awt.AWTEvent;
@@ -192,7 +193,7 @@ WindowListener, ServiceInterfaceHolder {
 	 */
 	private void initialize() {
 
-		LoginManager.initEnvironment();
+		Environment.initEnvironment();
 
 		new ApplicationEventListener();
 

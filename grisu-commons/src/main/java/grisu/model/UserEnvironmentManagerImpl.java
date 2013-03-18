@@ -5,6 +5,7 @@ import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.exceptions.StatusException;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.utils.FqanHelpers;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.GridFile;
@@ -16,7 +17,6 @@ import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
-import grith.jgrith.utils.FqanHelpers;
 
 import java.io.File;
 import java.net.URI;

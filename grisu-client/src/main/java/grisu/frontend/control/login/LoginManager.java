@@ -2,16 +2,10 @@ package grisu.frontend.control.login;
 
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.ServiceInterfaceException;
-import grisu.frontend.control.UncaughtExceptionHandler;
-import grisu.jcommons.configuration.CommonGridProperties;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.GridEnvironment;
-import grisu.jcommons.dependencies.BouncyCastleTool;
 import grisu.jcommons.dependencies.ClasspathHacker;
-import grisu.jcommons.utils.DefaultGridSecurityProvider;
 import grisu.jcommons.utils.EnvironmentVariableHelpers;
-import grisu.jcommons.utils.HttpProxyManager;
-import grisu.jcommons.utils.JythonHelpers;
 import grisu.jcommons.view.cli.CliHelpers;
 import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
@@ -23,7 +17,6 @@ import grith.jgrith.cred.ProxyCred;
 import grith.jgrith.cred.callbacks.CliCallback;
 import grith.jgrith.utils.CertificateFiles;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
@@ -37,57 +30,52 @@ import com.google.common.collect.ImmutableMap;
 
 public class LoginManager {
 
-
-
 	public static int REQUIRED_BACKEND_API_VERSION = 16;
 	public static final String DEFAULT_BACKEND = "bestgrid";
 	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
 
-
-	static final Logger myLogger = LoggerFactory
-			.getLogger(LoginManager.class.getName());
+	static final Logger myLogger = LoggerFactory.getLogger(LoginManager.class
+			.getName());
 
 	public static final ImmutableBiMap<String, String> SERVICEALIASES = new ImmutableBiMap.Builder<String, String>()
 			.put("local", "Local")
 			.put("testbed",
 					"https://compute.test.nesi.org.nz/soap/GrisuService")
-					.put("bestgrid",
-							"https://compute.services.bestgrid.org/soap/GrisuService")
-							.put("nesi", "https://compute.nesi.org.nz/soap/GrisuService")
-							.put("dev",
-									"https://compute-dev.services.bestgrid.org/soap/GrisuService")
-									.put("bestgrid-test",
-											"https://compute-test.services.bestgrid.org/soap/GrisuService")
-											.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
-											.put("local_ws", "http://localhost:8080/grisu-ws/soap/GrisuService")
-											.build();
+			.put("bestgrid",
+					"https://compute.services.bestgrid.org/soap/GrisuService")
+			.put("nesi", "https://compute.nesi.org.nz/soap/GrisuService")
+			.put("dev",
+					"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+			.put("bestgrid-test",
+					"https://compute-test.services.bestgrid.org/soap/GrisuService")
+			.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
+			.put("local_ws", "http://localhost:8080/grisu-ws/soap/GrisuService")
+			.build();
 
 	public static final ImmutableMap<String, String> MYPROXY_SERVERS = new ImmutableMap.Builder<String, String>()
 			.put("Local",
 					GridEnvironment.getDefaultMyProxyServer() + ":"
 							+ GridEnvironment.getDefaultMyProxyPort())
-							.put("https://compute.test.nesi.org.nz/soap/GrisuService",
-									"myproxy.test.nesi.org.nz:7512")
-									.put("https://compute.nesi.org.nz/soap/GrisuService",
-											"myproxy.nesi.org.nz:7512")
-											.put("https://compute.services.bestgrid.org/soap/GrisuService",
-													"myproxy.nesi.org.nz:7512")
-													.put("https://compute-dev.services.bestgrid.org/soap/GrisuService",
-															"myproxy.nesi.org.nz:7512")
-															.put("https://compute-test.services.bestgrid.org/soap/GrisuService",
-																	"myproxy.nesi.org.nz:7512")
-																	.put("http://localhost:8080/grisu-ws/soap/GrisuService",
-																			GridEnvironment.getDefaultMyProxyServer() + ":"
-																					+ GridEnvironment.getDefaultMyProxyPort())
-																					.put("http://localhost:8080/soap/GrisuService",
-																							GridEnvironment.getDefaultMyProxyServer() + ":"
-																									+ GridEnvironment.getDefaultMyProxyPort()).build();
+			.put("https://compute.test.nesi.org.nz/soap/GrisuService",
+					"myproxy.test.nesi.org.nz:7512")
+			.put("https://compute.nesi.org.nz/soap/GrisuService",
+					"myproxy.nesi.org.nz:7512")
+			.put("https://compute.services.bestgrid.org/soap/GrisuService",
+					"myproxy.nesi.org.nz:7512")
+			.put("https://compute-dev.services.bestgrid.org/soap/GrisuService",
+					"myproxy.nesi.org.nz:7512")
+			.put("https://compute-test.services.bestgrid.org/soap/GrisuService",
+					"myproxy.nesi.org.nz:7512")
+			.put("http://localhost:8080/grisu-ws/soap/GrisuService",
+					GridEnvironment.getDefaultMyProxyServer() + ":"
+							+ GridEnvironment.getDefaultMyProxyPort())
+			.put("http://localhost:8080/soap/GrisuService",
+					GridEnvironment.getDefaultMyProxyServer() + ":"
+							+ GridEnvironment.getDefaultMyProxyPort()).build();
 
 	private static String CLIENT_NAME = setClientName(null);
 	private static String CLIENT_VERSION = setClientVersion(null);
 	public static String USER_SESSION = setUserSessionId(null);
-
-	public static volatile boolean environmentInitialized = false;
 
 	public static void addPluginsToClasspath() throws IOException {
 
@@ -115,89 +103,28 @@ public class LoginManager {
 
 	}
 
-	public static synchronized void initEnvironment() {
-
-		if (!environmentInitialized) {
-			
-			HttpProxyManager.setDefaultHttpProxy();
-
-			// make sure tmp dir exists
-			String tmpdir = System.getProperty("java.io.tmpdir");
-			if (tmpdir.startsWith("~")) {
-				tmpdir = tmpdir.replaceFirst("~",
-						System.getProperty("user.home"));
-				System.setProperty("java.io.tmpdir", tmpdir);
-			}
-			File tmp = new File(tmpdir);
-			if (!tmp.exists()) {
-				myLogger.debug("Creating tmpdir: {}", tmpdir);
-				tmp.mkdirs();
-				if (!tmp.exists()) {
-					myLogger.error("Could not create tmp dir {}.", tmpdir);
-				}
-			}
-
-			java.util.logging.LogManager.getLogManager().reset();
-			// LoggerFactory.getLogger("root").setLevel(Level.OFF);
-
-			JythonHelpers.setJythonCachedir();
-
-			final String debug = CommonGridProperties
-					.getDefault()
-					.getGridProperty(
-							CommonGridProperties.Property.DEBUG_UNCAUGHT_EXCEPTIONS);
-
-			if ("true".equalsIgnoreCase(debug)) {
-				Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
-			}
-
-			java.security.Security
-			.addProvider(new DefaultGridSecurityProvider());
-
-			java.security.Security
-			.setProperty("ssl.TrustManagerFactory.algorithm",
-					"TrustAllCertificates");
-
-			try {
-				BouncyCastleTool.initBouncyCastle();
-			} catch (final Exception e) {
-				myLogger.error(e.getLocalizedMessage(), e);
-			}
-
-			try {
-				CertificateFiles.copyCACerts(false);
-			} catch (Exception e) {
-				myLogger.error("Problem copying root certificates.", e);
-			}
-
-			environmentInitialized = true;
-		}
-
-	}
-
 	public static synchronized void initGrisuClient(String clientname) {
 
 		Thread.currentThread().setName("main");
 
 		setClientName(clientname);
 
-		setClientVersion(grisu.jcommons.utils.Version
-				.get(clientname));
+		setClientVersion(grisu.jcommons.utils.Version.get(clientname));
 
-		EnvironmentVariableHelpers.loadEnvironmentVariablesToSystemProperties();
-
-		initEnvironment();
+		grith.jgrith.Environment.initEnvironment();
 
 	}
+
+
 
 	public static ServiceInterface login(String backend,
 			boolean displayCliProgress) throws NoCredentialException,
 			LoginException {
-		
-		initEnvironment();
 
-		System.out.println("PATH: "+System.getenv("X509_USER_PROXY"));
-		
+		grith.jgrith.Environment.initEnvironment();
+
+		System.out.println("PATH: " + System.getenv("X509_USER_PROXY"));
+
 		Cred c = null;
 		try {
 			c = new ProxyCred();
@@ -235,7 +162,7 @@ public class LoginManager {
 				CliHelpers.setIndeterminateProgress(
 						"Setting up environment...", true);
 			}
-			initEnvironment();
+			grith.jgrith.Environment.initEnvironment();
 
 			try {
 				addPluginsToClasspath();
@@ -245,8 +172,6 @@ public class LoginManager {
 				throw new RuntimeException(e2);
 			}
 
-
-
 			ServiceInterface si;
 			if (displayCliProgress) {
 				CliHelpers.setIndeterminateProgress("Logging in to backend...",
@@ -254,8 +179,8 @@ public class LoginManager {
 			}
 			try {
 
-				si = ServiceInterfaceFactory.createInterface(backend,
-						cred, null);
+				si = ServiceInterfaceFactory.createInterface(backend, cred,
+						null);
 				// loginParams.getHttpProxy(),
 				// loginParams.getHttpProxyPort(),
 				// loginParams.getHttpProxyUsername(),
@@ -284,7 +209,7 @@ public class LoginManager {
 	public static ServiceInterface loginCommandline(String backend)
 			throws LoginException {
 
-		LoginManager.initEnvironment();
+		grith.jgrith.Environment.initEnvironment();
 
 		AbstractCred c = AbstractCred.loadFromConfig(null, new CliCallback());
 

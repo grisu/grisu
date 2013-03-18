@@ -15,6 +15,7 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.utils.FqanHelpers;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
@@ -25,7 +26,6 @@ import grisu.model.job.JobDescription;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.cred.Cred;
-import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.util.Collection;
