@@ -338,7 +338,7 @@ public class User {
 		}
 
 		final Map<String, String> properties = new HashMap<String, String>();
-		boolean userDnPath = dir.isShared();
+		boolean userDnPath = Directory.isShared(dir);
 		if (StringUtils.isNotBlank(propString)) {
 
 			final String[] parts = propString.split(";");
@@ -538,7 +538,7 @@ public class User {
 			mp.addProperty(key, properties.get(key));
 		}
 
-		final boolean isVolatile = dir.isVolatileDirectory();
+		final boolean isVolatile = Directory.isVolatileDirectory(dir);
 		mp.setVolatileFileSystem(isVolatile);
 
 		return mp;
