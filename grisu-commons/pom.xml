@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.6.4</version>
+			<version>1.6.6</version>
 		</dependency>
 
 
@@ -173,11 +173,6 @@
 
 
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-			<version>1.6.4</version>
-		</dependency>
-		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
 			<version>0.14-SNAPSHOT</version>
@@ -193,6 +188,11 @@
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>2.0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.3</version>
 		</dependency>
 	</dependencies>
 	<build>

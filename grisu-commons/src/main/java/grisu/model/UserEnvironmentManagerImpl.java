@@ -13,6 +13,7 @@ import grisu.model.files.FileSystemItem;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.info.dto.Application;
+import grisu.model.info.dto.DtoProperties;
 import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
@@ -402,7 +403,7 @@ EventSubscriber<FqanEvent> {
 	public synchronized Map<String, String> getBookmarks() {
 
 		if (cachedBookmarks == null) {
-			cachedBookmarks = serviceInterface.getBookmarks().propertiesAsMap();
+			cachedBookmarks = DtoProperties.asMap(serviceInterface.getBookmarks());
 		}
 
 		return cachedBookmarks;

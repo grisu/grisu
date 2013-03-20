@@ -385,12 +385,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return DtoStringList.fromSingleString("No command specified.");
 		}
 
-		Map<String, String> configMap = new HashMap<String, String>();
-		if (config != null) {
-			configMap = config.propertiesAsMap();
-		}
-
-		return admin.execute(command, configMap);
+		return admin.execute(command, DtoProperties.asMap(config));
 	}
 
 	// private boolean checkWhetherGridResourceIsActuallyAvailable(
