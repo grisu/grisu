@@ -18,7 +18,7 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class Memory extends AbstractWidget {
 
-	private static final String[] DEFAULT_MEMORY = new String[] { "1",
+	private static final String[] DEFAULT_MEMORY = new String[] { "0", "1",
 		"2", "4", "8", "16", "32", "64" };
 
 	private final DefaultComboBoxModel memoryModel = new DefaultComboBoxModel(

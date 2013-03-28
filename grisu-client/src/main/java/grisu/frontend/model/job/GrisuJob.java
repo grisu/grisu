@@ -170,7 +170,7 @@ Comparable<GrisuJob> {
 		super((job.isArchived()) ? SeveralXMLHelpers.fromString(si
 				.getJsdlDocument(job.jobname())) : job.propertiesAsMap());
 
-		this.setTimestampJobname(jobname);
+		this.setJobname(jobname);
 
 		this.serviceInterface = si;
 		this.fm = GrisuRegistryManager.getDefault(si).getFileManager();

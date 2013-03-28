@@ -52,7 +52,6 @@
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
 			<version>${project.version}</version>
-
 		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
