@@ -632,26 +632,10 @@ public class RunningJobManager implements EventSubscriber {
 			return t;
 		}
 	}
-
-	public void killJobs(List<GrisuJob> jobs, boolean clean) {
-
-		if (jobs == null || jobs.size() == 0) {
-			return;
-		}
-
-		if (clean) {
-			for (GrisuJob job : jobs) {
-				job.setBeingCleaned(true);
-			}
-		}
-
-		Set<String> list = Sets.newTreeSet();
-		for (GrisuJob job : jobs) {
-			list.add(job.getJobname());
-		}
-
+	
+	public String killJobsByName(Collection<String> jobs, boolean clean ) {
 		final String handle = si.killJobs(
-				DtoStringList.fromStringColletion(list), clean);
+				DtoStringList.fromStringColletion(jobs), clean);
 
 		Thread t = new Thread() {
 			public void run() {
@@ -674,6 +658,28 @@ public class RunningJobManager implements EventSubscriber {
 		t.setName("multi job clean wait");
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
+		
+		return handle;
+	}
+
+	public String killJobs(List<GrisuJob> jobs, boolean clean) {
+
+		if (jobs == null || jobs.size() == 0) {
+			return null;
+		}
+
+		if (clean) {
+			for (GrisuJob job : jobs) {
+				job.setBeingCleaned(true);
+			}
+		}
+
+		Set<String> list = Sets.newTreeSet();
+		for (GrisuJob job : jobs) {
+			list.add(job.getJobname());
+		}
+		
+		return killJobsByName(list, clean);
 
 	}
 
