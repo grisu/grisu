@@ -115,7 +115,9 @@ public class LoginManager {
 
 	}
 
-
+	public static ServiceInterface login(String backend) throws NoCredentialException, LoginException {
+		return login(backend, false);
+	}
 
 	public static ServiceInterface login(String backend,
 			boolean displayCliProgress) throws NoCredentialException,

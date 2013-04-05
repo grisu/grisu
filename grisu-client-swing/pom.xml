@@ -43,9 +43,9 @@
 			<version>0.4</version>
 		</dependency>
 		<dependency>
-			<groupId>org.gjt.sp.jedit</groupId>
+			<groupId>org.gjt.sp</groupId>
 			<artifactId>jedit</artifactId>
-			<version>4.5.2</version>
+			<version>5.0.0</version>
 		</dependency>
 
 		<dependency>
