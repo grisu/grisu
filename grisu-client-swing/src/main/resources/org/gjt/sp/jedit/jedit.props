@@ -162,7 +162,7 @@ buffer.encodingAutodetect=true
 buffer.tabSize=4
 
 # Indent width
-buffer.indentSize=8
+buffer.indentSize=4
 
 # Automatic indentation
 buffer.autoIndent=full
@@ -245,7 +245,7 @@ view.eolMarkers=false
 view.eolMarkerColor=#ff6633
 
 # Wrap guide
-view.wrapGuide=true
+view.wrapGuide=false
 view.wrapGuideColor=#8080ff
 
 # Caret color
@@ -271,7 +271,7 @@ view.dragAndDrop=true
 view.joinNonWordChars=true
 
 # Middle mouse button pastes % register
-view.middleMousePaste=false
+view.middleMousePaste=true
 
 # Pressing Ctrl while mouse actions makes them
 # as if selection mode were rectangular mode
@@ -394,8 +394,8 @@ view.style.operator=color:#000000 style:b
 #}}}
 
 # Fancy Java2D stuff
-view.antiAlias=false
-view.fracFontMetrics=false
+view.antiAlias=true
+view.fracFontMetrics=true
 
 # Docking and tool bar positioning
 view.docking.alternateLayout=false
