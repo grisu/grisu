@@ -56,7 +56,7 @@ public class GridFileTextEditFrame extends JFrame {
 
 	private GridFileTextEditPanel getGridFileTextEditPanel() {
 		if (gridFileTextEditPanel == null) {
-			gridFileTextEditPanel = new GridFileTextEditPanel("Default", this);
+			gridFileTextEditPanel = new GridFileTextEditPanel("Default");
 		}
 		return gridFileTextEditPanel;
 	}

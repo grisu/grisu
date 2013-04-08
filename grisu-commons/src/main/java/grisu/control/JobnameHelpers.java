@@ -5,10 +5,15 @@ import java.util.Date;
 import java.util.UUID;
 
 public class JobnameHelpers {
+	
+	public final static SimpleDateFormat format = new SimpleDateFormat(
+			"yyyy.MM.dd_HH.mm.ss.SSS");
 
+	public final static SimpleDateFormat short_format = new SimpleDateFormat(
+			"yyyy.MM.dd_HH.mm.ss");
+
+	
 	public static String calculateTimestampedJobname(String baseJobname) {
-		final SimpleDateFormat format = new SimpleDateFormat(
-				"yyyy.MM.dd_HH.mm.ss.SSS");
 		return calculateTimestampedJobname(baseJobname, format);
 	}
 

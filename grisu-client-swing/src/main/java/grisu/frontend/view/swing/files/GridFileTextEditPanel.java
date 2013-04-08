@@ -1,11 +1,11 @@
 package grisu.frontend.view.swing.files;
 
+import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.view.swing.files.open.FileDialogManager;
 import grisu.frontend.view.swing.files.open.GridFileHolder;
-import grisu.frontend.view.swing.utils.DisabledGlassPane;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
@@ -15,10 +15,13 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-import javax.swing.JFrame;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
@@ -27,6 +30,8 @@ import org.gjt.sp.jedit.syntax.ModeProvider;
 import org.gjt.sp.jedit.textarea.StandaloneTextArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.Ostermiller.util.LineEnds;
 
 public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 
@@ -48,15 +53,11 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 
 	private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-	private DisabledGlassPane glassPane = new DisabledGlassPane();
-
 	/**
 	 * Create the panel.
 	 */
-	public GridFileTextEditPanel(String fileDialogAlias, JFrame frame) {
+	public GridFileTextEditPanel(String fileDialogAlias) {
 		setLayout(new BorderLayout(0, 0));
-
-		frame.setGlassPane(glassPane);
 
 		add(getStandaloneTextArea(), BorderLayout.CENTER);
 
@@ -64,11 +65,11 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 	}
 
 	public void activateGlassPane(String msg) {
-		glassPane.activate(msg);
+		// glassPane.activate(msg);
 	}
 
 	public void deactivateGlassPane() {
-		glassPane.deactivate();
+		// glassPane.deactivate();
 	}
 
 	public void addTextFileListener(PropertyChangeListener l) {
@@ -78,9 +79,7 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 	public void askUserForFile() {
 
 		GridFile file = fdm.popupFileDialogAndAskForFile(fileDialogAlias);
-
 		setFile(file);
-
 	}
 
 	public GridFile getFile() {
@@ -125,9 +124,94 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 	public void removeTextFileListener(PropertyChangeListener l) {
 		pcs.removePropertyChangeListener(l);
 	}
-	
+
 	public void setText(String text) {
 		setTextAreaText(text);
+	}
+	
+	public File saveAs() {
+		
+		final JFileChooser fc = new JFileChooser();
+		final int returnVal = fc.showDialog(GridFileTextEditPanel.this,
+				"Save as...");
+
+		if (JFileChooser.CANCEL_OPTION == returnVal) {
+			return null;
+		} else {
+			String currentUrl = null;
+			final File selFile = fc.getSelectedFile();
+			currentUrl = selFile.toURI().toString();
+
+			save(currentUrl);
+
+			return selFile;
+		}
+	}
+
+	public void save() {
+
+		if (currentFile == null) {
+
+			saveAs();
+
+		} else {
+			save(currentFile);
+		}
+
+	}
+
+	public void save(GridFile file) {
+		save(file.getUrl());
+	}
+
+	public void save(String url) {
+
+		String text = getText();
+
+		File tempFile = null;
+		try {
+			InputStream is = new ByteArrayInputStream(text.getBytes());
+			tempFile = File.createTempFile("input_file", "grisu");
+
+			FileOutputStream fop = new FileOutputStream(tempFile);
+
+			LineEnds.convert(is, fop, LineEnds.STYLE_UNIX);
+			fop.flush();
+			fop.close();
+
+		} catch (Exception e3) {
+			myLogger.error("Can't save file with Unix line endings.", e3);
+			return;
+		}
+
+		if (FileManager.isLocal(url)) {
+			try {
+				FileUtils.copyFile(tempFile,
+						FileManager.getFileFromUriOrPath(url));
+				FileUtils.deleteQuietly(tempFile);
+			} catch (final IOException e1) {
+				myLogger.error("Can't save file: " + url, e1);
+			}
+		} else {
+
+			final File temp = fm.getLocalCacheFile(url);
+			try {
+				FileUtils.copyFile(tempFile, temp);
+
+				fm.uploadFile(temp, url, true);
+
+				FileUtils.deleteQuietly(tempFile);
+			} catch (final IOException e1) {
+				myLogger.error("Can't copy file.", e1);
+			} catch (final FileTransactionException e2) {
+				myLogger.error("Can't upload file: " + url, e2);
+			}
+
+		}
+
+		documentUnsaved = false;
+		pcs.firePropertyChange("documentUnsaved", true, false);
+
 	}
 
 	public void setFile(final GridFile file) {
