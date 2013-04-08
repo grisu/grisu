@@ -50,7 +50,7 @@ public class FileDialogManager {
 	    }
 	}
 	
-	public static final Component defaultRootComponent = null;
+	public static Component defaultRootComponent = null;
 	
 	public static final String FILE_DIALOG_KEY = "file_dialog";
 

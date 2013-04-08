@@ -4,6 +4,7 @@ import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.model.events.ApplicationEventListener;
+import grisu.frontend.view.swing.files.open.FileDialogManager;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.login.LoginPanel;
 import grisu.frontend.view.swing.login.ServiceInterfaceHolder;
@@ -66,6 +67,7 @@ WindowListener, ServiceInterfaceHolder {
 
 	public GrisuApplicationWindow() throws Exception {
 		this((ServiceInterfacePanel) null);
+		
 	}
 	
 	public GrisuApplicationWindow(ServiceInterfacePanel panel) throws Exception {
@@ -87,8 +89,9 @@ WindowListener, ServiceInterfaceHolder {
 				addSettingsPanel(p.getPanelTitle(), p.getPanel());
 			}
 		}
-		addSettingsPanel("Http proxy settings", httpProxyPanel);	
+		addSettingsPanel("Http proxy settings", httpProxyPanel);
 		
+		FileDialogManager.defaultRootComponent = getFrame();
 	}
 
 	/**
@@ -117,7 +120,7 @@ WindowListener, ServiceInterfaceHolder {
 		}
 		addSettingsPanel("Http proxy settings", httpProxyPanel);
 					
-
+		FileDialogManager.defaultRootComponent = getFrame();
 	}
 
 	public void addGroupFileListPanel(List<GridFile> left, List<GridFile> right) {
