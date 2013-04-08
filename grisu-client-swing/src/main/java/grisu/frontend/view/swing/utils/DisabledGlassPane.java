@@ -1,10 +1,19 @@
 package grisu.frontend.view.swing.utils;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
-import javax.swing.border.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseMotionAdapter;
+
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
 /*
  *  Simple implementation of a Glass Pane that will capture and ignore all
@@ -24,7 +33,7 @@ public class DisabledGlassPane extends JComponent
 		//  Set glass pane properties
 
 		setOpaque( false );
-		Color base = UIManager.getColor("inactiveCaptionBorder");
+		Color base = Color.blue;
 		Color background = new Color(base.getRed(), base.getGreen(), base.getBlue(), 128);
 		setBackground( background );
 		setLayout( new GridBagLayout() );

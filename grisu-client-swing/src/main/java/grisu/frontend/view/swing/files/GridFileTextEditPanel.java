@@ -71,7 +71,7 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 		glassPane.deactivate();
 	}
 
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+	public void addTextFileListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);
 	}
 
@@ -122,8 +122,12 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 		return documentUnsaved;
 	}
 
-	public void removePropertyChangeListener(PropertyChangeListener l) {
+	public void removeTextFileListener(PropertyChangeListener l) {
 		pcs.removePropertyChangeListener(l);
+	}
+	
+	public void setText(String text) {
+		setTextAreaText(text);
 	}
 
 	public void setFile(final GridFile file) {
