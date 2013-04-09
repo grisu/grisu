@@ -215,7 +215,7 @@ public class RunningJobManager implements EventSubscriber {
 		createJob(job, null);
 	}
 
-	public synchronized void createJob(GrisuJob job, String fqan)
+	public synchronized void createJob(final GrisuJob job, String fqan)
 			throws JobPropertiesException {
 
 		if (StringUtils.isBlank(fqan)) {
@@ -225,7 +225,15 @@ public class RunningJobManager implements EventSubscriber {
 		}
 
 		cachedAllSingleJobs.put(job.getJobname(), job);
-		getJobs(job.getApplication()).add(job);
+//		getJobs(job.getApplication()).add(job);
+
+		new Thread() {
+			@Override
+			public void run() {
+				updateJobnameList(job.getApplication(), true);
+
+			}
+		}.start();
 		// if (watchingAllSingleJobs) {
 		// getJobs(Constants.ALLJOBS_KEY).add(job);
 		// }
