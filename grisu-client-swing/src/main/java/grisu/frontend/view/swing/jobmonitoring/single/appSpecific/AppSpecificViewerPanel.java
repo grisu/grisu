@@ -152,14 +152,13 @@ JobDetailPanel, PropertyChangeListener {
 		if ("status".equals(evt.getPropertyName())) {
 
 			final int status = checkJobStatus();
-			System.out.println("After check");
 
 			if (status == JobConstants.NO_SUCH_JOB) {
 				return;
 			} else if (status == JobConstants.ACTIVE) {
 				jobStarted();
 			} else if ((status >= JobConstants.FINISHED_EITHER_WAY)) {
-				System.out.println("JOB FINISHED");
+				//System.out.println("JOB FINISHED");
 				jobFinished();
 			}
 		} else if ("statusString".equals(evt.getPropertyName())) {

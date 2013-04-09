@@ -125,7 +125,7 @@ public class LoginManager {
 
 		grith.jgrith.Environment.initEnvironment();
 
-		System.out.println("PATH: " + System.getenv("X509_USER_PROXY"));
+		myLogger.debug("x509 proxy path: " + System.getenv("X509_USER_PROXY"));
 
 		Cred c = null;
 		try {

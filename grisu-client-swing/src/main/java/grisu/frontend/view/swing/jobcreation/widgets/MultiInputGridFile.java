@@ -84,7 +84,7 @@ public class MultiInputGridFile extends AbstractFileWidget {
 
 	private void addFile(GridFile f) {
 
-		System.out.println(f.getUrl());
+//		System.out.println(f.getUrl());
 		fileModel.addElement(f);
 
 	}

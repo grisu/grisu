@@ -50,7 +50,7 @@ public class GenericGridFileViewer extends JPanel implements GridFileViewer,
 		MagicMatch match = null;
 		try {
 			match = Magic.getMagicMatch(currentLocalCacheFile, true);
-			System.out.println(match.getMimeType());
+//			System.out.println(match.getMimeType());
 		} catch (final Exception e) {
 			myLogger.error(e.getLocalizedMessage(), e);
 		}
