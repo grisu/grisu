@@ -22,9 +22,9 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class GrisuCenterPanel extends JPanel {
@@ -56,11 +56,11 @@ public class GrisuCenterPanel extends JPanel {
 		this.si = si;
 		this.rjm = RunningJobManager.getDefault(si);
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("219px:grow"),
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("154px:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, }));
+				FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormSpecs.RELATED_GAP_ROWSPEC, RowSpec.decode("154px:grow"),
+				FormSpecs.RELATED_GAP_ROWSPEC, }));
 
 		wrapperPanel = new JPanel();
 

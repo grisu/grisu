@@ -12,9 +12,9 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class UnixCommands extends AppSpecificViewerPanel {
@@ -52,13 +52,13 @@ public class UnixCommands extends AppSpecificViewerPanel {
 		if (panel == null) {
 			panel = new JPanel();
 			panel.setLayout(new FormLayout(new ColumnSpec[] {
-					FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+					FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,
 					ColumnSpec.decode("46px:grow"),
-					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-					FormFactory.LINE_GAP_ROWSPEC, RowSpec.decode("14px"),
-					FormFactory.RELATED_GAP_ROWSPEC,
+					FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+					FormSpecs.LINE_GAP_ROWSPEC, RowSpec.decode("14px"),
+					FormSpecs.RELATED_GAP_ROWSPEC,
 					RowSpec.decode("default:grow"),
-					FormFactory.RELATED_GAP_ROWSPEC, }));
+					FormSpecs.RELATED_GAP_ROWSPEC, }));
 			panel.add(getLblStdout(), "2, 2, left, top");
 			panel.add(getScrollPane(), "2, 4, fill, fill");
 		}
@@ -69,13 +69,13 @@ public class UnixCommands extends AppSpecificViewerPanel {
 		if (panel_1 == null) {
 			panel_1 = new JPanel();
 			panel_1.setLayout(new FormLayout(new ColumnSpec[] {
-					FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+					FormSpecs.LABEL_COMPONENT_GAP_COLSPEC,
 					ColumnSpec.decode("46px:grow"),
-					FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-					FormFactory.LINE_GAP_ROWSPEC, RowSpec.decode("14px"),
-					FormFactory.RELATED_GAP_ROWSPEC,
+					FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+					FormSpecs.LINE_GAP_ROWSPEC, RowSpec.decode("14px"),
+					FormSpecs.RELATED_GAP_ROWSPEC,
 					RowSpec.decode("default:grow"),
-					FormFactory.RELATED_GAP_ROWSPEC, }));
+					FormSpecs.RELATED_GAP_ROWSPEC, }));
 			panel_1.add(getLblStderr(), "2, 2, left, top");
 			panel_1.add(getScrollPane_1(), "2, 4, fill, fill");
 		}

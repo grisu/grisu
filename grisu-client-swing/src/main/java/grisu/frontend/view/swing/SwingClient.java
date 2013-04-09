@@ -6,7 +6,6 @@ import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.view.swing.jobcreation.ExampleJobCreationPanel;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.utils.DefaultExceptionHandler;
-import grisu.jcommons.utils.EnvironmentVariableHelpers;
 import grith.jgrith.Environment;
 
 import java.awt.EventQueue;

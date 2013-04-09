@@ -48,24 +48,24 @@ public class MpiBlastExampleJobCreationPanel extends JPanel {
 	// */
 	// public MpiBlastExampleJobCreationPanel() {
 	// setLayout(new FormLayout(new ColumnSpec[] {
-	// FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-	// FormFactory.RELATED_GAP_COLSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC,
 	// ColumnSpec.decode("default:grow"),
-	// FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-	// FormFactory.RELATED_GAP_COLSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC,
 	// ColumnSpec.decode("default:grow"),
-	// FormFactory.RELATED_GAP_COLSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC,
 	// ColumnSpec.decode("max(16dlu;default)"),
-	// FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-	// FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-	// FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-	// FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-	// FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-	// FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-	// FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-	// FormFactory.RELATED_GAP_ROWSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+	// FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+	// FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+	// FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+	// FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+	// FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+	// FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+	// FormSpecs.RELATED_GAP_ROWSPEC,
 	// RowSpec.decode("default:grow"),
-	// FormFactory.RELATED_GAP_ROWSPEC, }));
+	// FormSpecs.RELATED_GAP_ROWSPEC, }));
 	// add(getLblFastaFile(), "2, 2, right, default");
 	// add(getInputFileComboBox(), "4, 2, 5, 1, fill, default");
 	// add(getBtnBrowse(), "10, 2");

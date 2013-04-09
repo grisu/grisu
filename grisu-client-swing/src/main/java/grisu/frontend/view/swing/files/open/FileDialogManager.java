@@ -3,7 +3,6 @@ package grisu.frontend.view.swing.files.open;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.view.swing.files.GridFileSelectionDialog;
-import grisu.frontend.view.swing.files.contextMenu.OpenAction;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;

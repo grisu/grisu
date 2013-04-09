@@ -1,6 +1,5 @@
 package grisu.frontend.view.swing.files;
 
-import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;

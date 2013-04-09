@@ -15,9 +15,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class BatchJobStatusPanel extends JPanel implements
@@ -83,25 +83,25 @@ public class BatchJobStatusPanel extends JPanel implements
 		this.bj.addPropertyChangeListener(this);
 
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("max(20dlu;default)"),
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("14dlu"),
-				ColumnSpec.decode("12dlu"), FormFactory.RELATED_GAP_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC, ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"), FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("14dlu"), ColumnSpec.decode("12dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("14dlu"),
-				ColumnSpec.decode("12dlu"), FormFactory.RELATED_GAP_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC, ColumnSpec.decode("14dlu"),
+				ColumnSpec.decode("12dlu"), FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("14dlu"), ColumnSpec.decode("12dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("12dlu"),
+				FormSpecs.RELATED_GAP_COLSPEC, ColumnSpec.decode("12dlu"),
 				ColumnSpec.decode("14dlu"), ColumnSpec.decode("12dlu"),
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				RowSpec.decode("8dlu"), FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				RowSpec.decode("8dlu"), FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("top:max(24dlu;default):grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("top:default"),
-				FormFactory.RELATED_GAP_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC, RowSpec.decode("top:default"),
+				FormSpecs.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("bottom:max(24dlu;default):grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, }));
+				FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC, }));
 		add(getUnsubValueLabel(), "4, 2, 2, 1, right, default");
 		add(getWaitingValueLabel(), "7, 2, 2, 1, right, default");
 		add(getRunValueLabel(), "10, 2, 2, 1, right, default");

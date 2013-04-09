@@ -62,12 +62,12 @@ public class BatchDownloadResultPanel extends JPanel {
 	// this.displayTimestamp = displayTimestamp;
 	//
 	// setLayout(new FormLayout(new ColumnSpec[] {
-	// FormFactory.RELATED_GAP_COLSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC,
 	// ColumnSpec.decode("default:grow"),
-	// FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-	// FormFactory.RELATED_GAP_ROWSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+	// FormSpecs.RELATED_GAP_ROWSPEC,
 	// RowSpec.decode("default:grow"),
-	// FormFactory.RELATED_GAP_ROWSPEC, }));
+	// FormSpecs.RELATED_GAP_ROWSPEC, }));
 	//
 	// fileModel = new EventTableModel<GlazedFile>(sortedList,
 	// new GlazedFileTableFormat());
