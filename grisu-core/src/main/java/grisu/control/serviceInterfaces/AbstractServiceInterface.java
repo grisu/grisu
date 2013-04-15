@@ -44,8 +44,9 @@ import grisu.model.info.dto.Version;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
+import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.utils.CertificateFiles;
-import grith.jgrith.voms.VOManagement.VOManagement;
+import grith.jgrith.voms.VOManagement.VOManager;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -166,10 +167,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
 
 			//String[] vos = ServerPropertiesManager.getVOsToUse();
+			
+			AbstractCred.DEFAULT_VO_MANAGER = new VOManager(informationManager);
 
 			Set<VO> vos = informationManager.getAllVOs();
 
-			VOManagement.setVOsToUse(vos);
+			//VOManagement.setVOsToUse(vos);
 
 			//			VomsesFiles.copyVomses(Arrays.asList(ServerPropertiesManager
 			//					.getVOsToUse()));

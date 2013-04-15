@@ -8,7 +8,6 @@ import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.VO;
 import grisu.settings.Environment;
 import grisu.settings.ServerPropertiesManager;
-import grith.jgrith.voms.VOManagement.VOManagement;
 
 import java.io.File;
 import java.io.IOException;
@@ -193,7 +192,7 @@ public class AdminInterface {
 		refreshConfig();
 		im.refresh();
 		Set<VO> vos = im.getAllVOs();
-		VOManagement.setVOsToUse(vos);
+//		VOManagement.setVOsToUse(vos);
 
 		return DtoStringList.fromSingleString("VOs refreshed.");
 
