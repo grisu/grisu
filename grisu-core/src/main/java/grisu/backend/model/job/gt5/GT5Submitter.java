@@ -19,6 +19,8 @@ import org.globus.gram.internal.GRAMConstants;
 import org.globus.gram.internal.GRAMProtocolErrorConstants;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
+import org.perf4j.StopWatch;
+import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,6 +195,9 @@ public class GT5Submitter extends JobSubmitter {
 	@Override
 	protected String submit(String host,
 			String factoryType, Job job) throws ServerJobSubmissionException {
+		
+		StopWatch sw = new Slf4JStopWatch(myLogger);
+		sw.start();
 
 		final RSLFactory f = RSLFactory.getRSLFactory();
 		String rsl = null;
@@ -201,6 +206,8 @@ public class GT5Submitter extends JobSubmitter {
 			rsl = f.create(job.getJobDescription(), job.getFqan()).toString();
 		} catch (final RSLCreationException rex) {
 			throw new ServerJobSubmissionException(rex);
+		} finally {
+			sw.stop("Grisu.Jobsubmission.GT5.failed");
 		}
 
 		
@@ -229,13 +236,15 @@ public class GT5Submitter extends JobSubmitter {
 			// gt5Job.getStatus();
 
 			job.setSubmittedJobDescription(rsl);
-
+			sw.stop("Grisu.Jobsubmission.GT5.success");
 			return gt5Job.getIDAsString();
 
 		} catch (final GSSException gss) {
 			myLogger.error(gss.getLocalizedMessage(), gss);
+			sw.stop("Grisu.Jobsubmission.GT5.failed");
 			throw new ServerJobSubmissionException("job credential is invalid");
 		} catch (final GramException gex) {
+			sw.stop("Grisu.Jobsubmission.GT5.failed");
 			throw new ServerJobSubmissionException(gex.getLocalizedMessage(),
 					gex);
 		}

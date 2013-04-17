@@ -17,6 +17,8 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.globus.ftp.MarkerListener;
+import org.perf4j.StopWatch;
+import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +67,9 @@ RemoteFileTransferObject {
 			@Override
 			public void run() {
 
+				StopWatch sw = new Slf4JStopWatch(myLogger);
+				sw.start();
+				
 				try {
 					for (int tryNo = 0; tryNo <= ServerPropertiesManager
 							.getFileTransferRetries(); tryNo++) {
@@ -127,7 +132,8 @@ RemoteFileTransferObject {
 					} catch (final Exception e) {
 						myLogger.warn(id + e.getLocalizedMessage());
 					}
-					myLogger.debug(id + ": finalized...");
+					
+					sw.stop("GrisuTransfer.CommonsVFS", "Finished transfer: "+id );
 				}
 
 			}

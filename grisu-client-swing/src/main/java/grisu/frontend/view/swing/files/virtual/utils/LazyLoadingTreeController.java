@@ -37,6 +37,8 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 						myLogger.error(e.getLocalizedMessage(), e);
 					} catch (final ExecutionException e) {
 						myLogger.error(e.getLocalizedMessage(), e);
+					} catch (final Exception ex) {
+						myLogger.error(ex.getLocalizedMessage(), ex);
 					}
 
 				}
