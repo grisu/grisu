@@ -9,7 +9,21 @@ import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Label;
+import java.awt.PopupMenu;
+import java.awt.RenderingHints;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
@@ -19,9 +33,18 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.apache.commons.io.FileUtils;
 import org.gjt.sp.jedit.Mode;
@@ -49,6 +72,12 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 	private String fileDialogAlias = null;
 
 	private GridFile currentFile;
+	
+	private ImageIcon icon;
+	
+	private Timer timer = null;
+	private JDialog frame = null;
+	private JComponent component = null;
 
 	private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
@@ -61,6 +90,50 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 		add(getStandaloneTextArea(), BorderLayout.CENTER);
 
 		this.fileDialogAlias = fileDialogAlias;
+		
+	       frame = new JDialog();
+	       
+	        frame.setLayout ( new BorderLayout() ); 
+	        
+	        // We should not use default background and opaque panel - that might cause repaint problems
+	        // This is why we use JPanel with transparent background painted and opacity set to false
+	        JPanel transparentPanel = new JPanel(new BorderLayout ())
+	        {
+	            protected void paintComponent ( Graphics g )
+	            {
+	                super.paintComponent ( g );
+	                g.setColor ( Color.WHITE );
+	                g.fillRect ( 0, 0, getWidth (), getHeight () );
+	            }
+	        };
+	        transparentPanel.setOpaque ( false );
+	        frame.add ( transparentPanel );
+
+	        // Image in another component
+	        component = new JComponent ()
+	        {
+	            protected void paintComponent ( Graphics g )
+	            {
+	                super.paintComponent ( g );
+
+	                Graphics2D g2d = ( Graphics2D ) g;
+
+	                // For better image quality when it is rotated
+	                g2d.setRenderingHint ( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR );
+
+	                // Transparency for image
+	                g2d.setComposite ( AlphaComposite.getInstance ( AlphaComposite.SRC_OVER, 0.5f ) );
+
+	                // Drawing image
+	                g2d.drawImage ( icon.getImage(), 0, 0, null );
+	            }
+	        };
+	        transparentPanel.add ( component );
+	        
+	        frame.setUndecorated ( true );
+
+	        
+	        frame.setVisible (false);		
 	}
 
 	public void activateGlassPane(String msg) {
@@ -224,11 +297,51 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 					+ file.getUrl());
 		}
 
-		activateGlassPane("Loading file: " + file.getName());
+		setTextAreaText("");
+		setOpaque(false);
+		
+//display loading animation start------------------------------------------------------------------------------		
 
+
+		
+		icon = new ImageIcon(getClass().getClassLoader().getResource("Loading-Dots-thumb1.png")); 
+        frame.setSize ( icon.getIconWidth (), icon.getIconHeight () );
+        frame.setLocationRelativeTo (SwingUtilities.windowForComponent(this));
+		frame.setVisible(true);
+		
+		//  animation (changes every 500ms)
+        
+        final Thread timerThread = new Thread(){
+        	public void run(){
+        		timer = new Timer(500, new ActionListener() {
+					
+        			int count=0;
+					public void actionPerformed(ActionEvent e) {
+						// TODO Auto-generated method stub
+						count=((count)%4) +1;
+						icon = new ImageIcon(getClass().getClassLoader().getResource("Loading-Dots-thumb"+count+".png"));
+						component.repaint();
+					}
+				});
+        		timer.start();
+        	}
+        };
+        
+        timerThread.start();
+        
+//display loading animation end------------------------------------------------------------------------------		
+		
+		
 		Thread t = new Thread() {
 			public void run() {
-
+//test loading animation start
+				try{
+					Thread.currentThread().sleep(2000);
+					}catch(InterruptedException e){
+						e.printStackTrace();
+					}
+//test loading animation end
+				
 				try {
 
 					File localfile = null;
@@ -261,7 +374,10 @@ public class GridFileTextEditPanel extends JPanel implements GridFileHolder {
 					pcs.firePropertyChange("currentFile", currentFile, old);
 
 				} finally {
-					deactivateGlassPane();
+//					deactivateGlassPane();
+					frame.setVisible(false); 
+					timer.stop();
+					timerThread.stop();
 				}
 			}
 		};
