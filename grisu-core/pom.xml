@@ -156,7 +156,7 @@
 
 			<groupId>commons-vfs-grid</groupId>
 			<artifactId>commons-vfs-grid</artifactId>
-			<version>1.5.2-nz</version>
+			<version>1.5.3-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>

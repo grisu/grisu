@@ -5,7 +5,6 @@ import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
-import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.cred.Cred;
 
 import java.net.MalformedURLException;

@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.activation.DataSource;
 
-import org.apache.commons.vfs.FileContent;
-import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs2.FileContent;
+import org.apache.commons.vfs2.FileObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

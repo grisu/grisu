@@ -59,7 +59,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	private final static ImageIcon REFRESH_ICON = createImageIcon(
 			"refresh.png", "Refresh");
 
-	private static ChartPanel createChart(String title, String y_axis,
+	public static ChartPanel createChart(String title, String y_axis,
 			XYDataset dataset, boolean createLegend) {
 
 		final JFreeChart chart = ChartFactory.createTimeSeriesChart(title, // title
