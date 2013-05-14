@@ -126,7 +126,7 @@ public class AdminInterface {
 		}
 
 		if (Constants.REFRESH_VOS.equals(command)) {
-			return refreshVos();
+			return refreshGridInfo();
 		} else if (Constants.REFRESH_CONFIG.equals(command)) {
 			return refreshConfig();
 		} else if (Constants.CLEAR_USER_CACHE.equals(command)) {
@@ -187,14 +187,14 @@ public class AdminInterface {
 		return DtoStringList.fromSingleString("Config refreshed.");
 	}
 
-	private DtoStringList refreshVos() {
+	private DtoStringList refreshGridInfo() {
 
 		refreshConfig();
 		im.refresh();
 		Set<VO> vos = im.getAllVOs();
 //		VOManagement.setVOsToUse(vos);
 
-		return DtoStringList.fromSingleString("VOs refreshed.");
+		return DtoStringList.fromSingleString("Info refreshed.");
 
 
 	}
