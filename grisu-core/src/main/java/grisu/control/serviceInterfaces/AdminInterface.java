@@ -189,12 +189,23 @@ public class AdminInterface {
 
 	private DtoStringList refreshGridInfo() {
 
-		refreshConfig();
-		im.refresh();
-		Set<VO> vos = im.getAllVOs();
-//		VOManagement.setVOsToUse(vos);
+		StringBuffer temp = new StringBuffer();
+		try {
+			refreshConfig();
+			temp.append("Config refreshed successfully.\n");
+		} catch (Exception e) {
+			temp.append("Refreshing config failed: "+e.getLocalizedMessage()+"\n");
+		}
+		try {
+			im.refresh();
+			Set<VO> vos = im.getAllVOs();
+			temp.append("Grid info refreshed successfully.\n");
+		} catch (Exception e) {
+			temp.append("Refreshing grid info failed: "+e.getLocalizedMessage()+"\n");
+		}
 
-		return DtoStringList.fromSingleString("Info refreshed.");
+
+		return DtoStringList.fromSingleString(temp.toString());
 
 
 	}
