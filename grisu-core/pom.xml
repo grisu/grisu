@@ -317,9 +317,9 @@
 			<version>0.1-SNAPSHOT</version>
 		</dependency>-->
 		<dependency>
-			<groupId>nz.nesi</groupId>
+			<groupId>nz.org.nesi</groupId>
 			<artifactId>grin</artifactId>
-			<version>0.2.2</version>
+			<version>0.2.3-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>orika-core</artifactId>
