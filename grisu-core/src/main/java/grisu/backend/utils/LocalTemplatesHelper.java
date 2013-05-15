@@ -1,6 +1,8 @@
 package grisu.backend.utils;
 
+import grisu.jcommons.git.GitRepoUpdater;
 import grisu.settings.Environment;
+import grisu.settings.ServerPropertiesManager;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -9,9 +11,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +29,12 @@ public final class LocalTemplatesHelper {
 
 	public static final File GLITE_DIRECTORY = new File(
 			System.getProperty("user.home"), ".glite");
+	
+	public static void main(String[] args) throws Exception {
+		
+		prepareTemplates();
+		
+	}
 
 	public static void copyFile(final File in, final File out)
 			throws IOException {
@@ -58,6 +68,28 @@ public final class LocalTemplatesHelper {
 			}
 			globusFolderCopied = true;
 		}
+	}
+	
+	
+	public static void prepareTemplates() throws Exception {
+		
+		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()
+				|| !Environment.getGrisuDirectory().exists()) {
+			createGrisuDirectories();
+		}
+		
+		Map<String, String> conf = ServerPropertiesManager.getTemplateManagerConf();
+		
+		String path = "git://github.com/grisu/grisu-templates.git";
+		
+		if ( conf != null && StringUtils.isNotBlank(conf.get("path")) ) {
+			path = conf.get("path");
+		}
+		
+		if ( path.startsWith("git") ) {
+			GitRepoUpdater.ensureUpdated(path, Environment.getAvailableTemplatesDirectory());
+		} 
+		
 	}
 
 	/**

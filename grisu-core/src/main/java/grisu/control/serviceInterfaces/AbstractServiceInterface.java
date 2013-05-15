@@ -164,7 +164,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				CoGProperties.ENFORCE_SIGNING_POLICY, "false");
 
 		try {
-			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
+//			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
+			
+			LocalTemplatesHelper.prepareTemplates();
+			
 
 			//String[] vos = ServerPropertiesManager.getVOsToUse();
 			

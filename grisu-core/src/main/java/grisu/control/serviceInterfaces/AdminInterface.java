@@ -2,6 +2,7 @@ package grisu.control.serviceInterfaces;
 
 import grisu.backend.hibernate.UserDAO;
 import grisu.backend.model.User;
+import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.model.info.dto.DtoStringList;
@@ -133,6 +134,8 @@ public class AdminInterface {
 			return clearUserCache(config);
 		} else if (Constants.LIST_USERS.equals(command)) {
 			return listUsers();
+		} else if ( Constants.REFRESH_TEMPLATES.equals(command)) {
+			return refreshTemplates();
 		}
 
 		return DtoStringList.fromSingleString("\"" + command
@@ -208,6 +211,19 @@ public class AdminInterface {
 		return DtoStringList.fromSingleString(temp.toString());
 
 
+	}
+	
+	private DtoStringList refreshTemplates() {
+		StringBuffer temp = new StringBuffer();
+		
+		try {
+			LocalTemplatesHelper.prepareTemplates();
+			temp.append("Templates refreshed successfully.\n");
+		} catch (Exception e) {
+			temp.append("Failed refreshing templates: "+e.getLocalizedMessage()+"\n");
+		}
+		
+		return DtoStringList.fromSingleString(temp.toString());
 	}
 
 }

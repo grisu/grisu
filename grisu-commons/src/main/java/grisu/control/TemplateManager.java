@@ -39,7 +39,7 @@ public class TemplateManager {
 
 	public String addLocalTemplate(File template) {
 
-		final File file = new File(Environment.getTemplateDirectory(),
+		final File file = new File(Environment.getIndividualTemplateDirectory(),
 				template.getName());
 
 		if (!file.equals(template)) {
@@ -85,13 +85,13 @@ public class TemplateManager {
 
 		final List<String> temp = getRemoteTemplate(name);
 
-		File file = new File(Environment.getTemplateDirectory(), name
+		File file = new File(Environment.getIndividualTemplateDirectory(), name
 				+ ".template");
 		int i = 1;
 		String tempName = name;
 		while (file.exists()) {
 			tempName = name + "_" + i;
-			file = new File(Environment.getTemplateDirectory(), tempName
+			file = new File(Environment.getIndividualTemplateDirectory(), tempName
 					+ ".template");
 			i = i + 1;
 		}
@@ -147,7 +147,7 @@ public class TemplateManager {
 
 		final Map<String, List<String>> localTemplates = new HashMap<String, List<String>>();
 
-		final File tempDir = new File(Environment.getTemplateDirectory());
+		final File tempDir = new File(Environment.getIndividualTemplateDirectory());
 
 		if (!tempDir.exists()) {
 			if (!tempDir.mkdirs()) {
@@ -229,7 +229,7 @@ public class TemplateManager {
 
 		// localTemplates.remove(name);
 
-		final File temp = new File(Environment.getTemplateDirectory(), name
+		final File temp = new File(Environment.getIndividualTemplateDirectory(), name
 				+ ".template");
 
 		temp.delete();
