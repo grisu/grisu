@@ -73,6 +73,9 @@ public final class LocalTemplatesHelper {
 	
 	public static void prepareTemplates() throws Exception {
 		
+		myLogger.debug("Preparing templates...");
+
+		
 		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()
 				|| !Environment.getGrisuDirectory().exists()) {
 			createGrisuDirectories();
@@ -85,10 +88,14 @@ public final class LocalTemplatesHelper {
 		if ( conf != null && StringUtils.isNotBlank(conf.get("path")) ) {
 			path = conf.get("path");
 		}
+
 		
 		if ( path.startsWith("git") ) {
+			myLogger.debug("Updating template repo: "+path+" to: "+Environment.getAvailableTemplatesDirectory());
 			GitRepoUpdater.ensureUpdated(path, Environment.getAvailableTemplatesDirectory());
-		} 
+		}  else {
+			myLogger.debug("Template directory local, does not need update: "+path);
+		}
 		
 	}
 

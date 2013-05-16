@@ -124,10 +124,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			try {
 				JoranConfigurator configurator = new JoranConfigurator();
 				configurator.setContext(context);
-				// Call context.reset() to clear any previous configuration, e.g.
-				// default
-				// configuration. For multi-step configuration, omit calling
-				// context.reset().
 				context.reset();
 				configurator.doConfigure(logbackPath);
 			} catch (JoranException je) {
@@ -135,18 +131,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			StatusPrinter.printInCaseOfErrorsOrWarnings(context);
 		}
-
-
-		// TODO change to logback
-		// String log4jPath = "/etc/grisu/grisu-log4j.xml";
-		// if (new File(log4jPath).exists() && (new File(log4jPath).length() >
-		// 0)) {
-		// try {
-		// DOMConfigurator.configure(log4jPath);
-		// } catch (Exception e) {
-		// myLogger.error(e.getLocalizedMessage(), e);
-		// }
-		// }
 
 		myLogger = LoggerFactory.getLogger(AbstractServiceInterface.class
 				.getName());
@@ -165,7 +149,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		try {
 //			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
-			
 			LocalTemplatesHelper.prepareTemplates();
 			
 
