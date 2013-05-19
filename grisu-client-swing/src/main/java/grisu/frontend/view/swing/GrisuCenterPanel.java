@@ -165,6 +165,7 @@ public class GrisuCenterPanel extends JPanel {
 			}
 		});
 
+
 		getMultiSingleJobMonitoringGrid()
 		.displayGridForApplication(application);
 

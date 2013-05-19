@@ -37,7 +37,11 @@ public class MultiSingleJobMonitoringGrid extends JPanel {
 			final SingleJobTabbedPane temp = new SingleJobTabbedPane(si,
 					application);
 			grids.put(application, temp);
-			add(temp, application);
+			SwingUtilities.invokeLater(new Thread() {
+				public void run() {
+					add(temp, application);
+				}
+			});
 		}
 
 		SwingUtilities.invokeLater(new Thread() {
