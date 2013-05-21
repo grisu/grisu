@@ -111,7 +111,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>grid-session</artifactId>
-			<version>0.3-SNAPSHOT</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>grisu.backend</groupId>
