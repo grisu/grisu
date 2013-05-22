@@ -17,7 +17,7 @@ import java.util.TreeMap;
 import javax.activation.DataHandler;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs2.FileObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

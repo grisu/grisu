@@ -39,7 +39,7 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 		this.cliParams = params;
 		this.args = args;
 
-		LoginManager.initEnvironment();
+		grith.jgrith.Environment.initEnvironment();
 	}
 
 	public String[] getGridCliArguments() {

@@ -215,7 +215,7 @@ public class RunningJobManager implements EventSubscriber {
 		createJob(job, null);
 	}
 
-	public synchronized void createJob(GrisuJob job, String fqan)
+	public synchronized void createJob(final GrisuJob job, String fqan)
 			throws JobPropertiesException {
 
 		if (StringUtils.isBlank(fqan)) {
@@ -225,7 +225,15 @@ public class RunningJobManager implements EventSubscriber {
 		}
 
 		cachedAllSingleJobs.put(job.getJobname(), job);
-		getJobs(job.getApplication()).add(job);
+//		getJobs(job.getApplication()).add(job);
+
+		new Thread() {
+			@Override
+			public void run() {
+				updateJobnameList(job.getApplication(), true);
+
+			}
+		}.start();
 		// if (watchingAllSingleJobs) {
 		// getJobs(Constants.ALLJOBS_KEY).add(job);
 		// }
@@ -632,26 +640,10 @@ public class RunningJobManager implements EventSubscriber {
 			return t;
 		}
 	}
-
-	public void killJobs(List<GrisuJob> jobs, boolean clean) {
-
-		if (jobs == null || jobs.size() == 0) {
-			return;
-		}
-
-		if (clean) {
-			for (GrisuJob job : jobs) {
-				job.setBeingCleaned(true);
-			}
-		}
-
-		Set<String> list = Sets.newTreeSet();
-		for (GrisuJob job : jobs) {
-			list.add(job.getJobname());
-		}
-
+	
+	public String killJobsByName(Collection<String> jobs, boolean clean ) {
 		final String handle = si.killJobs(
-				DtoStringList.fromStringColletion(list), clean);
+				DtoStringList.fromStringColletion(jobs), clean);
 
 		Thread t = new Thread() {
 			public void run() {
@@ -674,6 +666,28 @@ public class RunningJobManager implements EventSubscriber {
 		t.setName("multi job clean wait");
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
+		
+		return handle;
+	}
+
+	public String killJobs(List<GrisuJob> jobs, boolean clean) {
+
+		if (jobs == null || jobs.size() == 0) {
+			return null;
+		}
+
+		if (clean) {
+			for (GrisuJob job : jobs) {
+				job.setBeingCleaned(true);
+			}
+		}
+
+		Set<String> list = Sets.newTreeSet();
+		for (GrisuJob job : jobs) {
+			list.add(job.getJobname());
+		}
+		
+		return killJobsByName(list, clean);
 
 	}
 

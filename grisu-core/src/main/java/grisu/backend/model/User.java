@@ -15,6 +15,7 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.utils.FqanHelpers;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
@@ -25,7 +26,6 @@ import grisu.model.job.JobDescription;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.cred.Cred;
-import grith.jgrith.utils.FqanHelpers;
 import grith.jgrith.vomsProxy.VomsException;
 
 import java.util.Collection;
@@ -58,7 +58,7 @@ import javax.persistence.Transient;
 import net.sf.ehcache.util.NamedThreadFactory;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.vfs.FileSystemException;
+import org.apache.commons.vfs2.FileSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -338,7 +338,7 @@ public class User {
 		}
 
 		final Map<String, String> properties = new HashMap<String, String>();
-		boolean userDnPath = dir.isShared();
+		boolean userDnPath = Directory.isShared(dir);
 		if (StringUtils.isNotBlank(propString)) {
 
 			final String[] parts = propString.split(";");
@@ -538,7 +538,7 @@ public class User {
 			mp.addProperty(key, properties.get(key));
 		}
 
-		final boolean isVolatile = dir.isVolatileDirectory();
+		final boolean isVolatile = Directory.isVolatileDirectory(dir);
 		mp.setVolatileFileSystem(isVolatile);
 
 		return mp;

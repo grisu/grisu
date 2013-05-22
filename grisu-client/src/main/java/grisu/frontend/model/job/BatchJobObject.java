@@ -1908,7 +1908,7 @@ Comparable<BatchJobObject>, Listener {
 
 		try {
 			serviceInterface.restartBatchJob(batchJobname, policy.getName(),
-					policy.getProperties()).propertiesAsMap();
+					policy.getProperties());
 		} catch (final NoSuchJobException e) {
 			setResubmitting(false);
 			return false;

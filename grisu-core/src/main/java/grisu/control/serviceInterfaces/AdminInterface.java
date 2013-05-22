@@ -2,13 +2,13 @@ package grisu.control.serviceInterfaces;
 
 import grisu.backend.hibernate.UserDAO;
 import grisu.backend.model.User;
+import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.VO;
 import grisu.settings.Environment;
 import grisu.settings.ServerPropertiesManager;
-import grith.jgrith.voms.VOManagement.VOManagement;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,14 +126,16 @@ public class AdminInterface {
 					.fromSingleString("No valid grisu-admins.config found. Not doing anything.");
 		}
 
-		if (Constants.REFRESH_VOS.equals(command)) {
-			return refreshVos();
+		if (Constants.REFERSH_GRID_INFO.equals(command)) {
+			return refreshGridInfo();
 		} else if (Constants.REFRESH_CONFIG.equals(command)) {
 			return refreshConfig();
 		} else if (Constants.CLEAR_USER_CACHE.equals(command)) {
 			return clearUserCache(config);
 		} else if (Constants.LIST_USERS.equals(command)) {
 			return listUsers();
+		} else if ( Constants.REFRESH_TEMPLATES.equals(command)) {
+			return refreshTemplates();
 		}
 
 		return DtoStringList.fromSingleString("\"" + command
@@ -188,16 +190,40 @@ public class AdminInterface {
 		return DtoStringList.fromSingleString("Config refreshed.");
 	}
 
-	private DtoStringList refreshVos() {
+	private DtoStringList refreshGridInfo() {
 
-		refreshConfig();
-		im.refresh();
-		Set<VO> vos = im.getAllVOs();
-		VOManagement.setVOsToUse(vos);
+		StringBuffer temp = new StringBuffer();
+		try {
+			refreshConfig();
+			temp.append("Config refreshed successfully.\n");
+		} catch (Exception e) {
+			temp.append("Refreshing config failed: "+e.getLocalizedMessage()+"\n");
+		}
+		try {
+			im.refresh();
+			Set<VO> vos = im.getAllVOs();
+			temp.append("Grid info refreshed successfully.\n");
+		} catch (Exception e) {
+			temp.append("Refreshing grid info failed: "+e.getLocalizedMessage()+"\n");
+		}
 
-		return DtoStringList.fromSingleString("VOs refreshed.");
+
+		return DtoStringList.fromSingleString(temp.toString());
 
 
+	}
+	
+	private DtoStringList refreshTemplates() {
+		StringBuffer temp = new StringBuffer();
+		
+		try {
+			LocalTemplatesHelper.prepareTemplates();
+			temp.append("Templates refreshed successfully.\n");
+		} catch (Exception e) {
+			temp.append("Failed refreshing templates: "+e.getLocalizedMessage()+"\n");
+		}
+		
+		return DtoStringList.fromSingleString(temp.toString());
 	}
 
 }

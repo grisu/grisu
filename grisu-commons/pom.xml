@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5.34-SNAPSHOT</version>
+		<version>0.6.4</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>grisu-commons</artifactId>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.6.4</version>
+			<version>1.6.6</version>
 		</dependency>
 
 
@@ -63,48 +63,6 @@
 			<version>1.0-M1</version> </dependency> -->
 
 		<dependency>
-			<groupId>commons-configuration</groupId>
-			<artifactId>commons-configuration</artifactId>
-			<version>1.6</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.maven</groupId>
-					<artifactId>maven-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-jxpath</groupId>
-					<artifactId>commons-jxpath</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xerces</groupId>
-					<artifactId>xerces</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xalan</groupId>
-					<artifactId>xalan</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-beanutils</groupId>
-					<artifactId>commons-beanutils</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-beanutils-core</artifactId>
-					<groupId>commons-beanutils</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.4</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.vpac.historyRepeater</groupId>
 			<artifactId>historyRepeater</artifactId>
 			<version>0.5</version>
@@ -116,6 +74,10 @@
 				<exclusion>
 					<artifactId>grid-jcommons</artifactId>
 					<groupId>grisu</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-configuration</artifactId>
+					<groupId>commons-configuration</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -173,26 +135,31 @@
 
 
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-			<version>1.6.4</version>
-		</dependency>
-		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>jgrith</artifactId>
-			<version>0.12</version>
+			<version>${jgrith.version}</version>
 
 		</dependency>
 
 		<dependency>
 			<groupId>grisu</groupId>
 			<artifactId>grid-jcommons</artifactId>
-			<version>2.5</version>
+			<version>${grid-jcommons.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>2.0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -369,4 +336,8 @@
 	</build>
 
 
+	<properties>
+		<jgrith.version>0.16</jgrith.version>
+		<grid-jcommons.version>2.7</grid-jcommons.version>
+	</properties>
 </project>

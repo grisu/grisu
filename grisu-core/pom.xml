@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5.34-SNAPSHOT</version>
+		<version>0.6.4</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.backend</groupId>
@@ -156,7 +156,7 @@
 
 			<groupId>commons-vfs-grid</groupId>
 			<artifactId>commons-vfs-grid</artifactId>
-			<version>1.5.2-nz</version>
+			<version>1.5.3-nz</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>cog-jglobus</artifactId>
@@ -317,9 +317,9 @@
 			<version>0.1-SNAPSHOT</version>
 		</dependency>-->
 		<dependency>
-			<groupId>nz.nesi</groupId>
+			<groupId>nz.org.nesi</groupId>
 			<artifactId>grin</artifactId>
-			<version>0.1.3</version>
+			<version>0.3</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>orika-core</artifactId>

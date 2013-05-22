@@ -5,6 +5,7 @@ import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.exceptions.StatusException;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.utils.FqanHelpers;
 import grisu.model.dto.DtoBatchJob;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.GridFile;
@@ -12,11 +13,11 @@ import grisu.model.files.FileSystemItem;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.info.dto.Application;
+import grisu.model.info.dto.DtoProperties;
 import grisu.model.info.dto.DtoStringList;
 import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
-import grith.jgrith.utils.FqanHelpers;
 
 import java.io.File;
 import java.net.URI;
@@ -402,7 +403,7 @@ EventSubscriber<FqanEvent> {
 	public synchronized Map<String, String> getBookmarks() {
 
 		if (cachedBookmarks == null) {
-			cachedBookmarks = serviceInterface.getBookmarks().propertiesAsMap();
+			cachedBookmarks = DtoProperties.asMap(serviceInterface.getBookmarks());
 		}
 
 		return cachedBookmarks;

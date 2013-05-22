@@ -2,7 +2,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.5.34-SNAPSHOT</version>
+		<version>0.6.4</version>
 
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -52,7 +52,6 @@
 			<groupId>grisu</groupId>
 			<artifactId>grisu-commons</artifactId>
 			<version>${project.version}</version>
-
 		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
@@ -112,7 +111,7 @@
 		<dependency>
 			<groupId>grith</groupId>
 			<artifactId>grid-session</artifactId>
-			<version>0.1.14</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>grisu.backend</groupId>

@@ -4,7 +4,6 @@ import grisu.frontend.model.job.GrisuJob;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.Arrays;
 
 import javax.swing.JTable;
 import javax.swing.UIManager;

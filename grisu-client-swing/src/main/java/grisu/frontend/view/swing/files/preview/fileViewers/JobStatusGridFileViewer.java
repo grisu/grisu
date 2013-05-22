@@ -46,9 +46,9 @@ import org.jfree.ui.RectangleInsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
@@ -59,7 +59,7 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	private final static ImageIcon REFRESH_ICON = createImageIcon(
 			"refresh.png", "Refresh");
 
-	private static ChartPanel createChart(String title, String y_axis,
+	public static ChartPanel createChart(String title, String y_axis,
 			XYDataset dataset, boolean createLegend) {
 
 		final JFreeChart chart = ChartFactory.createTimeSeriesChart(title, // title
@@ -145,18 +145,18 @@ public class JobStatusGridFileViewer extends JPanel implements GridFileViewer {
 	 */
 	public JobStatusGridFileViewer() {
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+				FormSpecs.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("default:grow"),
-				FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC, }));
+				FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC, }));
 		cpusDataset.addSeries(cpusSeries);
 		licensesDataset.addSeries(licensesUserSeries);
 		licensesDataset.addSeries(licensesAllSeries);

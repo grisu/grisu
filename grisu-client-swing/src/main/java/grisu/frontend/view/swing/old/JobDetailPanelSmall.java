@@ -28,15 +28,15 @@ public class JobDetailPanelSmall extends JPanel {
 	// this.si = si;
 	//
 	// setLayout(new FormLayout(new ColumnSpec[] {
-	// FormFactory.RELATED_GAP_COLSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC,
 	// ColumnSpec.decode("default:grow"),
-	// FormFactory.RELATED_GAP_COLSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC,
 	// ColumnSpec.decode("default:grow"),
-	// FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-	// FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-	// FormFactory.RELATED_GAP_ROWSPEC,
+	// FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+	// FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+	// FormSpecs.RELATED_GAP_ROWSPEC,
 	// RowSpec.decode("default:grow"),
-	// FormFactory.RELATED_GAP_ROWSPEC, }));
+	// FormSpecs.RELATED_GAP_ROWSPEC, }));
 	// add(getLblStatus(), "2, 2, right, default");
 	// add(getTextField_1(), "4, 2, fill, default");
 	// add(getJideTabbedPane(), "2, 4, 3, 1, fill, fill");

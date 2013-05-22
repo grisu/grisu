@@ -9,9 +9,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class BackgroundActionProgressDialogSmall extends JDialog {
@@ -50,16 +50,16 @@ public class BackgroundActionProgressDialogSmall extends JDialog {
 		setBounds(100, 100, 221, 121);
 		getContentPane().setLayout(
 				new FormLayout(new ColumnSpec[] {
-						FormFactory.RELATED_GAP_COLSPEC,
+						FormSpecs.RELATED_GAP_COLSPEC,
 						ColumnSpec.decode("default:grow"),
-						FormFactory.RELATED_GAP_COLSPEC, }, new RowSpec[] {
-						FormFactory.RELATED_GAP_ROWSPEC,
-						FormFactory.DEFAULT_ROWSPEC,
-						FormFactory.RELATED_GAP_ROWSPEC,
-						FormFactory.DEFAULT_ROWSPEC,
-						FormFactory.RELATED_GAP_ROWSPEC,
-						FormFactory.DEFAULT_ROWSPEC,
-						FormFactory.RELATED_GAP_ROWSPEC, }));
+						FormSpecs.RELATED_GAP_COLSPEC, }, new RowSpec[] {
+						FormSpecs.RELATED_GAP_ROWSPEC,
+						FormSpecs.DEFAULT_ROWSPEC,
+						FormSpecs.RELATED_GAP_ROWSPEC,
+						FormSpecs.DEFAULT_ROWSPEC,
+						FormSpecs.RELATED_GAP_ROWSPEC,
+						FormSpecs.DEFAULT_ROWSPEC,
+						FormSpecs.RELATED_GAP_ROWSPEC, }));
 		getContentPane().add(getProgressBar(), "2, 2");
 		getContentPane().add(getLblDownloading(), "2, 4");
 		getContentPane().add(getFileTextField(), "2, 6, fill, default");

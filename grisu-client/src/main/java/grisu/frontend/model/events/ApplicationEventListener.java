@@ -4,8 +4,12 @@ import grisu.model.status.ActionStatusEvent;
 
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ApplicationEventListener implements EventSubscriber {
+	
+	public static final Logger myLogger = LoggerFactory.getLogger(ApplicationEventListener.class);
 
 	public ApplicationEventListener() {
 		EventBus.subscribe(ActionStatusEvent.class, this);
@@ -15,7 +19,7 @@ public class ApplicationEventListener implements EventSubscriber {
 	}
 
 	public void onEvent(Object event) {
-		System.out.println("EVENT: " + event.toString());
+		myLogger.debug("EVENT: " + event.toString());
 	}
 
 }

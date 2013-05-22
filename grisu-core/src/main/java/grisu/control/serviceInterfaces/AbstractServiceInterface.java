@@ -44,8 +44,9 @@ import grisu.model.info.dto.Version;
 import grisu.settings.ServerPropertiesManager;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
+import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.utils.CertificateFiles;
-import grith.jgrith.voms.VOManagement.VOManagement;
+import grith.jgrith.voms.VOManagement.VOManager;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -123,10 +124,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			try {
 				JoranConfigurator configurator = new JoranConfigurator();
 				configurator.setContext(context);
-				// Call context.reset() to clear any previous configuration, e.g.
-				// default
-				// configuration. For multi-step configuration, omit calling
-				// context.reset().
 				context.reset();
 				configurator.doConfigure(logbackPath);
 			} catch (JoranException je) {
@@ -134,18 +131,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			StatusPrinter.printInCaseOfErrorsOrWarnings(context);
 		}
-
-
-		// TODO change to logback
-		// String log4jPath = "/etc/grisu/grisu-log4j.xml";
-		// if (new File(log4jPath).exists() && (new File(log4jPath).length() >
-		// 0)) {
-		// try {
-		// DOMConfigurator.configure(log4jPath);
-		// } catch (Exception e) {
-		// myLogger.error(e.getLocalizedMessage(), e);
-		// }
-		// }
 
 		myLogger = LoggerFactory.getLogger(AbstractServiceInterface.class
 				.getName());
@@ -163,13 +148,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 				CoGProperties.ENFORCE_SIGNING_POLICY, "false");
 
 		try {
-			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
+//			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
+			LocalTemplatesHelper.prepareTemplates();
+			
 
 			//String[] vos = ServerPropertiesManager.getVOsToUse();
+			
+			AbstractCred.DEFAULT_VO_MANAGER = new VOManager(informationManager);
 
 			Set<VO> vos = informationManager.getAllVOs();
 
-			VOManagement.setVOsToUse(vos);
+			//VOManagement.setVOsToUse(vos);
 
 			//			VomsesFiles.copyVomses(Arrays.asList(ServerPropertiesManager
 			//					.getVOsToUse()));
@@ -385,12 +374,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return DtoStringList.fromSingleString("No command specified.");
 		}
 
-		Map<String, String> configMap = new HashMap<String, String>();
-		if (config != null) {
-			configMap = config.propertiesAsMap();
-		}
-
-		return admin.execute(command, configMap);
+		return admin.execute(command, DtoProperties.asMap(config));
 	}
 
 	// private boolean checkWhetherGridResourceIsActuallyAvailable(
@@ -1093,7 +1077,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		} else if ("API_VERSION".equalsIgnoreCase(key)) {
 			return Integer.toString(ServiceInterface.API_VERSION);
 		} else if ("TYPE".equalsIgnoreCase(key)) {
-			return "Webservice (REST/SOAP) interface";
+			return getInterfaceType();
 		} else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
 			return BACKEND_VERSION;
 		}

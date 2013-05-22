@@ -564,6 +564,27 @@ public final class ServerPropertiesManager {
 		return retries;
 
 	}
+	
+	public static Map<String, String> getTemplateManagerConf() {
+		
+		SubnodeConfiguration conf;
+		try {
+			conf = getServerConfiguration().getSection("TemplateManager");
+		} catch (final ConfigurationException e) {
+			myLogger.error(e.getLocalizedMessage());
+			return null;
+		}
+
+		final Map<String, String> result = new TreeMap<String, String>();
+		final Iterator it = conf.getKeys();
+		while (it.hasNext()) {
+			final Object key = it.next();
+			final String value = conf.getString(key.toString());
+			result.put(key.toString(), value);
+		}
+
+		return result;
+	}
 
 	public static Map<String, String> getInformationManagerConf() {
 

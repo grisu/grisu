@@ -36,7 +36,7 @@ public final class Environment {
 	private static File GRISU_DIRECTORY;
 
 	public static String getAvailableTemplatesDirectory() {
-		return getGrisuDirectory() + File.separator + "templates_available";
+		return getVarGrisuDirectory() + File.separator + "templates_available";
 	}
 
 	public static String getAxisClientConfig() {
@@ -167,7 +167,7 @@ public final class Environment {
 		return dir;
 	}
 
-	public static String getTemplateDirectory() {
+	public static String getIndividualTemplateDirectory() {
 		return getGrisuClientDirectory() + File.separator + "templates";
 	}
 
