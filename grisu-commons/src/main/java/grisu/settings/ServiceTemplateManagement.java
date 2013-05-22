@@ -1,13 +1,16 @@
 package grisu.settings;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Helps to manage all available jsdl templates that are stored in
@@ -31,34 +34,54 @@ public final class ServiceTemplateManagement {
 	 */
 	public static String[] getAllAvailableApplications() {
 
-		final File[] templates = new File(
-				Environment.getAvailableTemplatesDirectory()).listFiles();
-		final Set<String> allAvalableTemplates = new TreeSet<String>();
+//        final File[] templates = new File(
+//                Environment.getAvailableTemplatesDirectory()).listFiles();
 
-		if (templates == null) {
-			return new String[] {};
-		}
+        final Collection<File> templates = getAllTemplateFiles();
 
-		for (final File file : templates) {
-			if (file.getName().endsWith(".template")) {
-				allAvalableTemplates.add(file.getName().substring(0,
-						file.getName().lastIndexOf(".template")));
-			}
-		}
+        final Set<String> allAvalableTemplates = new TreeSet<String>();
 
-		return allAvalableTemplates.toArray(new String[allAvalableTemplates
-				.size()]);
-	}
+        if (templates == null) {
+            return new String[]{};
+        }
+
+        for (final File file : templates) {
+            if (file.getName().endsWith(".template")) {
+                allAvalableTemplates.add(file.getName().substring(0,
+                        file.getName().lastIndexOf(".template")));
+            }
+        }
+
+        return allAvalableTemplates.toArray(new String[allAvalableTemplates
+                .size()]);
+    }
+
+    public static Collection<File> getAllTemplateFiles() {
+        final Collection<File> templates = FileUtils.listFiles(new File(Environment.getAvailableTemplatesDirectory()),new String[]{".template"}, true);
+        return templates;
+    }
 
 	public static String getTemplate(String name) {
 
-		final File file = new File(
-				Environment.getAvailableTemplatesDirectory(), name
-						+ ".template");
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+        File templateFile = null;
+        for (File tf : getAllTemplateFiles() ) {
+            if (name.equals(FilenameUtils.getBaseName(tf.getAbsolutePath()))) {
+                templateFile = tf;
+                break;
+            }
+        }
+
+        if ( templateFile == null ){
+            return null;
+        }
+
 
 		String temp;
 		try {
-			temp = FileUtils.readFileToString(file);
+			temp = FileUtils.readFileToString(templateFile);
 		} catch (final IOException e) {
 			return null;
 		}
