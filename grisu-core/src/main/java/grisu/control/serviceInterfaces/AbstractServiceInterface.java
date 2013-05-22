@@ -104,15 +104,12 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	static Logger myLogger = null;
 	public static CacheManager cache;
 
-	public static final InformationManager informationManager = new GrinformationManagerDozer(
-			ServerPropertiesManager.getInformationManagerConf());
+	public static final InformationManager informationManager;
 
-	public final static AdminInterface admin = new AdminInterface(null,
-			informationManager,
-			User.userdao);
+	public final static AdminInterface admin;
 
 
-	static {
+    static {
 
 		String logbackPath = "/etc/grisu/logback.xml";
 		if (new File(logbackPath).exists()
@@ -137,6 +134,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
         if ( StringUtils.isNotBlank(dir) ) {
             GridEnvironment.GRID_CACHE_DIR = dir;
         }
+        informationManager = new GrinformationManagerDozer(
+                ServerPropertiesManager.getInformationManagerConf());
+        admin = new AdminInterface(null,
+                informationManager,
+                User.userdao);
 
 		myLogger = LoggerFactory.getLogger(AbstractServiceInterface.class
 				.getName());
