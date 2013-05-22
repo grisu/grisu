@@ -20,6 +20,7 @@ import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.interfaces.GrinformationManagerDozer;
 import grisu.jcommons.interfaces.InformationManager;
@@ -131,6 +132,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			StatusPrinter.printInCaseOfErrorsOrWarnings(context);
 		}
+
+        String dir = ServerPropertiesManager.getCacheDirectory();
+        if ( StringUtils.isNotBlank(dir) ) {
+            GridEnvironment.GRID_CACHE_DIR = dir;
+        }
 
 		myLogger = LoggerFactory.getLogger(AbstractServiceInterface.class
 				.getName());

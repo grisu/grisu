@@ -991,4 +991,26 @@ public final class ServerPropertiesManager {
 		return allow;
 	}
 
+    public static String getCacheDirectory() {
+
+        String cachedir = null;
+        try {
+            cachedir = getServerConfiguration().getString(
+                    "General.cacheDir");
+
+            if (StringUtils.isNotBlank(cachedir)
+                    && "none".equals(cachedir.toLowerCase())) {
+                cachedir = null;
+            }
+
+        } catch (final Exception e) {
+            cachedir = null;
+        }
+
+        if (cachedir == null) {
+            cachedir = new File(Environment.getVarGrisuDirectory(), "cache").getAbsolutePath();
+        }
+
+        return cachedir;
+    }
 }

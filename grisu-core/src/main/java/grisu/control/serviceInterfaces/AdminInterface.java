@@ -126,7 +126,7 @@ public class AdminInterface {
 					.fromSingleString("No valid grisu-admins.config found. Not doing anything.");
 		}
 
-		if (Constants.REFERSH_GRID_INFO.equals(command)) {
+		if (Constants.REFRESH_GRID_INFO.equals(command)) {
 			return refreshGridInfo();
 		} else if (Constants.REFRESH_CONFIG.equals(command)) {
 			return refreshConfig();
