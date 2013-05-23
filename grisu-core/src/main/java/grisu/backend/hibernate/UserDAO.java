@@ -59,7 +59,6 @@ public class UserDAO extends BaseHibernateDAO {
 	 * Looks up the database whether a user with the specified dn is already
 	 * persisted.
 	 * 
-	 * @param dn
 	 *            the dn of the user
 	 * @return the {@link User} or null if not found
 	 */
@@ -226,6 +225,33 @@ public class UserDAO extends BaseHibernateDAO {
 				final List<String> userDNs = (queryObject.list());
 				getCurrentSession().getTransaction().commit();
 				return userDNs;
+
+			} catch (final QueryException qe) {
+				// means user not in db yet.
+				myLogger.debug(qe.getLocalizedMessage());
+				return null;
+			}
+
+		} catch (final RuntimeException e) {
+			myLogger.error(e.getLocalizedMessage(), e);
+			throw e; // or display error message
+		} finally {
+			getCurrentSession().close();
+		}
+	}
+
+	public List<User> findAllUsersThatContain(String exp){
+		final String queryString = "from grisu.backend.model.User as user where user.dn like :exp";
+		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
+		try {
+			getCurrentSession().beginTransaction();
+
+			final Query queryObject = getCurrentSession().createQuery(queryString).setParameter("exp", "%"+exp+"%");
+
+			try {
+				final List<User> user = (queryObject.list());
+				getCurrentSession().getTransaction().commit();
+				return user;
 
 			} catch (final QueryException qe) {
 				// means user not in db yet.
