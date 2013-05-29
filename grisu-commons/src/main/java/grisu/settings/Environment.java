@@ -23,6 +23,8 @@ public final class Environment {
 	private static final String GRISU_DEFAULT_DIRECTORY = System
 			.getProperty("user.home") + File.separator + ".grisu";
 
+    private static String GRISU_AVAILABLE_TEMPLATES_DIRECTORY = null;
+
 	private static final String GRISU_SYSTEM_WIDE_CONFIG_DIR = "/etc/grisu";
 	private static final String GRISU_SYSTEM_WIDE_VAR_DIR = "/var/lib/grisu/";
 	private static final String GRISU_CLIENT_DIR = System
@@ -36,7 +38,11 @@ public final class Environment {
 	private static File GRISU_DIRECTORY;
 
 	public static String getAvailableTemplatesDirectory() {
-		return getVarGrisuDirectory() + File.separator + "templates_available";
+        if (StringUtils.isNotBlank(GRISU_AVAILABLE_TEMPLATES_DIRECTORY)) {
+            return GRISU_AVAILABLE_TEMPLATES_DIRECTORY;
+        } else {
+            return getVarGrisuDirectory() + File.separator + "templates_available";
+        }
 	}
 
 	public static String getAxisClientConfig() {
@@ -205,4 +211,9 @@ public final class Environment {
 	private Environment() {
 	}
 
+    public static void setAvailableTemplatesDirectory(String dir) {
+
+        GRISU_AVAILABLE_TEMPLATES_DIRECTORY = dir;
+
+    }
 }

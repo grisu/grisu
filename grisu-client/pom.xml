@@ -112,6 +112,16 @@
 			<groupId>grith</groupId>
 			<artifactId>grid-session</artifactId>
 			<version>0.3</version>
+ 			<exclusions>
+				<exclusion>
+					<artifactId>grid-jcommons</artifactId>
+					<groupId>grisu</groupId>
+				</exclusion>
+                <exclusion>
+                    <artifactId>jgrith</artifactId>
+                    <groupId>grith</groupId>
+                </exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>grisu.backend</groupId>

@@ -54,17 +54,6 @@ ServiceInterface {
 		return "Local";
 	}
 
-	public final String getTemplate(final String application)
-			throws NoSuchTemplateException {
-		final String temp = ServiceTemplateManagement.getTemplate(application);
-
-		if (StringUtils.isBlank(temp)) {
-			throw new NoSuchTemplateException(
-					"Could not find template for application: " + application
-					+ ".");
-		}
-		return temp;
-	}
 
 	@Override
 	protected final synchronized User getUser() {

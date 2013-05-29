@@ -251,61 +251,6 @@
 			<groupId>external.globus</groupId>
 			<artifactId>globus-dependencies</artifactId>
 			<version>0.3</version>
-			<!-- consists of those dependencies: -->
-			<!-- <artifactId>xmlbeans</artifactId> <groupId>org.apache.xmlbeans</groupId> 
-				<artifactId>jython</artifactId> <groupId>jython</groupId> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>addressing-1</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>axis</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>axis-url</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>cog-axis</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>cog-trap-1</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.jglobus</groupId> 
-				<artifactId>cog-url</artifactId> <version>1.6.0</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>commonj</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>commons-beanutils</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>commons-collections</groupId> 
-				<artifactId>commons-collections</artifactId> <version>3.2</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>commons-digester</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>commons-discovery</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>globus_delegation_service</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>globus_delegation_stubs</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>globus_wsrf_mds_aggregator_stubs</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>globus_wsrf_rendezvous_service</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>globus_wsrf_rendezvous_stubs</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>globus_wsrf_rft_stubs</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>gram-client</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>gram-stubs</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>gram-utils</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>jaxrpc</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>naming-common</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>naming-factory</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>naming-java</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>naming-resources</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>opensaml</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>wsdl4j</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>wsrf_core</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>wsrf_core_stubs</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>wsrf_mds_index_stubs</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>wsrf_mds_usefulrp_schema_stubs</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>wsrf_provider_jce</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>wsrf_tools</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>wss4j</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>xalan</groupId> <artifactId>xalan</artifactId> <version>2.7.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>xmlsec</artifactId> 
-				<version>0.1</version> </dependency> -->
 		</dependency>
 
 

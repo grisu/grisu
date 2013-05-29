@@ -75,26 +75,33 @@ public final class LocalTemplatesHelper {
 		
 		myLogger.debug("Preparing templates...");
 
-		
-		if (!new File(Environment.getAvailableTemplatesDirectory()).exists()
-				|| !Environment.getGrisuDirectory().exists()) {
-			createGrisuDirectories();
-		}
-		
 		Map<String, String> conf = ServerPropertiesManager.getTemplateManagerConf();
 		
 		String path = "git://github.com/grisu/grisu-templates.git";
-		
-		if ( conf != null && StringUtils.isNotBlank(conf.get("path")) ) {
-			path = conf.get("path");
-		}
+        if ( conf != null && StringUtils.isNotBlank(conf.get("path")) ) {
+            path = conf.get("path");
+        }
 
-		
+        if ( path.startsWith("git")) {
+            myLogger.debug("Updating template repo: "+path);
+            File localRepo = GitRepoUpdater.ensureUpdated(path);
+            Environment.setAvailableTemplatesDirectory(localRepo.getAbsolutePath());
+        } else {
+            myLogger.debug("Template directory local, does not need update: "+path);
+            if (!new File(Environment.getAvailableTemplatesDirectory()).exists()
+                    || !Environment.getGrisuDirectory().exists()) {
+                createGrisuDirectories();
+            }
+        }
+
+
+
+
+
 		if ( path.startsWith("git") ) {
-			myLogger.debug("Updating template repo: "+path+" to: "+Environment.getAvailableTemplatesDirectory());
-			GitRepoUpdater.ensureUpdated(path, Environment.getAvailableTemplatesDirectory());
+
 		}  else {
-			myLogger.debug("Template directory local, does not need update: "+path);
+
 		}
 		
 	}

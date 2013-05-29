@@ -667,7 +667,11 @@ Comparable<GrisuJob> {
 
 		if ((allJobProperties == null) || forceRefresh) {
 
-			synchronized (this) {
+            String jn = this.getJobname();
+            if ( StringUtils.isBlank(jn) || Constants.NO_JOBNAME_INDICATOR_STRING.equals(jn)) {
+                throw new JobException(this, "No jobname, so can't get jobproperties.");
+            }
+//			synchronized (jn) {
 				try {
 					allJobProperties = serviceInterface.getJob(getJobname())
 							.propertiesAsMap();
@@ -675,7 +679,7 @@ Comparable<GrisuJob> {
 					throw new JobException(this,
 							"Could not get jobproperties.", e);
 				}
-			}
+//			}
 
 		}
 		return allJobProperties;

@@ -13,12 +13,7 @@ import grisu.backend.model.job.gt5.RSLFactory;
 import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
-import grisu.control.exceptions.BatchJobException;
-import grisu.control.exceptions.JobPropertiesException;
-import grisu.control.exceptions.JobSubmissionException;
-import grisu.control.exceptions.NoSuchJobException;
-import grisu.control.exceptions.NoValidCredentialException;
-import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.control.exceptions.*;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.constants.JobSubmissionProperty;
@@ -43,6 +38,7 @@ import grisu.model.info.dto.Site;
 import grisu.model.info.dto.VO;
 import grisu.model.info.dto.Version;
 import grisu.settings.ServerPropertiesManager;
+import grisu.settings.ServiceTemplateManagement;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
 import grith.jgrith.cred.AbstractCred;
@@ -534,7 +530,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * A multipartjob is just a collection of jobs that belong together to make
 	 * them more easily managable.
 	 * 
-	 * @param batchJobname
+	 * @param batchJobnameBase
 	 *            the id (name) of the multipartjob
 	 * @throws JobPropertiesException
 	 */
@@ -1311,60 +1307,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// .getAllQueues(application, version));
 	}
 
-	// public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
-	// final String application) {
-	// // if (ServerPropertiesManager.getMDSenabled()) {
-	// //
-	// myLogger.debug("Getting map of submissionlocations per version of application for: "
-	// // + application);
-	// final Map<String, String> appVersionMap = new HashMap<String, String>();
-	// final List<Version> temp = informationManager
-	// .getAllVersionsOfApplicationOnGrid(application);
-	// Version[] versions;
-	// if (temp == null) {
-	// versions = new Version[] {};
-	// } else {
-	// versions = temp.toArray(new Version[] {});
-	// }
-	// for (int i = 0; (versions != null) && (i < versions.length); i++) {
-	// Collection<Queue> submitLocations = null;
-	// try {
-	// submitLocations = informationManager.getAllQueues(application,
-	// versions[i].getVersion());
-	// if (submitLocations == null) {
-	// myLogger.error("Couldn't find submission locations for application: \""
-	// + application
-	// + "\""
-	// + ", version \""
-	// + versions[i]
-	// + "\". Most likely the mds is not published correctly.");
-	// continue;
-	// }
-	// } catch (final Exception e) {
-	// myLogger.error("Couldn't find submission locations for application: \""
-	// + application
-	// + "\""
-	// + ", version \""
-	// + versions[i]
-	// + "\". Most likely the mds is not published correctly.");
-	// continue;
-	// }
-	// final StringBuffer submitLoc = new StringBuffer();
-	//
-	// if (submitLocations != null) {
-	// List<String> list = new LinkedList<String>(submitLocations);
-	// for (int j = 0; j < list.size(); j++) {
-	// submitLoc.append(list.get(j));
-	// if (j < (list.size() - 1)) {
-	// submitLoc.append(",");
-	// }
-	// }
-	// }
-	// appVersionMap.put(versions[i], submitLoc.toString());
-	// }
-	// return DtoApplicationInfo.createApplicationInfo(application,
-	// appVersionMap);
-	// }
+    public final String getTemplate(final String application)
+            throws NoSuchTemplateException {
+        final String temp = ServiceTemplateManagement.getTemplate(application);
+
+        if (StringUtils.isBlank(temp)) {
+            throw new NoSuchTemplateException(
+                    "Could not find template for application: " + application
+                            + ".");
+        }
+        return temp;
+    }
 
 	public DtoStringList getUsedApplications() {
 

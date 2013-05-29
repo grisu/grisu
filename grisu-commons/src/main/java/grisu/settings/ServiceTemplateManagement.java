@@ -57,7 +57,7 @@ public final class ServiceTemplateManagement {
     }
 
     public static Collection<File> getAllTemplateFiles() {
-        final Collection<File> templates = FileUtils.listFiles(new File(Environment.getAvailableTemplatesDirectory()),new String[]{".template"}, true);
+        final Collection<File> templates = FileUtils.listFiles(new File(Environment.getAvailableTemplatesDirectory()),new String[]{"template"}, true);
         return templates;
     }
 
