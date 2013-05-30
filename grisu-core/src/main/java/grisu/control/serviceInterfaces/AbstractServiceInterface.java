@@ -1,14 +1,17 @@
 package grisu.control.serviceInterfaces;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
+import com.google.common.base.Functions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 import grisu.GrisuVersion;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.backend.model.fs.UserFileManager;
-import grisu.backend.model.job.BatchJob;
-import grisu.backend.model.job.Job;
-import grisu.backend.model.job.Jobhelper;
-import grisu.backend.model.job.UserBatchJobManager;
-import grisu.backend.model.job.UserJobManager;
+import grisu.backend.model.job.*;
 import grisu.backend.model.job.gt5.RSLFactory;
 import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.control.JobConstants;
@@ -20,23 +23,10 @@ import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.interfaces.GrinformationManagerDozer;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.model.MountPoint;
-import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoJob;
-import grisu.model.dto.DtoJobs;
-import grisu.model.dto.DtoMountPoints;
-import grisu.model.dto.GridFile;
-import grisu.model.info.dto.Application;
-import grisu.model.info.dto.Directory;
-import grisu.model.info.dto.DtoProperties;
-import grisu.model.info.dto.DtoProperty;
-import grisu.model.info.dto.DtoStringList;
-import grisu.model.info.dto.JobQueueMatch;
+import grisu.model.dto.*;
+import grisu.model.info.dto.*;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
-import grisu.model.info.dto.Site;
-import grisu.model.info.dto.VO;
-import grisu.model.info.dto.Version;
 import grisu.settings.ServerPropertiesManager;
 import grisu.settings.ServiceTemplateManagement;
 import grisu.utils.FileHelpers;
@@ -44,38 +34,21 @@ import grisu.utils.SeveralXMLHelpers;
 import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.utils.CertificateFiles;
 import grith.jgrith.voms.VOManagement.VOManager;
-
-import java.io.File;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.activation.DataHandler;
-import javax.annotation.security.RolesAllowed;
-
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
-
 import org.apache.commons.lang.StringUtils;
 import org.globus.common.CoGProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.util.StatusPrinter;
-
-import com.google.common.base.Functions;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Sets;
+import javax.activation.DataHandler;
+import javax.annotation.security.RolesAllowed;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.*;
 
 /**
  * This abstract class implements most of the methods of the
@@ -103,7 +76,6 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public static final InformationManager informationManager;
 
 	public final static AdminInterface admin;
-
 
     static {
 
@@ -1084,7 +1056,13 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			return getInterfaceType();
 		} else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
 			return BACKEND_VERSION;
-		}
+        } else if (LAST_CONFIG_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastConfigUpdate().getTime());
+        } else if (LAST_INFO_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastInfoUpdate().getTime());
+        } else if (LAST_TEMPLATES_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastTemplatesUpdate().getTime());
+        }
 
 		return null;
 	}

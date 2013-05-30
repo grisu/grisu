@@ -1,5 +1,6 @@
 package grisu.control.serviceInterfaces;
 
+import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -21,23 +22,19 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AdminInterface {
 
     private static Logger myLogger = LoggerFactory
             .getLogger(AdminInterface.class.getName());
-
     private final UserDAO userdao;
-
-    private List<String> admin_dns;
-
     final private String adminUserFile;
-
     private final InformationManager im;
+    private Date lastInfoUpdate = new Date();
+    private Date lastConfigUpdate = new Date();
+    private Date lastTemplatesUpdate = new Date();
+    private List<String> admin_dns;
 
     public AdminInterface(String adminUserFile, InformationManager im,
                           UserDAO userdao) {
@@ -48,6 +45,18 @@ public class AdminInterface {
 
         readAdminConfigFile();
 
+    }
+
+    public Date getLastInfoUpdate() {
+        return lastInfoUpdate;
+    }
+
+    public Date getLastConfigUpdate() {
+        return lastConfigUpdate;
+    }
+
+    public Date getLastTemplatesUpdate() {
+        return lastTemplatesUpdate;
     }
 
     private DtoStringList clearUserCache(Map<String, String> config) {
@@ -91,13 +100,11 @@ public class AdminInterface {
             Collection<User> users = getUsersMatch(userdn);
             List<String> userDns = Lists.newArrayList();
 
-            for (User user : users ) {
-                    myLogger.debug("Clearing mountpointcache for user " + user.getDn());
-                    user.clearMountPointCache(null);
-                    userDns.add(user.getDn());
+            for (User user : users) {
+                myLogger.debug("Clearing mountpointcache for user " + user.getDn());
+                user.clearMountPointCache(null);
+                userDns.add(user.getDn());
             }
-
-
 
 
             // CacheManager.getInstance();
@@ -116,7 +123,7 @@ public class AdminInterface {
                 }
             }
 
-            if (userDns.size() == 0 ) {
+            if (userDns.size() == 0) {
                 userDns.add("n/a");
             }
 
@@ -143,7 +150,7 @@ public class AdminInterface {
             return clearUserCache(config);
         } else if (Constants.LIST_USERS.equals(command)) {
             String u = Constants.ALL_USERS;
-            if ( config != null && StringUtils.isNotBlank(config.get(Constants.USER))) {
+            if (config != null && StringUtils.isNotBlank(config.get(Constants.USER))) {
                 u = config.get(Constants.USER);
             }
             return listUsers(u);
@@ -176,7 +183,7 @@ public class AdminInterface {
     private List<User> getUsersMatch(String user) {
         List<User> users = userdao.findAllUsers();
 
-        if ( StringUtils.isBlank(user) || Constants.ALL_USERS.equals(user) ) {
+        if (StringUtils.isBlank(user) || Constants.ALL_USERS.equals(user)) {
             user = null;
         } else {
             user.toLowerCase();
@@ -185,7 +192,7 @@ public class AdminInterface {
         List<User> dns = Lists.newLinkedList();
 
         for (User u : users) {
-            if ( user == null || u.getDn().toLowerCase().contains(user) ) {
+            if (user == null || u.getDn().toLowerCase().contains(user)) {
                 dns.add(u);
             }
         }
@@ -223,6 +230,7 @@ public class AdminInterface {
     private DtoStringList refreshConfig() {
         readAdminConfigFile();
         List<String> msg = ServerPropertiesManager.refreshConfig();
+        lastConfigUpdate = new Date();
         return DtoStringList.fromStringList(msg);
     }
 
@@ -243,7 +251,15 @@ public class AdminInterface {
             msg = "Refreshing grid info failed: " + e.getLocalizedMessage();
         }
 
+        new Thread() {
+            public void run() {
+                Map<String, String> config = Maps.newHashMap();
+                config.put(Constants.USER, Constants.ALL_USERS);
+                clearUserCache(config);
+            }
+        }.start();
 
+        lastInfoUpdate = new Date();
         return DtoStringList.fromSingleString(msg);
 
 
@@ -258,6 +274,8 @@ public class AdminInterface {
         } catch (Exception e) {
             temp.append("Failed refreshing templates: " + e.getLocalizedMessage() + "\n");
         }
+
+        lastTemplatesUpdate = new Date();
 
         return DtoStringList.fromSingleString(temp.toString());
     }

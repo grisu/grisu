@@ -145,21 +145,15 @@ public class AdminPanel implements ServiceInterfacePanel {
             msg = Lists.newArrayList();
             msg.add("n/a");
         }
-        JTextArea text = new JTextArea();
-        text.setEditable(false);
-        text.setText(StringUtils.join(msg, "\n").toString());
-        text.setLineWrap(false);
-        JScrollPane scrollPane = new JScrollPane(text);
-        scrollPane.setPreferredSize(new Dimension(320, 240));
 
-        JDialog dialog = new JDialog();
-        dialog.setTitle("Admin command");
-        dialog.add(scrollPane);
+        String message = StringUtils.join(msg, "\n");
 
-        dialog.pack();
-        dialog.setSize(new Dimension(400, 350));
-
-        dialog.setVisible(true);
+        MessageDialog d = new MessageDialog();
+        d.setPreferredSize(new Dimension(550, 600));
+        d.setPlainText();
+        d.setMessage(message);
+        d.pack();
+        d.setVisible(true);
     }
 
     private void showResult(DtoStringList msg) {
