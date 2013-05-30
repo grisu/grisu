@@ -209,21 +209,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public static String getBackendInfo() {
 
 		if (StringUtils.isBlank(backendInfo)) {
-			//			String host = getInterfaceInfo("HOSTNAME");
-			//			if (StringUtils.isBlank(host)) {
-			//				host = "Host unknown";
-			//			}
-			//			String version = getInterfaceInfo("VERSION");
-			//			if (StringUtils.isBlank(version)) {
-			//				version = "Version unknown";
-			//			}
-			//			String name = getInterfaceInfo("NAME");
-			//			if (StringUtils.isBlank(name)) {
-			//				name = "Backend name unknown";
-			//			}
-			//
-			//			backendInfo = name + " / " + host + " / version:" + version;
-			backendInfo = "Not implemented yet.";
+            StringBuffer temp = new StringBuffer();
+            temp.append(getInterfaceInfoStatic("HOSTNAME"));
+            temp.append(" - ");
+            temp.append(getInterfaceInfoStatic("VERSION"));
+			backendInfo = temp.toString();
 
 		}
 		return backendInfo;
@@ -1030,32 +1020,32 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoStringList.fromStringColletion(getUser().getFqans().keySet());
 	}
 
-	public String getInterfaceInfo(String key) {
-		if ("HOSTNAME".equalsIgnoreCase(key)) {
-			if (hostname == null) {
-				try {
-					final InetAddress addr = InetAddress.getLocalHost();
-					final byte[] ipAddr = addr.getAddress();
-					hostname = addr.getHostName();
-					if (StringUtils.isBlank(hostname)) {
-						hostname = "";
-					} else {
-						hostname = hostname + " / ";
-					}
-					hostname = hostname + addr.getHostAddress();
-				} catch (final UnknownHostException e) {
-					hostname = "Unavailable";
-				}
-			}
-			return hostname;
-		} else if ("VERSION".equalsIgnoreCase(key)) {
-			return grisu.jcommons.utils.Version.get("grisu-core");
-		} else if ("API_VERSION".equalsIgnoreCase(key)) {
-			return Integer.toString(ServiceInterface.API_VERSION);
-		} else if ("TYPE".equalsIgnoreCase(key)) {
-			return getInterfaceType();
-		} else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
-			return BACKEND_VERSION;
+    public String getInterfaceInfo(String key) {
+        if ("HOSTNAME".equalsIgnoreCase(key)) {
+            if (hostname == null) {
+                try {
+                    final InetAddress addr = InetAddress.getLocalHost();
+                    final byte[] ipAddr = addr.getAddress();
+                    hostname = addr.getHostName();
+                    if (StringUtils.isBlank(hostname)) {
+                        hostname = "";
+                    } else {
+                        hostname = hostname + " / ";
+                    }
+                    hostname = hostname + addr.getHostAddress();
+                } catch (final UnknownHostException e) {
+                    hostname = "Unavailable";
+                }
+            }
+            return hostname;
+        } else if ("VERSION".equalsIgnoreCase(key)) {
+            return grisu.jcommons.utils.Version.get("grisu-core");
+        } else if ("API_VERSION".equalsIgnoreCase(key)) {
+            return Integer.toString(ServiceInterface.API_VERSION);
+        } else if ("TYPE".equalsIgnoreCase(key)) {
+            return getInterfaceType();
+        } else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
+            return BACKEND_VERSION;
         } else if (LAST_CONFIG_UPDATE_KEY.equalsIgnoreCase(key)) {
             return Long.toString(admin.getLastConfigUpdate().getTime());
         } else if (LAST_INFO_UPDATE_KEY.equalsIgnoreCase(key)) {
@@ -1064,7 +1054,44 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
             return Long.toString(admin.getLastTemplatesUpdate().getTime());
         }
 
-		return null;
+        return null;
+
+    }
+	public static String getInterfaceInfoStatic(String key) {
+        if ("HOSTNAME".equalsIgnoreCase(key)) {
+            if (hostname == null) {
+                try {
+                    final InetAddress addr = InetAddress.getLocalHost();
+                    final byte[] ipAddr = addr.getAddress();
+                    hostname = addr.getHostName();
+                    if (StringUtils.isBlank(hostname)) {
+                        hostname = "";
+                    } else {
+                        hostname = hostname + " / ";
+                    }
+                    hostname = hostname + addr.getHostAddress();
+                } catch (final UnknownHostException e) {
+                    hostname = "Unavailable";
+                }
+            }
+            return hostname;
+        } else if ("VERSION".equalsIgnoreCase(key)) {
+            return grisu.jcommons.utils.Version.get("grisu-core");
+        } else if ("API_VERSION".equalsIgnoreCase(key)) {
+            return Integer.toString(ServiceInterface.API_VERSION);
+        } else if ("TYPE".equalsIgnoreCase(key)) {
+            return "n/a";
+        } else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
+            return BACKEND_VERSION;
+        } else if (LAST_CONFIG_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastConfigUpdate().getTime());
+        } else if (LAST_INFO_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastInfoUpdate().getTime());
+        } else if (LAST_TEMPLATES_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastTemplatesUpdate().getTime());
+        }
+
+        return null;
 	}
 
 	abstract public String getInterfaceType();
