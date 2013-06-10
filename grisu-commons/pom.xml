@@ -52,6 +52,13 @@
 		</dependency>
 
 
+        <dependency>
+            <groupId>nz.org.nesi</groupId>
+            <artifactId>envtest</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+
+
 		<!-- <dependency> -->
 		<!-- <groupId>com.google.collections</groupId> -->
 		<!-- <artifactId>google-collections</artifactId> -->

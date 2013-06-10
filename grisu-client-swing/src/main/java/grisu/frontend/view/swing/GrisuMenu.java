@@ -5,6 +5,7 @@ import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.utils.ClientPropertiesHelper;
 import grisu.frontend.view.swing.utils.MessageDialog;
 import grisu.frontend.view.swing.utils.SettingsDialog;
+import nz.org.nesi.envtester.view.swing.EnvTestStartDialog;
 import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
@@ -42,6 +43,7 @@ public class GrisuMenu extends JMenuBar {
     private JMenuItem exitItem;
     private JMenuItem exitItemDeleteSession;
     private JMenuItem versionItem;
+    private JMenuItem envtestItem;
 
     private JLabel warningLabel;
 
@@ -101,7 +103,7 @@ public class GrisuMenu extends JMenuBar {
         return warningLabel;
     }
 
-    private JMenuItem getExitItem() {
+    public JMenuItem getExitItem() {
         if (exitItem == null) {
             exitItem = new JMenuItem("Exit");
             exitItem.addActionListener(new ActionListener() {
@@ -115,7 +117,7 @@ public class GrisuMenu extends JMenuBar {
         return exitItem;
     }
 
-    private JMenuItem getExitDeleteSessionItem() {
+    public JMenuItem getExitDeleteSessionItem() {
         if (exitItemDeleteSession == null) {
             exitItemDeleteSession = new JMenuItem("Exit (and delete session)");
             exitItemDeleteSession.addActionListener(new ActionListener() {
@@ -140,15 +142,16 @@ public class GrisuMenu extends JMenuBar {
         return fileMenu;
     }
 
-    private JMenu getGrisuHelpMenu() {
+    public JMenu getGrisuHelpMenu() {
         if (helpMenu == null) {
             helpMenu = new JMenu("Help");
+            helpMenu.add(getEnvtestItem());
             helpMenu.add(getVersionItem());
         }
         return helpMenu;
     }
 
-    private JMenuItem getSettingsItem() {
+    public JMenuItem getSettingsItem() {
         if (settingsItem == null) {
             settingsItem = new JMenuItem("Settings");
             settingsItem.addActionListener(new ActionListener() {
@@ -169,7 +172,7 @@ public class GrisuMenu extends JMenuBar {
         return toolsMenu;
     }
 
-    private JMenuItem getVersionItem() {
+    public JMenuItem getVersionItem() {
         if (versionItem == null) {
             versionItem = new JMenuItem("About");
             versionItem.addActionListener(new ActionListener() {
@@ -193,6 +196,27 @@ public class GrisuMenu extends JMenuBar {
             });
         }
         return versionItem;
+    }
+
+    public JMenuItem getEnvtestItem() {
+        if (envtestItem == null) {
+            envtestItem = new JMenuItem("Test network/environment");
+            envtestItem.addActionListener(new ActionListener() {
+
+                public void actionPerformed(ActionEvent e) {
+
+                    new Thread() {
+                        public void run() {
+                            EnvTestStartDialog dialog = new EnvTestStartDialog(null);
+                            dialog.pack();
+                            dialog.setVisible(true);
+                        }
+                    }.start();
+
+                }
+            });
+        }
+        return envtestItem;
     }
 
 
