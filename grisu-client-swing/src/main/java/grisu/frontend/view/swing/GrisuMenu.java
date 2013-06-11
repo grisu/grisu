@@ -5,6 +5,7 @@ import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.utils.ClientPropertiesHelper;
 import grisu.frontend.view.swing.utils.MessageDialog;
 import grisu.frontend.view.swing.utils.SettingsDialog;
+import nz.org.nesi.envtester.TestController;
 import nz.org.nesi.envtester.view.swing.EnvTestStartDialog;
 import org.apache.commons.lang.StringUtils;
 
@@ -207,7 +208,8 @@ public class GrisuMenu extends JMenuBar {
 
                     new Thread() {
                         public void run() {
-                            EnvTestStartDialog dialog = new EnvTestStartDialog(null);
+                            TestController tc = new TestController("https://raw.github.com/nesi/nesi-grid-info/develop/env_test_config.groovy");
+                            EnvTestStartDialog dialog = new EnvTestStartDialog(null, tc);
                             dialog.pack();
                             dialog.setVisible(true);
                         }
