@@ -1,29 +1,22 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
+import com.jidesoft.swing.JideTabbedPane;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.model.events.JobCleanedEvent;
 import grisu.frontend.model.job.GrisuJob;
+import org.apache.commons.lang.StringUtils;
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventSubscriber;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Cursor;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
-import org.apache.commons.lang.StringUtils;
-import org.bushe.swing.event.EventBus;
-import org.bushe.swing.event.EventSubscriber;
-
-import com.jidesoft.swing.JideTabbedPane;
 
 public class SingleJobTabbedPane extends JPanel implements
 SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
@@ -69,7 +62,6 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 			jideTabbedPane.setHideOneTab(false);
 			jideTabbedPane.setShowCloseButtonOnTab(true);
 			jideTabbedPane.setCloseTabOnMouseMiddleButton(true);
-			jideTabbedPane.setTabClosableAt(0, false);
 			String title = null;
 			if (StringUtils.isBlank(application)) {
 				title = "All jobs";
@@ -78,6 +70,7 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 						+ " jobs";
 			}
 			jideTabbedPane.addTab(title, getGrid());
+            jideTabbedPane.setTabClosableAt(0, false);
 
 		}
 		return jideTabbedPane;
