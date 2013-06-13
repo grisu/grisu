@@ -1,20 +1,22 @@
 package grisu.settings;
 
+import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import grisu.control.ServiceInterface;
 import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.utils.tid.SecureRandomTid;
 import grisu.jcommons.utils.tid.TidGenerator;
 
 import java.io.File;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.TreeMap;
+import java.util.*;
 
+import grisu.model.info.dto.DtoStringList;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -900,9 +902,18 @@ public final class ServerPropertiesManager {
 		return waittime_in_seconds;
 	}
 
-	public static void refreshConfig() {
+	public static List<String> refreshConfig() {
 		config = null;
-	}
+        try {
+            File configFile = getServerConfiguration().getFile();
+            return Files.readLines(configFile, Charsets.UTF_8);
+        } catch (Exception e) {
+            List<String> msg = Lists.newArrayList();
+            msg.add("Config invalid:");
+            msg.add(ExceptionUtils.getStackTrace(e));
+            return msg;
+        }
+    }
 
 	/**
 	 * Checks whether the default (hsqldb) database configuration should be
@@ -991,4 +1002,26 @@ public final class ServerPropertiesManager {
 		return allow;
 	}
 
+    public static String getCacheDirectory() {
+
+        String cachedir = null;
+        try {
+            cachedir = getServerConfiguration().getString(
+                    "General.cacheDir");
+
+            if (StringUtils.isNotBlank(cachedir)
+                    && "none".equals(cachedir.toLowerCase())) {
+                cachedir = null;
+            }
+
+        } catch (final Exception e) {
+            cachedir = null;
+        }
+
+        if (cachedir == null) {
+            cachedir = new File(Environment.getVarGrisuDirectory(), "cache").getAbsolutePath();
+        }
+
+        return cachedir;
+    }
 }

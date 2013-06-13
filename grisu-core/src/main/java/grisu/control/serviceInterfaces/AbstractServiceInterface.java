@@ -1,84 +1,54 @@
 package grisu.control.serviceInterfaces;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
+import com.google.common.base.Functions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 import grisu.GrisuVersion;
 import grisu.backend.model.RemoteFileTransferObject;
 import grisu.backend.model.User;
 import grisu.backend.model.fs.UserFileManager;
-import grisu.backend.model.job.BatchJob;
-import grisu.backend.model.job.Job;
-import grisu.backend.model.job.Jobhelper;
-import grisu.backend.model.job.UserBatchJobManager;
-import grisu.backend.model.job.UserJobManager;
+import grisu.backend.model.job.*;
 import grisu.backend.model.job.gt5.RSLFactory;
 import grisu.backend.utils.LocalTemplatesHelper;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
-import grisu.control.exceptions.BatchJobException;
-import grisu.control.exceptions.JobPropertiesException;
-import grisu.control.exceptions.JobSubmissionException;
-import grisu.control.exceptions.NoSuchJobException;
-import grisu.control.exceptions.NoValidCredentialException;
-import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.control.exceptions.*;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.jcommons.interfaces.GrinformationManagerDozer;
 import grisu.jcommons.interfaces.InformationManager;
 import grisu.model.MountPoint;
-import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoJob;
-import grisu.model.dto.DtoJobs;
-import grisu.model.dto.DtoMountPoints;
-import grisu.model.dto.GridFile;
-import grisu.model.info.dto.Application;
-import grisu.model.info.dto.Directory;
-import grisu.model.info.dto.DtoProperties;
-import grisu.model.info.dto.DtoProperty;
-import grisu.model.info.dto.DtoStringList;
-import grisu.model.info.dto.JobQueueMatch;
+import grisu.model.dto.*;
+import grisu.model.info.dto.*;
 import grisu.model.info.dto.Package;
 import grisu.model.info.dto.Queue;
-import grisu.model.info.dto.Site;
-import grisu.model.info.dto.VO;
-import grisu.model.info.dto.Version;
 import grisu.settings.ServerPropertiesManager;
+import grisu.settings.ServiceTemplateManagement;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
 import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.utils.CertificateFiles;
 import grith.jgrith.voms.VOManagement.VOManager;
-
-import java.io.File;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.activation.DataHandler;
-import javax.annotation.security.RolesAllowed;
-
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
-
 import org.apache.commons.lang.StringUtils;
 import org.globus.common.CoGProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.util.StatusPrinter;
-
-import com.google.common.base.Functions;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Sets;
+import javax.activation.DataHandler;
+import javax.annotation.security.RolesAllowed;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.*;
 
 /**
  * This abstract class implements most of the methods of the
@@ -103,15 +73,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	static Logger myLogger = null;
 	public static CacheManager cache;
 
-	public static final InformationManager informationManager = new GrinformationManagerDozer(
-			ServerPropertiesManager.getInformationManagerConf());
+	public static final InformationManager informationManager;
 
-	public final static AdminInterface admin = new AdminInterface(null,
-			informationManager,
-			User.userdao);
+	public final static AdminInterface admin;
 
-
-	static {
+    static {
 
 		String logbackPath = "/etc/grisu/logback.xml";
 		if (new File(logbackPath).exists()
@@ -131,6 +97,16 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 			}
 			StatusPrinter.printInCaseOfErrorsOrWarnings(context);
 		}
+
+        String dir = ServerPropertiesManager.getCacheDirectory();
+        if ( StringUtils.isNotBlank(dir) ) {
+            GridEnvironment.GRID_CACHE_DIR = dir;
+        }
+        informationManager = new GrinformationManagerDozer(
+                ServerPropertiesManager.getInformationManagerConf());
+        admin = new AdminInterface(null,
+                informationManager,
+                User.userdao);
 
 		myLogger = LoggerFactory.getLogger(AbstractServiceInterface.class
 				.getName());
@@ -233,21 +209,11 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	public static String getBackendInfo() {
 
 		if (StringUtils.isBlank(backendInfo)) {
-			//			String host = getInterfaceInfo("HOSTNAME");
-			//			if (StringUtils.isBlank(host)) {
-			//				host = "Host unknown";
-			//			}
-			//			String version = getInterfaceInfo("VERSION");
-			//			if (StringUtils.isBlank(version)) {
-			//				version = "Version unknown";
-			//			}
-			//			String name = getInterfaceInfo("NAME");
-			//			if (StringUtils.isBlank(name)) {
-			//				name = "Backend name unknown";
-			//			}
-			//
-			//			backendInfo = name + " / " + host + " / version:" + version;
-			backendInfo = "Not implemented yet.";
+            StringBuffer temp = new StringBuffer();
+            temp.append(getInterfaceInfoStatic("HOSTNAME"));
+            temp.append(" - ");
+            temp.append(getInterfaceInfoStatic("VERSION"));
+			backendInfo = temp.toString();
 
 		}
 		return backendInfo;
@@ -526,7 +492,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * A multipartjob is just a collection of jobs that belong together to make
 	 * them more easily managable.
 	 * 
-	 * @param batchJobname
+	 * @param batchJobnameBase
 	 *            the id (name) of the multipartjob
 	 * @throws JobPropertiesException
 	 */
@@ -1054,35 +1020,78 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		return DtoStringList.fromStringColletion(getUser().getFqans().keySet());
 	}
 
-	public String getInterfaceInfo(String key) {
-		if ("HOSTNAME".equalsIgnoreCase(key)) {
-			if (hostname == null) {
-				try {
-					final InetAddress addr = InetAddress.getLocalHost();
-					final byte[] ipAddr = addr.getAddress();
-					hostname = addr.getHostName();
-					if (StringUtils.isBlank(hostname)) {
-						hostname = "";
-					} else {
-						hostname = hostname + " / ";
-					}
-					hostname = hostname + addr.getHostAddress();
-				} catch (final UnknownHostException e) {
-					hostname = "Unavailable";
-				}
-			}
-			return hostname;
-		} else if ("VERSION".equalsIgnoreCase(key)) {
-			return grisu.jcommons.utils.Version.get("grisu-core");
-		} else if ("API_VERSION".equalsIgnoreCase(key)) {
-			return Integer.toString(ServiceInterface.API_VERSION);
-		} else if ("TYPE".equalsIgnoreCase(key)) {
-			return getInterfaceType();
-		} else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
-			return BACKEND_VERSION;
-		}
+    public String getInterfaceInfo(String key) {
+        if ("HOSTNAME".equalsIgnoreCase(key)) {
+            if (hostname == null) {
+                try {
+                    final InetAddress addr = InetAddress.getLocalHost();
+                    final byte[] ipAddr = addr.getAddress();
+                    hostname = addr.getHostName();
+                    if (StringUtils.isBlank(hostname)) {
+                        hostname = "";
+                    } else {
+                        hostname = hostname + " / ";
+                    }
+                    hostname = hostname + addr.getHostAddress();
+                } catch (final UnknownHostException e) {
+                    hostname = "Unavailable";
+                }
+            }
+            return hostname;
+        } else if ("VERSION".equalsIgnoreCase(key)) {
+            return grisu.jcommons.utils.Version.get("grisu-core");
+        } else if ("API_VERSION".equalsIgnoreCase(key)) {
+            return Integer.toString(ServiceInterface.API_VERSION);
+        } else if ("TYPE".equalsIgnoreCase(key)) {
+            return getInterfaceType();
+        } else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
+            return BACKEND_VERSION;
+        } else if (LAST_CONFIG_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastConfigUpdate().getTime());
+        } else if (LAST_INFO_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastInfoUpdate().getTime());
+        } else if (LAST_TEMPLATES_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastTemplatesUpdate().getTime());
+        }
 
-		return null;
+        return null;
+
+    }
+	public static String getInterfaceInfoStatic(String key) {
+        if ("HOSTNAME".equalsIgnoreCase(key)) {
+            if (hostname == null) {
+                try {
+                    final InetAddress addr = InetAddress.getLocalHost();
+                    final byte[] ipAddr = addr.getAddress();
+                    hostname = addr.getHostName();
+                    if (StringUtils.isBlank(hostname)) {
+                        hostname = "";
+                    } else {
+                        hostname = hostname + " / ";
+                    }
+                    hostname = hostname + addr.getHostAddress();
+                } catch (final UnknownHostException e) {
+                    hostname = "Unavailable";
+                }
+            }
+            return hostname;
+        } else if ("VERSION".equalsIgnoreCase(key)) {
+            return grisu.jcommons.utils.Version.get("grisu-core");
+        } else if ("API_VERSION".equalsIgnoreCase(key)) {
+            return Integer.toString(ServiceInterface.API_VERSION);
+        } else if ("TYPE".equalsIgnoreCase(key)) {
+            return "n/a";
+        } else if ("BACKEND_VERSION".equalsIgnoreCase(key)) {
+            return BACKEND_VERSION;
+        } else if (LAST_CONFIG_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastConfigUpdate().getTime());
+        } else if (LAST_INFO_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastInfoUpdate().getTime());
+        } else if (LAST_TEMPLATES_UPDATE_KEY.equalsIgnoreCase(key)) {
+            return Long.toString(admin.getLastTemplatesUpdate().getTime());
+        }
+
+        return null;
 	}
 
 	abstract public String getInterfaceType();
@@ -1303,60 +1312,17 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		// .getAllQueues(application, version));
 	}
 
-	// public DtoApplicationInfo getSubmissionLocationsPerVersionOfApplication(
-	// final String application) {
-	// // if (ServerPropertiesManager.getMDSenabled()) {
-	// //
-	// myLogger.debug("Getting map of submissionlocations per version of application for: "
-	// // + application);
-	// final Map<String, String> appVersionMap = new HashMap<String, String>();
-	// final List<Version> temp = informationManager
-	// .getAllVersionsOfApplicationOnGrid(application);
-	// Version[] versions;
-	// if (temp == null) {
-	// versions = new Version[] {};
-	// } else {
-	// versions = temp.toArray(new Version[] {});
-	// }
-	// for (int i = 0; (versions != null) && (i < versions.length); i++) {
-	// Collection<Queue> submitLocations = null;
-	// try {
-	// submitLocations = informationManager.getAllQueues(application,
-	// versions[i].getVersion());
-	// if (submitLocations == null) {
-	// myLogger.error("Couldn't find submission locations for application: \""
-	// + application
-	// + "\""
-	// + ", version \""
-	// + versions[i]
-	// + "\". Most likely the mds is not published correctly.");
-	// continue;
-	// }
-	// } catch (final Exception e) {
-	// myLogger.error("Couldn't find submission locations for application: \""
-	// + application
-	// + "\""
-	// + ", version \""
-	// + versions[i]
-	// + "\". Most likely the mds is not published correctly.");
-	// continue;
-	// }
-	// final StringBuffer submitLoc = new StringBuffer();
-	//
-	// if (submitLocations != null) {
-	// List<String> list = new LinkedList<String>(submitLocations);
-	// for (int j = 0; j < list.size(); j++) {
-	// submitLoc.append(list.get(j));
-	// if (j < (list.size() - 1)) {
-	// submitLoc.append(",");
-	// }
-	// }
-	// }
-	// appVersionMap.put(versions[i], submitLoc.toString());
-	// }
-	// return DtoApplicationInfo.createApplicationInfo(application,
-	// appVersionMap);
-	// }
+    public final String getTemplate(final String application)
+            throws NoSuchTemplateException {
+        final String temp = ServiceTemplateManagement.getTemplate(application);
+
+        if (StringUtils.isBlank(temp)) {
+            throw new NoSuchTemplateException(
+                    "Could not find template for application: " + application
+                            + ".");
+        }
+        return temp;
+    }
 
 	public DtoStringList getUsedApplications() {
 

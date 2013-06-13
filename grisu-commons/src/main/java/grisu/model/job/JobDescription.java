@@ -511,7 +511,7 @@ public class JobDescription {
 
 	/**
 	 * Creates a map for the currently set job properties.
-	 * 
+     *
 	 * @return a map of job properties
 	 */
 	@Transient

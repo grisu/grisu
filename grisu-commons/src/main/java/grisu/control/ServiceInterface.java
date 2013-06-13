@@ -61,7 +61,13 @@ public interface ServiceInterface {
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
 	public static String GRISU_BATCH_JOB_FILE_NAME = ".grisubatchjob";
 
-	/**
+    public static final String LAST_INFO_UPDATE_KEY = "lastInfoUpdate";
+    public static final String LAST_CONFIG_UPDATE_KEY = "lastConfigUpdate";
+    public static final String LAST_TEMPLATES_UPDATE_KEY = "lastTemplatesUpdate";
+
+
+
+    /**
 	 * Adds an archive location.
 	 * 
 	 * @param alias

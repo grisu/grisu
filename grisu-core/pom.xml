@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.6.4</version>
+		<version>0.7.1</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>grisu.backend</groupId>
@@ -30,7 +30,7 @@
 		connect to
 		it.</description>
 
-	<!-- <repositories> <repository> <id>commons-vfs-grid</id> <url>http://commonsvfsgrid.sourceforge.net/maven/</url> 
+	<!-- <repositories> <repository> <id>commons-vfs-grid</id> <url>http://commonsvfsgrid.sourceforge.net/maven/</url>
 		</repository> </repositories> -->
 
 	<dependencies>
@@ -208,10 +208,10 @@
 			<artifactId>derby-all</artifactId>
 			<version>10.6.1.0</version>
 			<!-- contains: -->
-			<!-- <dependency> <groupId>org.apache.derby</groupId> <artifactId>derbynet</artifactId> 
-				<version>10.6.1.0</version> <type>jar</type> <scope>compile</scope> </dependency> 
-				<dependency> <groupId>org.apache.derby</groupId> <artifactId>derby</artifactId> 
-				<version>10.6.1.0</version> </dependency> <dependency> <groupId>org.apache.derby</groupId> 
+			<!-- <dependency> <groupId>org.apache.derby</groupId> <artifactId>derbynet</artifactId>
+				<version>10.6.1.0</version> <type>jar</type> <scope>compile</scope> </dependency>
+				<dependency> <groupId>org.apache.derby</groupId> <artifactId>derby</artifactId>
+				<version>10.6.1.0</version> </dependency> <dependency> <groupId>org.apache.derby</groupId>
 				<artifactId>derbyclient</artifactId> <version>10.6.1.0</version> </dependency> -->
 		</dependency>
 		<dependency>
@@ -230,7 +230,7 @@
 		<dependency>
 			<groupId>org.simpleframework</groupId>
 			<artifactId>simple-xml</artifactId>
-			<version>2.1.3</version>
+			<version>2.7</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>stax-api</artifactId>
@@ -251,61 +251,6 @@
 			<groupId>external.globus</groupId>
 			<artifactId>globus-dependencies</artifactId>
 			<version>0.3</version>
-			<!-- consists of those dependencies: -->
-			<!-- <artifactId>xmlbeans</artifactId> <groupId>org.apache.xmlbeans</groupId> 
-				<artifactId>jython</artifactId> <groupId>jython</groupId> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>addressing-1</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>axis</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>axis-url</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>cog-axis</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>cog-trap-1</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.jglobus</groupId> 
-				<artifactId>cog-url</artifactId> <version>1.6.0</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>commonj</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>commons-beanutils</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>commons-collections</groupId> 
-				<artifactId>commons-collections</artifactId> <version>3.2</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>commons-digester</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>commons-discovery</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>globus_delegation_service</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>globus_delegation_stubs</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>globus_wsrf_mds_aggregator_stubs</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>globus_wsrf_rendezvous_service</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>globus_wsrf_rendezvous_stubs</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>globus_wsrf_rft_stubs</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>gram-client</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>gram-stubs</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>gram-utils</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>jaxrpc</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>naming-common</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>naming-factory</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>naming-java</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>naming-resources</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>opensaml</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>wsdl4j</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>external.globus</groupId> <artifactId>wsrf_core</artifactId> <version>0.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>wsrf_core_stubs</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>wsrf_mds_index_stubs</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>wsrf_mds_usefulrp_schema_stubs</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>wsrf_provider_jce</artifactId> <version>0.1</version> </dependency> 
-				<dependency> <groupId>external.globus</groupId> <artifactId>wsrf_tools</artifactId> 
-				<version>0.1</version> </dependency> <dependency> <groupId>external.globus</groupId> 
-				<artifactId>wss4j</artifactId> <version>0.1</version> </dependency> <dependency> 
-				<groupId>xalan</groupId> <artifactId>xalan</artifactId> <version>2.7.1</version> 
-				</dependency> <dependency> <groupId>external.globus</groupId> <artifactId>xmlsec</artifactId> 
-				<version>0.1</version> </dependency> -->
 		</dependency>
 
 
@@ -319,7 +264,7 @@
 		<dependency>
 			<groupId>nz.org.nesi</groupId>
 			<artifactId>grin</artifactId>
-			<version>0.3</version>
+			<version>0.4</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>orika-core</artifactId>
@@ -373,7 +318,7 @@
 					<value>${project.version}</value>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 			  <groupId>org.apache.maven.plugins</groupId>
 			  <artifactId>maven-surefire-plugin</artifactId>
@@ -427,8 +372,8 @@
 	</build>
 
 	<profiles>
-		
-		
+
+
 		<profile>
 			<id>deb</id>
 			<!-- <activation> -->
@@ -518,7 +463,7 @@
 												<group>root</group>
 											</mapper>
 										</data>
-															
+
 
 									</dataSet>
 
@@ -579,9 +524,9 @@
 							<preinstallScriptlet>
 								<script>echo "Installing Gricli..."</script>
 							</preinstallScriptlet>
-							<!-- <postinstallScriptlet> <scriptFile>src/main/scripts/postinstall</scriptFile> 
-								<fileEncoding>utf-8</fileEncoding> </postinstallScriptlet> <preremoveScriptlet> 
-								<scriptFile>src/main/scripts/preremove</scriptFile> <fileEncoding>utf-8</fileEncoding> 
+							<!-- <postinstallScriptlet> <scriptFile>src/main/scripts/postinstall</scriptFile>
+								<fileEncoding>utf-8</fileEncoding> </postinstallScriptlet> <preremoveScriptlet>
+								<scriptFile>src/main/scripts/preremove</scriptFile> <fileEncoding>utf-8</fileEncoding>
 								</preremoveScriptlet> -->
 						</configuration>
 					</plugin>
@@ -590,16 +535,16 @@
 
 
 		</profile>
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+
+
+
+
+
+
+
+
 	</profiles>
 	<properties>
 	</properties>

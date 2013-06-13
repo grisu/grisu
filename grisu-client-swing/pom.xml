@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>grisu</artifactId>
 		<groupId>grisu</groupId>
-		<version>0.6.4</version>
+		<version>0.7.1</version>
 	</parent>
 	<groupId>grisu.frontend</groupId>
 	<artifactId>grisu-client-swing</artifactId>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>com.jidesoft</groupId>
 			<artifactId>jide-oss</artifactId>
-			<version>3.4.0</version>
+			<version>3.5.5</version>
 			<exclusions>
 				<exclusion>
 					<groupId>aqua</groupId>
@@ -73,6 +73,12 @@
 			<artifactId>swingx-core</artifactId>
 			<version>1.6.3</version>
 		</dependency>
+
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>forms_rt</artifactId>
+            <version>7.0.3</version>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -160,7 +166,7 @@
 <!--			</plugin>-->
 		</plugins>
 	</build>
-	
+
 	<profiles>
 		<profile>
 			<id>sign</id>
@@ -194,6 +200,6 @@
 			</build>
 
 		</profile>
-	</profiles>	
-	
+	</profiles>
+
 </project>

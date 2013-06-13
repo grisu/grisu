@@ -1,5 +1,12 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jidesoft.swing.JideTabbedPane;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
 import grisu.frontend.model.job.GrisuJob;
@@ -8,11 +15,19 @@ import grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 import grisu.frontend.view.swing.jobmonitoring.single.appSpecific.AppSpecificViewerPanel;
 import grisu.frontend.view.swing.utils.BackgroundActionProgressDialogSmall;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.utils.MemoryUtils;
+import grisu.jcommons.utils.WalltimeUtils;
 import grisu.model.dto.DtoActionStatus;
 import grisu.model.dto.GridFile;
 import grisu.model.status.StatusObject;
+import org.apache.commons.lang.StringUtils;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.Cursor;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -24,30 +39,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JEditorPane;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.FormSpecs;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jidesoft.swing.JideTabbedPane;
 
 public class JobDetailPanelDefault extends JPanel implements
 PropertyChangeListener, JobDetailPanel {
@@ -622,18 +613,37 @@ PropertyChangeListener, JobDetailPanel {
 	}
 
 	private void setProperties() {
-		final String propText = generateHtml(job.getAllJobProperties(true));
+        Map<String, String> properties = Maps.newLinkedHashMap(job.getAllJobProperties(true));
+
+        final String subTimeString = properties.get(Constants.SUBMISSION_TIME_KEY);
+        String subTime = null;
+        try {
+            subTime = DateFormat.getInstance().format(
+                    new Date(Long.parseLong(subTimeString)));
+            properties.put(Constants.SUBMISSION_TIME_KEY, subTime);
+        } catch (final Exception e) {
+            subTime = "n/a";
+        }
+
+        try {
+            int wt = Integer.parseInt(properties.get(Constants.WALLTIME_IN_MINUTES_KEY));
+            String wtString = StringUtils.join(WalltimeUtils.convertSecondsInHumanReadableString(wt*60), " ");
+            properties.put(Constants.WALLTIME_IN_MINUTES_KEY, wtString);
+        } catch (Exception e) {
+            myLogger.error("Can't get walltime: "+e.getLocalizedMessage());
+        }
+        try {
+            long wt = Long.parseLong(properties.get(Constants.MEMORY_IN_B_KEY));
+            String wtString = MemoryUtils.humanReadableByteCount(wt, false);
+            properties.put(Constants.MEMORY_IN_B_KEY, wtString);
+        } catch (Exception e) {
+            myLogger.error("Can't get walltime: "+e.getLocalizedMessage());
+        }
+
+        final String propText = generateHtml(properties);
 		getPropertiesPane().setText(propText);
 
-		String subTime = null;
-		try {
-			final String subTimeString = job.getJobProperty(
-					Constants.SUBMISSION_TIME_KEY, false);
-			subTime = DateFormat.getInstance().format(
-					new Date(Long.parseLong(subTimeString)));
-		} catch (final Exception e) {
-			subTime = "n/a";
-		}
+
 		getSubmittedTextField().setText(subTime);
 
 		getApplicationTextField().setText(

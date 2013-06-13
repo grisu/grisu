@@ -8,6 +8,7 @@ import grisu.frontend.view.swing.files.open.FileDialogManager;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
 import grisu.frontend.view.swing.login.LoginPanel;
 import grisu.frontend.view.swing.login.ServiceInterfaceHolder;
+import grisu.frontend.view.swing.utils.AdminPanel;
 import grisu.frontend.view.swing.utils.AdvancedSettingsPanel;
 import grisu.jcommons.utils.HttpProxyPanel;
 import grisu.model.dto.GridFile;
@@ -23,10 +24,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.swing.InputMap;
 import javax.swing.JButton;
@@ -78,10 +76,15 @@ WindowListener, ServiceInterfaceHolder {
 		getFrame().setJMenuBar(menu);
 
 		if (panel == null) {
-			this.configPanels = new HashSet<ServiceInterfacePanel>();
+			this.configPanels = new LinkedHashSet<ServiceInterfacePanel>();
 			this.configPanels.add(new AdvancedSettingsPanel());
-			addSettingsPanel("Advanced", this.configPanels.iterator().next()
-					.getPanel());
+            if ( ClientPropertiesManager.isAdmin() ) {
+                this.configPanels.add(new AdminPanel());
+            }
+            for (ServiceInterfacePanel p : configPanels ) {
+                addSettingsPanel(p.getPanelTitle(), p.getPanel());
+            }
+
 		} else {
 			this.configPanels = new HashSet<ServiceInterfacePanel>();
 			this.configPanels.add(panel);
