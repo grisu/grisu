@@ -6,12 +6,6 @@ commandline = ${commandline}
 // optional
 // --------
 
-// submission properties
-// ---------------------
-
-//group = /nz/nesi
-${queue}
-
 // job properties
 // --------------
 

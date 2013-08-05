@@ -24,11 +24,20 @@ public class GJob {
 
 	public static void main(String[] args) throws Exception {
 
+        if ( args.length != 1 ) {
+            System.err.println("Wrong number of arguments, only path to job is allowed.");
+        }
+        String path = args[0];
+
+
 		LoginManager.initGrisuClient("gjob");
 
+        System.out.println("Logging in...");
 		ServiceInterface si = LoginManager.login("nesi", false);
 		// ServiceInterface si = LoginManager.login("local", false);
 
+
+        System.out.println("Reading job description...");
 		GJob gjob = new GJob(
 				"/data/src/config/end-to-end-tests/Gaussian/jobs/H2O");
 		// GJob gjob = new
@@ -81,13 +90,13 @@ public class GJob {
 
 
         if (StringUtils.isBlank(queue)) {
-            properties.put("queue", "//queue = pan:gram.uoa.nesi.org.nz");
+            properties.put("queue", "queue = pan:gram.uoa.nesi.org.nz");
         } else {
             properties.put("queue", "queue = "+queue);
         }
 
         if (StringUtils.isBlank(group)) {
-            properties.put("group", "//group = /nz/nesi");
+            properties.put("group", "group = /nz/nesi");
         } else {
             properties.put("group", "group = "+group);
         }
@@ -124,6 +133,14 @@ public class GJob {
 
         try {
             FileUtils.write(jobFile, configContent);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        File submitFile = new File(jobFolder, "submit.grisu");
+        configContent = VelocityUtils.render("submit.grisu", properties);
+        try {
+            FileUtils.write(submitFile, configContent);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -255,14 +272,22 @@ public class GJob {
 			submit_properties_file = some_file_or_folder;
 			Map<String, String> tempProperties = parsePropertiesFile(some_file_or_folder);
 			String job = tempProperties.get(JOB_KEY);
+            if ( job == null ) {
+                job = ".";
+            }
 			if (StringUtils.isBlank(job)) {
 				throw new RuntimeException("No job specified in: "
 						+ some_file_or_folder);
 			}
-			if (job.startsWith("..")) {
+            if (job.startsWith("..")) {
 				job = new File(submit_properties_file.getParentFile(), job)
 						.getAbsolutePath();
-			}
+			} else if ( ".".equals(job) ) {
+                job = new File(submit_properties_file.getParentFile(), JOB_PROPERTIES_FILE_NAME).getAbsolutePath();
+            } else {
+                job = new File(submit_properties_file.getParentFile(), job).getAbsolutePath();
+            }
+
 			job_properties_file = getConfigFile(job, JOB_PROPERTIES_FILE_NAME);
 			job_folder = job_properties_file.getParentFile();
 			// job_properties_file = getConfigFile(job_folder,
@@ -410,5 +435,12 @@ public class GJob {
 
 		return job;
 	}
+
+    public String getJobname() {
+        if (job_name == null ) {
+            return job_properties_file.getAbsolutePath();
+        }
+        return job_name;
+    }
 
 }

@@ -63,7 +63,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 
 	/**
 	 * Default constructor
-	 * 
+	 *
 	 * @param model
 	 *            Tree model
 	 */
@@ -73,7 +73,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return a new Loading please wait node
 	 */
 	protected MutableTreeNode createLoadingNode() {
@@ -83,7 +83,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 
 	/**
 	 * Create worker that will load the nodes
-	 * 
+	 *
 	 * @param tree
 	 *            the tree
 	 * @return the newly created SwingWorker
@@ -95,7 +95,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 
 	/**
 	 * If the Node is not already loaded
-	 * 
+	 *
 	 * @param node
 	 * @param model
 	 */
@@ -114,7 +114,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	public SwingWorkerFactory<MutableTreeNode[], ?> getWorkerFactory() {
@@ -165,7 +165,7 @@ public class LazyLoadingTreeController implements TreeWillExpandListener {
 					// node
 					// .getChildAt(0);
 					//
-					// TreePath path = new TreePath(tmp.getPath());
+					// TreePath path = new TreePath(tmp.getPaths());
 					// tree.expandPath(path);
 					// }
 				}
