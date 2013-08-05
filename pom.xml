@@ -81,6 +81,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
+                    <use>false</use>
 					<aggregate>true</aggregate>
 					<linksource>true</linksource>
 <!-- 					<excludePackageNames>org.vpac.grisu.grisuBatch.*:org.vpac.grisu.examples.*:cct.*:org.vpac.grisu.plugins.*:com.swtdesigner.*</excludePackageNames> -->

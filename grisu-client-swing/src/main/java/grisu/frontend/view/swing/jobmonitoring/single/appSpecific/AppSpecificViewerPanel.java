@@ -114,7 +114,7 @@ JobDetailPanel, PropertyChangeListener {
 	/**
 	 * This gets called once the first time Grisu figures out the job is
 	 * finished.
-	 * 
+	 *
 	 * Maybe just after initialization, maybe sometime later.
 	 */
 	abstract void jobFinished();
@@ -127,11 +127,11 @@ JobDetailPanel, PropertyChangeListener {
 
 	/**
 	 * This method gets called if some property of the GrisuJob changes.
-	 * 
+	 *
 	 * This method does get all the job events, except for the events that
 	 * concern the jobs status.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param evt
 	 *            the property event that is fired from the GrisuJob
 	 */
@@ -141,7 +141,7 @@ JobDetailPanel, PropertyChangeListener {
 	 * This gets called while the job is running in a configurable intervall. It
 	 * also is called one last time after the status changed from running to
 	 * finished (successfull or not).
-	 * 
+	 *
 	 * Use this to update progress. For example, download an output file and
 	 * display it's content grahically (a progress bar, for example).
 	 */
