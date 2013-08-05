@@ -1,0 +1,44 @@
+// required
+// --------
+
+commandline = ${commandline}
+
+// optional
+// --------
+
+// submission properties
+// ---------------------
+
+//group = /nz/nesi
+${queue}
+
+// job properties
+// --------------
+
+${application}
+${applicationVersion}
+${cpus}
+${memory}
+${virtualMemory}
+${walltime}
+
+//mpi = false
+//single = true
+//hostCount = 1
+
+// files
+
+//stderr = stderr.txt
+//stdout = stdout.txt
+//stdin = stdin.txt
+
+// email settings
+
+//email_address = m.binsteiner@auckland.ac.nz
+//email_on_job_finish = true
+//email_on_job_start = false
+
+// environment variables
+
+//env = [LL_VAR=requirements=(Feature=="sandybridge")][other_env=othervalue][....]
+

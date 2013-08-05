@@ -1,29 +1,24 @@
 package grisu.frontend.control;
 
+import com.google.common.collect.Maps;
 import grisu.control.JobnameHelpers;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.JobPropertiesException;
 import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.model.job.GrisuJob;
 import grisu.jcommons.constants.Constants;
+import grisu.jcommons.utils.PackageFileHelper;
+import grisu.jcommons.view.html.VelocityUtils;
 import grisu.model.job.JobDescription;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Maps;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.*;
 
 public class GJob {
 
@@ -44,6 +39,112 @@ public class GJob {
 		job.submitJob();
 
 	}
+
+
+
+    public static void createJobStub(File parentFolder, String jobname, String commandline, String walltime, String queue, String group, String application, String version, Integer cpus, String memory, String virtualMemory) {
+        Map<String, Object> properties = Maps.newHashMap();
+        if (StringUtils.isBlank(commandline)) {
+            properties.put("commandline", "cat inputFile.txt");
+        }
+        if ( cpus == null || cpus < 1 ) {
+            properties.put("cpus", "//cpus = 1");
+        } else {
+            properties.put("cpus", "cpus = "+cpus.toString());
+        }
+        if ( StringUtils.isBlank(application)) {
+            properties.put("application", "//application = generic");
+        } else {
+            properties.put("application", "application = "+application);
+        }
+        if ( StringUtils.isBlank(version)) {
+            properties.put("applicationVersion", "//applicationVersion = generic");
+        } else {
+            properties.put("applicationVersion", "applicationVersion = "+version);
+        }
+        if (StringUtils.isBlank(memory)) {
+            properties.put("memory", "//memory = 2g");
+        } else {
+            properties.put("memory", "memory = "+memory);
+        }
+        if (StringUtils.isBlank(virtualMemory)) {
+            properties.put("virtualMemory", "//virtualMemory = 2g");
+        } else {
+            properties.put("virtualMemory", "virtualMemory = "+virtualMemory);
+        }
+
+        if (StringUtils.isBlank(walltime)) {
+            properties.put("walltime", "//walltime = 5m");
+        } else {
+            properties.put("walltime", "walltime = "+walltime);
+        }
+
+
+        if (StringUtils.isBlank(queue)) {
+            properties.put("queue", "//queue = pan:gram.uoa.nesi.org.nz");
+        } else {
+            properties.put("queue", "queue = "+queue);
+        }
+
+        if (StringUtils.isBlank(group)) {
+            properties.put("group", "//group = /nz/nesi");
+        } else {
+            properties.put("group", "group = "+group);
+        }
+
+
+        createJobStub(parentFolder, jobname, properties);
+    }
+
+    public static void createJobStub(String parentFolder, String jobname) {
+        createJobStub(new File(parentFolder), jobname);
+    }
+
+    public static void createJobStub(File parentFolder, String jobname) {
+        createJobStub(parentFolder, jobname, null, null, null, null, null, null, null, null, null);
+    }
+
+    public static void createJobStub(File parentFolder, String jobname, Map<String, Object> properties) {
+
+        File jobFolder = new File(parentFolder, jobname);
+        if ( jobFolder.exists() ) {
+            throw new RuntimeException("Jobfolder '"+jobFolder.toString()+"'already exists.");
+        }
+
+        jobFolder.mkdirs();
+
+        if (! jobFolder.exists() ) {
+            throw new RuntimeException("Could not create jobfolder: "+jobFolder.toString());
+        }
+
+		File temp = null;
+        File jobFile = new File(jobFolder, "job.grisu");
+
+        String configContent = VelocityUtils.render("job.grisu", properties);
+
+        try {
+            FileUtils.write(jobFile, configContent);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        File filesFolder = new File(jobFolder, GJob.FILES_DIR_NAME);
+        filesFolder.mkdirs();
+
+        if ( ! filesFolder.exists() ) {
+            throw new RuntimeException("Could not create input files folder: "+filesFolder.toString());
+        }
+
+        temp = PackageFileHelper.getFile("inputFile.txt");
+
+        try {
+            FileUtils.copyFile(temp, new File(filesFolder, temp.getName()));
+        } catch (IOException e) {
+            throw new RuntimeException("Could not copy input file to: "+filesFolder.toString());
+        }
+
+
+    }
 
 	public final static Logger myLogger = LoggerFactory.getLogger(GJob.class);
 
@@ -282,7 +383,7 @@ public class GJob {
 		}
 
 		JobDescription desc = new JobDescription(final_submit_props);
-		
+
 		desc.setJobname(jobname);
 
 		if (files_folder.exists()) {
