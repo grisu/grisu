@@ -97,6 +97,7 @@ public class Grisu extends GrisuCliClient<GrisuMultiCliParameters> {
                     jc.usage();
                     System.exit(1);
                 } else {
+                    c.setServiceInterface(serviceInterface);
                     c.execute();
                 }
 
