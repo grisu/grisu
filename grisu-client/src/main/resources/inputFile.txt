@@ -1,1 +1,4 @@
 hello world!
+
+<delete this file when configuring your job>
+

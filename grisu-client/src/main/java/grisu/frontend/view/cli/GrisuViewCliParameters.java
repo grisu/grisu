@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-public class GrisuViewCliParameters {
+public class GrisuViewCliParameters extends GrisuCliCommand {
 
     @Parameter
     private List<String> paths = Lists.newArrayList();
@@ -18,5 +18,8 @@ public class GrisuViewCliParameters {
     }
 
 
-
+    @Override
+    public void execute() throws Exception {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

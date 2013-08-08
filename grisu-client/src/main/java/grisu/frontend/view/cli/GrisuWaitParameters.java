@@ -2,10 +2,12 @@ package grisu.frontend.view.cli;
 
 import com.beust.jcommander.Parameter;
 import com.google.common.collect.Lists;
+import grisu.control.exceptions.NoSuchJobException;
+import grisu.frontend.model.job.GrisuJob;
 
 import java.util.List;
 
-public class GrisuWaitParameters {
+public class GrisuWaitParameters extends GrisuCliCommand {
 
     @Parameter
     private List<String> jobnames = Lists.newArrayList();
@@ -25,5 +27,21 @@ public class GrisuWaitParameters {
     }
 
 
+    @Override
+    public void execute() throws Exception {
 
+        List<String> jobnames = getJobnames();
+
+        for (String jobname : jobnames) {
+
+            try {
+                final GrisuJob job = new GrisuJob(si, jobname);
+                job.waitForJobToFinish(getWaittime());
+                System.out.println(job.getJobname()+":\t\t"+job.getStatusString(false));
+            } catch (final NoSuchJobException e) {
+                System.err.println("No such job: " + jobname);
+                continue;
+            }
+        }
+    }
 }
