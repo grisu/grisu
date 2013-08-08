@@ -13,12 +13,12 @@ public class GrisuSubmitCliParameters extends GrisuCliCommand {
     @Parameter
     private List<String> pathToJobs = Lists.newArrayList();
 
-    @Parameter(names = {"--jobname"}, description = "overwrites the name of the job")
-    private String jobname = null;
-
-    public String getJobname() {
-        return jobname;
-    }
+//    @Parameter(names = {"--jobname"}, description = "overwrites the name of the job")
+//    private String jobname = null;
+//
+//    public String getJobname() {
+//        return jobname;
+//    }
 
     public List<String> getPaths() {
         if ( pathToJobs.isEmpty() ) {
