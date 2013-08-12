@@ -114,8 +114,7 @@ public class GrisuStatusCliParameters extends GrisuCliCommand {
                     final Map<String, String> props = job.propertiesAsMap();
                     final Map<String, String> result = Maps.newTreeMap();
 
-                    result.put(Constants.STATUS_STRING,
-                            JobConstants.translateStatus(job.getStatus()));
+                    result.put(Constants.STATUS_STRING,job.statusAsString());
 
                     for (final String key : props.keySet()) {
 
