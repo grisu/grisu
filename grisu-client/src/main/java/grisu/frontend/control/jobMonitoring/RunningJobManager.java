@@ -1,5 +1,8 @@
 package grisu.frontend.control.jobMonitoring;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import com.google.common.collect.Sets;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.BatchJobException;
 import grisu.control.exceptions.JobPropertiesException;
@@ -20,31 +23,13 @@ import grisu.model.dto.DtoJobs;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.DtoStringList;
 import grisu.model.status.StatusObject;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
-
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-
-import com.google.common.collect.Sets;
+import java.util.*;
 
 public class RunningJobManager implements EventSubscriber {
 
@@ -148,7 +133,7 @@ public class RunningJobManager implements EventSubscriber {
 
 		return cachedRegistries.get(si);
 	}
-	
+
 	public static final Long MIN_WAIT_TIME_SEC = 5L;
 
 	private final UserEnvironmentManager em;
@@ -171,7 +156,7 @@ public class RunningJobManager implements EventSubscriber {
 			.synchronizedMap(new HashMap<String, EventList<BatchJobObject>>());
 
 	private final Map<String, Long> jobListAccessTime = Collections.synchronizedMap(new HashMap<String, Long>());
-	
+
 	private final Timer updateTimer = new Timer();;
 
 	// private final boolean checkForNewApplicationsForSingleJobs = false;
@@ -289,7 +274,7 @@ public class RunningJobManager implements EventSubscriber {
 			watchingAllBatchJobs = true;
 		}
 
-		if (cachedBatchJobsPerApplication.get(application) == null) {
+		if (cachedBatchJobsPerApplication.get(application.toLowerCase()) == null) {
 
 			final EventList<BatchJobObject> temp = new BasicEventList<BatchJobObject>();
 			final String tempApp = application;
@@ -316,10 +301,10 @@ public class RunningJobManager implements EventSubscriber {
 
 			t.start();
 
-			cachedBatchJobsPerApplication.put(application, temp);
+			cachedBatchJobsPerApplication.put(application.toLowerCase(), temp);
 
 		}
-		return cachedBatchJobsPerApplication.get(application);
+		return cachedBatchJobsPerApplication.get(application.toLowerCase());
 	}
 
 	public List<GridFile> getFinishedOutputFilesForBatchJob(
@@ -372,7 +357,7 @@ public class RunningJobManager implements EventSubscriber {
 			watchingAllSingleJobs = true;
 		}
 
-		if (cachedSingleJobsPerApplication.get(application) == null) {
+		if (cachedSingleJobsPerApplication.get(application.toLowerCase()) == null) {
 
 			final EventList<GrisuJob> temp = new BasicEventList<GrisuJob>();
 
@@ -403,10 +388,10 @@ public class RunningJobManager implements EventSubscriber {
 				}
 			}.start();
 
-			cachedSingleJobsPerApplication.put(application, temp);
+			cachedSingleJobsPerApplication.put(application.toLowerCase(), temp);
 
 		}
-		return cachedSingleJobsPerApplication.get(application);
+		return cachedSingleJobsPerApplication.get(application.toLowerCase());
 
 	}
 
@@ -477,9 +462,9 @@ public class RunningJobManager implements EventSubscriber {
 
 	/**
 	 * Updates the list of jobnames for this application.
-	 * 
+	 *
 	 * This doesn't update the batchjobs itself.
-	 * 
+	 *
 	 * @param application
 	 *            the application
 	 */
@@ -550,15 +535,15 @@ public class RunningJobManager implements EventSubscriber {
 		if (StringUtils.isBlank(app)) {
 			app = Constants.ALLJOBS_KEY;
 		}
-		
+
 		final String application = app.toLowerCase();
-		
+
 		synchronized (application.intern()) {
 
 			Long lastAccess = jobListAccessTime.get(application);
-			
+
 			Long now = new Date().getTime();
-			
+
 			if ( lastAccess != null && now-lastAccess < MIN_WAIT_TIME_SEC  && ! force) {
 				return null;
 			} else {
@@ -620,7 +605,7 @@ public class RunningJobManager implements EventSubscriber {
 			for (final GrisuJob j : toRemove) {
 				cachedAllSingleJobs.remove(j.getJobname());
 			}
-			
+
 			// do the rest in the background
 			final Thread t = new Thread() {
 				@Override
@@ -640,7 +625,7 @@ public class RunningJobManager implements EventSubscriber {
 			return t;
 		}
 	}
-	
+
 	public String killJobsByName(Collection<String> jobs, boolean clean ) {
 		final String handle = si.killJobs(
 				DtoStringList.fromStringColletion(jobs), clean);
@@ -666,7 +651,7 @@ public class RunningJobManager implements EventSubscriber {
 		t.setName("multi job clean wait");
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-		
+
 		return handle;
 	}
 
@@ -686,7 +671,7 @@ public class RunningJobManager implements EventSubscriber {
 		for (GrisuJob job : jobs) {
 			list.add(job.getJobname());
 		}
-		
+
 		return killJobsByName(list, clean);
 
 	}

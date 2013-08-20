@@ -349,7 +349,7 @@
 
 
 	<properties>
-		<jgrith.version>1.0</jgrith.version>
+		<jgrith.version>1.0.3-SNAPSHOT</jgrith.version>
 		<grid-jcommons.version>2.9</grid-jcommons.version>
 	</properties>
 </project>
