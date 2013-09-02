@@ -11,7 +11,6 @@ public class GrisuWaitParameters extends GrisuCliCommand {
 
     @Parameter
     private List<String> jobnames = Lists.newArrayList();
-
     @Parameter(names = {"-w", "--waittime"}, description = "seconds to wait inbetween status checks, default: 60 (don't use very small numbers because of the load this would put on the backend")
     private Integer waittime = 60;
 
@@ -22,10 +21,17 @@ public class GrisuWaitParameters extends GrisuCliCommand {
         return jobnames;
     }
 
+    public void setJobnames(List<String> jobnames) {
+        this.jobnames = jobnames;
+    }
+
     public Integer getWaittime() {
         return waittime;
     }
 
+    public void setWaittime(Integer waittime) {
+        this.waittime = waittime;
+    }
 
     @Override
     public void execute() throws Exception {

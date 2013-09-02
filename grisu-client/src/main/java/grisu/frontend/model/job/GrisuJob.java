@@ -1,14 +1,12 @@
 package grisu.frontend.model.job;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
 import grisu.control.events.FileDeletedEvent;
 import grisu.control.events.FolderCreatedEvent;
-import grisu.control.exceptions.JobPropertiesException;
-import grisu.control.exceptions.JobSubmissionException;
-import grisu.control.exceptions.NoSuchJobException;
-import grisu.control.exceptions.RemoteFileSystemException;
-import grisu.control.exceptions.StatusException;
+import grisu.control.exceptions.*;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
 import grisu.frontend.control.fileTransfers.FileTransaction;
 import grisu.frontend.control.fileTransfers.FileTransactionManager;
@@ -25,24 +23,9 @@ import grisu.model.dto.GridFile;
 import grisu.model.job.JobCreatedProperty;
 import grisu.model.job.JobDescription;
 import grisu.model.status.StatusObject;
+import grisu.model.utils.ZipUtils;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-
-import javax.persistence.Transient;
-
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
@@ -50,7 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.google.common.collect.Maps;
+import javax.persistence.Transient;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A model class that hides all the complexity of creating and submitting a job.
@@ -66,6 +52,8 @@ Comparable<GrisuJob> {
 
 	static final Logger myLogger = LoggerFactory.getLogger(GrisuJob.class
 			.getName());
+
+    static final String INPUTFILES_ZIP_NAME = "inputfiles.zip";
 
 	public static GrisuJob createJobObject(ServiceInterface si,
 			JobDescription jobsubmissionObject)
@@ -101,7 +89,13 @@ Comparable<GrisuJob> {
 
 	private String description = null;
 
-	private final List<String> submissionLog = Collections
+    private boolean compress_input_files = false;
+
+    public void setCompress_input_files(boolean compress_input_files) {
+        this.compress_input_files = compress_input_files;
+    }
+
+    private final List<String> submissionLog = Collections
 			.synchronizedList(new LinkedList<String>());
 
 	private final Map<String, String> properties = Collections
@@ -463,6 +457,16 @@ Comparable<GrisuJob> {
 	public final String createJob(final String fqan,
 			final String jobnameCreationMethod) throws JobPropertiesException {
 
+        // if we use the compress option, we need to add the uncompressing of the input files to the prolog
+
+        String existingProlog = getEnvironmentVariables().get("PROLOG");
+        if (StringUtils.isNotBlank(existingProlog)) {
+            existingProlog = "unzip -qq "+INPUTFILES_ZIP_NAME+";"+existingProlog;
+        } else {
+            existingProlog = "unzip -qq " + INPUTFILES_ZIP_NAME;
+        }
+        addEnvironmentVariable("PROLOG", existingProlog);
+
 		EventBus.publish(new JobStatusEvent(this, this.status,
 				JobConstants.UNDEFINED));
 		addJobLogMessage("Creating job on backend...");
@@ -498,7 +502,7 @@ Comparable<GrisuJob> {
 			Thread t = new Thread() {
 				@Override
 				public void run() {
-					
+
 					getAllJobProperties(true);
 					addJobLogMessage("Submission site is: "
 							+ getJobProperty(Constants.SUBMISSION_SITE_KEY,
@@ -1330,42 +1334,54 @@ Comparable<GrisuJob> {
 		final FileTransactionManager ftm = FileTransactionManager
 				.getDefault(serviceInterface);
 
-		for (final String target : targets.keySet()) {
+        if (compress_input_files) {
+            File zipFile = ZipUtils.createTempZipFile(targets);
 
-			final FileTransaction fileTransfer = ftm.addJobInputFileTransfer(
-					targets.get(target), this, target);
-			try {
-				fileTransfer.join();
-			} catch (final ExecutionException e) {
-				addJobLogMessage("Staging failed: " + e.getLocalizedMessage());
-				if (fileTransfer.getException() != null) {
-					throw fileTransfer.getException();
-				} else {
-					throw new FileTransactionException(
-							fileTransfer.getFailedSourceFile(), jobDirectory,
-							"File staging failed.", null);
-				}
-			}
-			if (!FileTransaction.Status.FINISHED.equals(fileTransfer
-					.getStatus())) {
-				if (fileTransfer.getException() != null) {
-					throw fileTransfer.getException();
-				} else {
-					throw new FileTransactionException(
-							fileTransfer.getFailedSourceFile(), jobDirectory,
-							"File staging failed.", null);
-				}
-			}
+            addTransfer(ftm, Sets.newHashSet(zipFile.getAbsolutePath()), INPUTFILES_ZIP_NAME);
 
-		}
+        } else {
 
-		addJobLogMessage("Staging of input files finished.");
+            for (final String target : targets.keySet()) {
+
+                addTransfer(ftm, targets.get(target), target);
+
+            }
+
+        }
+        addJobLogMessage("Staging of input files finished.");
 
 		if ((getInputFiles() != null) && (getInputFiles().size() > 0)) {
 			setStatus(JobConstants.INPUT_FILES_UPLOADED);
 		}
 
 	}
+
+    private void addTransfer(FileTransactionManager ftm, Set<String> sources, String target) throws InterruptedException, FileTransactionException {
+        final FileTransaction fileTransfer = ftm.addJobInputFileTransfer(
+                sources, this, target);
+        try {
+            fileTransfer.join();
+        } catch (final ExecutionException e) {
+            addJobLogMessage("Staging failed: " + e.getLocalizedMessage());
+            if (fileTransfer.getException() != null) {
+                throw fileTransfer.getException();
+            } else {
+                throw new FileTransactionException(
+                        fileTransfer.getFailedSourceFile(), jobDirectory,
+                        "File staging failed.", null);
+            }
+        }
+        if (!FileTransaction.Status.FINISHED.equals(fileTransfer
+                .getStatus())) {
+            if (fileTransfer.getException() != null) {
+                throw fileTransfer.getException();
+            } else {
+                throw new FileTransactionException(
+                        fileTransfer.getFailedSourceFile(), jobDirectory,
+                        "File staging failed.", null);
+            }
+        }
+    }
 
 	// /**
 	// * Interrupts the {@link #waitForJobToFinish(int)} method.
@@ -1640,13 +1656,13 @@ Comparable<GrisuJob> {
 
 	/**
 	 * This is for internal display control, dont' set it manually.
-	 * 
+	 *
 	 * @param whether the job is about to be cleaned or not.
 	 */
 	public void setBeingCleaned(boolean b) {
 
 		this.isBeingCleaned = true;
-		
+
 	}
 
 }

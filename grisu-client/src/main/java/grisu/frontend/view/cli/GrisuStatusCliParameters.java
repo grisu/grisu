@@ -24,6 +24,10 @@ public class GrisuStatusCliParameters extends GrisuCliCommand {
 
     @Parameter
     private List<String> jobnames = Lists.newArrayList();
+    @Parameter(names = {"--summary"}, description = "displays a summary of all jobs. if this is set all other parameters will be ignored")
+    private boolean summary = false;
+    @Parameter(names = {"--details"}, description = "displays all job properties, not only status")
+    private boolean details = false;
 
     public List<String> getJobnames() {
         if ( jobnames.isEmpty() ) {
@@ -32,18 +36,24 @@ public class GrisuStatusCliParameters extends GrisuCliCommand {
         return jobnames;
     }
 
-    @Parameter(names = {"--summary"}, description = "displays a summary of all jobs. if this is set all other parameters will be ignored")
-    private boolean summary = false;
-
-    @Parameter(names = {"--details"}, description = "displays all job properties, not only status")
-    private boolean details = false;
+    public void setJobnames(List<String> jobnames) {
+        this.jobnames = jobnames;
+    }
 
     public boolean isSummary() {
         return summary;
     }
 
+    public void setSummary(boolean summary) {
+        this.summary = summary;
+    }
+
     public boolean isDetails() {
         return details;
+    }
+
+    public void setDetails(boolean details) {
+        this.details = details;
     }
 
     @Override

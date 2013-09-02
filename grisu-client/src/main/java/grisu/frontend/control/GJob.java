@@ -38,12 +38,14 @@ public class GJob {
 
 
         System.out.println("Reading job description...");
-		GJob gjob = new GJob(
-				"/data/src/config/end-to-end-tests/Gaussian/jobs/H2O");
+        GJob gjob = new GJob(path);
+//		GJob gjob = new GJob(
+//				"/data/src/config/end-to-end-tests/Gaussian/jobs/H2O");
 		// GJob gjob = new
 		// GJob("/data/src/config/end-to-end-tests/generic/jobs/stdinput_test");
 
 		GrisuJob job = gjob.createJobDescription(si);
+        job.setCompress_input_files(true);
 
 		job.submitJob();
 
@@ -132,7 +134,7 @@ public class GJob {
         String configContent = VelocityUtils.render("job.grisu", properties);
 
         try {
-            FileUtils.write(jobFile, configContent);
+            FileUtils.writeStringToFile(jobFile, configContent);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -140,7 +142,7 @@ public class GJob {
         File submitFile = new File(jobFolder, "submit.grisu");
         configContent = VelocityUtils.render("submit.grisu", properties);
         try {
-            FileUtils.write(submitFile, configContent);
+            FileUtils.writeStringToFile(submitFile, configContent);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -173,7 +175,7 @@ public class GJob {
 	public final static String SUBMIT_PROPERTIES_FILE_NAME = "submit.grisu";
 	public final static String FILES_PROPERTIES_FILE_NAME = "files.grisu";
 
-	public final static String FILES_DIR_NAME = "files";
+    public final static String FILES_DIR_NAME = "files";
 
 	public static File getConfigFile(String file, String config_filename) {
 		return getConfigFile(new File(file), config_filename);
@@ -326,22 +328,24 @@ public class GJob {
 //		}
 
 		job_name = jobname;
-		files_folder = new File(job_folder, FILES_DIR_NAME);
-		if (new File(job_folder, FILES_PROPERTIES_FILE_NAME).exists()) {
-			files_file = new File(job_folder, FILES_PROPERTIES_FILE_NAME);
-			try {
-				List<String> paths = FileUtils.readLines(files_file);
-				additional_files.addAll(paths);
-			} catch (IOException e) {
-				throw new RuntimeException("Can't read file: "
-						+ files_file.getAbsolutePath());
-			}
+        files_folder = new File(job_folder, FILES_DIR_NAME);
+        if (new File(job_folder, FILES_PROPERTIES_FILE_NAME).exists()) {
+            files_file = new File(job_folder, FILES_PROPERTIES_FILE_NAME);
+            try {
+                List<String> paths = FileUtils.readLines(files_file);
+                additional_files.addAll(paths);
+            } catch (IOException e) {
+                throw new RuntimeException("Can't read file: "
+                        + files_file.getAbsolutePath());
+            }
 
-		} else {
-			files_file = null;
-		}
+        } else {
+            files_file = null;
+        }
 
-	}
+
+
+    }
 
 	public GrisuJob createJobDescription(ServiceInterface si)
 			throws JobPropertiesException {
@@ -418,6 +422,11 @@ public class GJob {
 				}
 			}
 		}
+        if ( additional_files != null ) {
+            for ( String path : additional_files ) {
+                desc.addInputFileUrl(path);
+            }
+        }
 
 		GrisuJob job = GrisuJob.createJobObject(si, desc);
 
@@ -432,7 +441,7 @@ public class GJob {
 		if (createJobOnBackend) {
 			job.createJob(group);
 		}
-        
+
 		return job;
 	}
 
