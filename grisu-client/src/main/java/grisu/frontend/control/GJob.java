@@ -10,6 +10,7 @@ import grisu.jcommons.constants.Constants;
 import grisu.jcommons.utils.PackageFileHelper;
 import grisu.jcommons.view.html.VelocityUtils;
 import grisu.model.job.JobDescription;
+import grisu.settings.ClientPropertiesManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class GJob {
 		// GJob("/data/src/config/end-to-end-tests/generic/jobs/stdinput_test");
 
 		GrisuJob job = gjob.createJobDescription(si);
-        job.setCompress_input_files(true);
+//        job.setCompressInputFiles(true);
 
 		job.submitJob();
 
@@ -430,7 +431,18 @@ public class GJob {
 
 		GrisuJob job = GrisuJob.createJobObject(si, desc);
 
-		if (StringUtils.isBlank(job.getApplication())) {
+        // non-job relevant properties
+        String compressInput = final_submit_props.get(ClientPropertiesManager.COMPRESS_INPUT_FILES_KEY);
+        if ( StringUtils.isNotBlank(compressInput) ) {
+            job.setCompressInputFiles(Boolean.parseBoolean(compressInput));
+        }
+        String compressOutput = final_submit_props.get(ClientPropertiesManager.COMPRESS_OUTPUT_FILES_KEY);
+        if ( StringUtils.isNotBlank(compressOutput) ) {
+            job.setCompressOutputFiles(Boolean.parseBoolean(compressOutput));
+        }
+
+
+        if (StringUtils.isBlank(job.getApplication())) {
 			job.setApplication(Constants.GENERIC_APPLICATION_NAME);
 		}
 

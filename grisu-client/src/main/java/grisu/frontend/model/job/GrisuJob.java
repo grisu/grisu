@@ -24,6 +24,7 @@ import grisu.model.job.JobCreatedProperty;
 import grisu.model.job.JobDescription;
 import grisu.model.status.StatusObject;
 import grisu.model.utils.ZipUtils;
+import grisu.settings.ClientPropertiesManager;
 import grisu.utils.FileHelpers;
 import grisu.utils.SeveralXMLHelpers;
 import org.apache.commons.io.FileUtils;
@@ -53,7 +54,9 @@ Comparable<GrisuJob> {
 	static final Logger myLogger = LoggerFactory.getLogger(GrisuJob.class
 			.getName());
 
-    static final String INPUTFILES_ZIP_NAME = "inputfiles.zip";
+    public static final String INPUTFILES_ZIP_NAME = "inputfiles.zip";
+    public static final String OUTPUTFILES_ZIP_NAME = "output.zip";
+
 
 	public static GrisuJob createJobObject(ServiceInterface si,
 			JobDescription jobsubmissionObject)
@@ -89,10 +92,15 @@ Comparable<GrisuJob> {
 
 	private String description = null;
 
-    private boolean compress_input_files = false;
+    private boolean compressInputFiles = ClientPropertiesManager.isCompressInputFiles();
+    private boolean compressOutputFiles = ClientPropertiesManager.isCompressOutputFiles();
 
-    public void setCompress_input_files(boolean compress_input_files) {
-        this.compress_input_files = compress_input_files;
+    public void setCompressInputFiles(boolean compress_input_files) {
+        this.compressInputFiles = compress_input_files;
+    }
+
+    public void setCompressOutputFiles(boolean compress_output_files) {
+        this.compressOutputFiles = compress_output_files;
     }
 
     private final List<String> submissionLog = Collections
@@ -459,16 +467,32 @@ Comparable<GrisuJob> {
 
         // if we use the compress option, we need to add the uncompressing of the input files to the prolog
 
-        String existingProlog = getEnvironmentVariables().get("PROLOG");
-        if (StringUtils.isNotBlank(existingProlog)) {
-            existingProlog = "unzip -qq "+INPUTFILES_ZIP_NAME+";"+existingProlog;
-        } else {
-            existingProlog = "unzip -qq " + INPUTFILES_ZIP_NAME;
+        if (compressInputFiles) {
+
+            String existingProlog = getEnvironmentVariables().get("PROLOG");
+            if (StringUtils.isNotBlank(existingProlog)) {
+                existingProlog = "unzip -qq " + INPUTFILES_ZIP_NAME + ";" + existingProlog;
+            } else {
+                existingProlog = "unzip -qq " + INPUTFILES_ZIP_NAME;
+            }
+            addEnvironmentVariable("PROLOG", existingProlog);
         }
-        addEnvironmentVariable("PROLOG", existingProlog);
+
+        if (compressOutputFiles) {
+
+            String existingEpilog = getEnvironmentVariables().get("EPILOG");
+            if (StringUtils.isNotBlank(existingEpilog)) {
+                existingEpilog = existingEpilog + "; zip -qrD9 "+OUTPUTFILES_ZIP_NAME+" * -x nul";
+            } else {
+                existingEpilog = "zip -qrD9 "+OUTPUTFILES_ZIP_NAME+" * -x nu";
+            }
+            addEnvironmentVariable("EPILOG", existingEpilog);
+        }
+
+
 
 		EventBus.publish(new JobStatusEvent(this, this.status,
-				JobConstants.UNDEFINED));
+                JobConstants.UNDEFINED));
 		addJobLogMessage("Creating job on backend...");
 		if (StringUtils.isNotBlank(getJobname())) {
 			EventBus.publish(this.getJobname(), new JobStatusEvent(this,
@@ -1334,7 +1358,7 @@ Comparable<GrisuJob> {
 		final FileTransactionManager ftm = FileTransactionManager
 				.getDefault(serviceInterface);
 
-        if (compress_input_files) {
+        if (compressInputFiles) {
             File zipFile = ZipUtils.createTempZipFile(targets);
 
             addTransfer(ftm, Sets.newHashSet(zipFile.getAbsolutePath()), INPUTFILES_ZIP_NAME);
@@ -1596,6 +1620,20 @@ Comparable<GrisuJob> {
 		logMessages = job.getLogMessages().asMap();
 
 	}
+
+    public final boolean waitForJobToFinish() {
+
+        int interval = 300;  // 5 minutes as default
+
+        if (getWalltimeInSeconds() > 36000 ) {
+            interval = 600; // 10 mins
+        } else if(getWalltimeInSeconds() <= 3000) {
+             interval =  getWalltimeInSeconds() / 10;
+        }
+
+        return waitForJobToFinish(interval);
+
+    }
 
 	/**
 	 * You can use this method to wait for the job to finish (either

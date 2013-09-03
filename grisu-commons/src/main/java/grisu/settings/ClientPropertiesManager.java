@@ -3,9 +3,6 @@ package grisu.settings;
 import grisu.control.events.ClientPropertiesEvent;
 import grisu.jcommons.constants.Enums.LoginType;
 import grith.gsindl.SLCS;
-
-import java.io.File;
-
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
@@ -13,11 +10,13 @@ import org.bushe.swing.event.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
 /**
  * Manages the $HOME/.grisu/grisu.config file.
- * 
+ *
  * @author Markus Binsteiner
- * 
+ *
  */
 public final class ClientPropertiesManager {
 
@@ -62,11 +61,13 @@ public final class ClientPropertiesManager {
 
 	public static final String AUTO_LOGIN_KEY = "autoLogin";
 	public static final String ADMIN_KEY = "admin";
+    public static final String COMPRESS_INPUT_FILES_KEY = "compressInputFiles";
+    public static final String COMPRESS_OUTPUT_FILES_KEY = "compressOutputFiles";
 
 	/**
 	 * Call this if the user wants a new (server-side) template to his personal
 	 * templates.
-	 * 
+	 *
 	 * @param templateName
 	 *            the name of the template
 	 */
@@ -94,7 +95,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Use this if you want to add the url to the list of previously used.
-	 * 
+	 *
 	 * @param serviceInterfaceUrl
 	 *            the url of the ServiceInterface
 	 */
@@ -155,7 +156,7 @@ public final class ClientPropertiesManager {
 				}
 			}
 		}
-		
+
 		return impersonate;
 	}
 
@@ -175,9 +176,43 @@ public final class ClientPropertiesManager {
 
 	}
 
+
+	public static boolean isCompressInputFiles() {
+
+		boolean compress = false;
+		try {
+			compress = Boolean.parseBoolean(getClientConfiguration().getString(
+					COMPRESS_INPUT_FILES_KEY));
+
+		} catch (final Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return false;
+		}
+
+		return compress;
+
+	}
+
+    	public static boolean isCompressOutputFiles() {
+
+		boolean compress = false;
+		try {
+			compress = Boolean.parseBoolean(getClientConfiguration().getString(
+					COMPRESS_OUTPUT_FILES_KEY));
+
+		} catch (final Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return false;
+		}
+
+		return compress;
+
+	}
+
+
 	/**
 	 * Retrieves the configuration parameters from the properties file.
-	 * 
+	 *
 	 * @return the configuration
 	 * @throws ConfigurationException
 	 *             if the file could not be read/parsed
@@ -252,7 +287,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Gets the connection timeout for the connection to a backend.
-	 * 
+	 *
 	 * @return the timeout
 	 */
 	public static long getConnectionTimeoutInMS() {
@@ -294,7 +329,7 @@ public final class ClientPropertiesManager {
 	/**
 	 * Returns the full path to the executable that is used as a default to
 	 * handle files with the specified extension.
-	 * 
+	 *
 	 * @param extension
 	 *            the file extension
 	 * @return the full path to the executable
@@ -321,7 +356,7 @@ public final class ClientPropertiesManager {
 	/**
 	 * Returns the default (most likely: last used) serviceinterfaceurl for this
 	 * user.
-	 * 
+	 *
 	 * @return the serviceInterfaceurl
 	 */
 	public static String getDefaultServiceInterfaceUrl() {
@@ -364,11 +399,11 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * This one determines how big files can be to be kept in the local cache.
-	 * 
+	 *
 	 * If a file is bigger and gets downloaded, it will be downloaded to the
 	 * cache but then moved to the final destination. Otherwise it'll be
 	 * copied...
-	 * 
+	 *
 	 * @return the threshold in bytes
 	 */
 	public static long getFileSizeThresholdForCache() {
@@ -410,11 +445,11 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * This one determines how big files can be to be kept in the local cache.
-	 * 
+	 *
 	 * If a file is bigger and gets downloaded, it will be downloaded to the
 	 * cache but then moved to the final destination. Otherwise it'll be
 	 * copied...
-	 * 
+	 *
 	 * @return the threshold in bytes
 	 */
 	public static long getFolderSizeThresholdForCache() {
@@ -497,7 +532,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Loads the last selected tab: certificate or myproxy.
-	 * 
+	 *
 	 * @return the index of the tab
 	 */
 	public static int getLastSelectedTab() {
@@ -519,7 +554,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Returns the last used fqan for this user.
-	 * 
+	 *
 	 * @return the fqan
 	 */
 	public static String getLastUsedFqan() {
@@ -585,7 +620,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Returns the name of the last used shib idp.
-	 * 
+	 *
 	 * @return the idp name.
 	 */
 	public static String getSavedShibbolethIdp() {
@@ -601,7 +636,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Returns the last used shib username.
-	 * 
+	 *
 	 * @return the username
 	 */
 	public static String getSavedShibbolethUsername() {
@@ -618,7 +653,7 @@ public final class ClientPropertiesManager {
 	/**
 	 * Returns all the (server-side) templates this users added to his personal
 	 * templates.
-	 * 
+	 *
 	 * @return the templates
 	 */
 	public static String[] getServerTemplates() {
@@ -645,7 +680,7 @@ public final class ClientPropertiesManager {
 	/**
 	 * Returns all serviceInterface urls that the user connected to successfully
 	 * in the past.
-	 * 
+	 *
 	 * @return the urls of the ServiceInterfaces
 	 */
 	public static String[] getServiceInterfaceUrls() {
@@ -693,7 +728,7 @@ public final class ClientPropertiesManager {
 	/**
 	 * Call this if a user wants to remove a (server-side) template from his
 	 * personal templates.
-	 * 
+	 *
 	 * @param templateName
 	 *            the name of the template
 	 */
@@ -718,7 +753,7 @@ public final class ClientPropertiesManager {
 	/**
 	 * Saves whether to check ("true") or not ("false") the
 	 * "Advanced connection properties" checkbox the next time.
-	 * 
+	 *
 	 * @param useHttpProxy
 	 *            whether to check checkbox next time
 	 */
@@ -734,7 +769,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Saves the httpproxy server port for next time.
-	 * 
+	 *
 	 * @param port
 	 *            the port of the http proxy server (e.g. 3128)
 	 */
@@ -750,7 +785,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Saves the httpproxy server hostname for next time.
-	 * 
+	 *
 	 * @param server
 	 *            the hostname of the proxy server (e.g. "proxy.vpac.org")
 	 */
@@ -766,7 +801,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Saves the httpproxy username for next time.
-	 * 
+	 *
 	 * @param username
 	 *            the username to auththenticate against the httpproxy
 	 */
@@ -794,7 +829,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Stores the last used fqan for this user.
-	 * 
+	 *
 	 * @param fqan
 	 *            the fqan
 	 */
@@ -809,7 +844,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Saves the last selected tab.
-	 * 
+	 *
 	 * @param selectedLoginPanel
 	 *            the tab to display on startup
 	 */
@@ -825,7 +860,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Call this to store the name of the last used shib idp.
-	 * 
+	 *
 	 * @param idpName
 	 *            the name of the idp
 	 */
@@ -840,7 +875,7 @@ public final class ClientPropertiesManager {
 
 	/**
 	 * Saves the last used shib username.
-	 * 
+	 *
 	 * @param username
 	 *            the username
 	 */
@@ -871,6 +906,39 @@ public final class ClientPropertiesManager {
 		}
 
 	}
+	
+	public static void setCompressInputFiles(boolean selected) {
+
+
+		try {
+			getClientConfiguration().setProperty(COMPRESS_INPUT_FILES_KEY,
+					new Boolean(selected).toString());
+			getClientConfiguration().save();
+
+			EventBus.publish(new ClientPropertiesEvent(COMPRESS_INPUT_FILES_KEY,
+					new Boolean(selected).toString()));
+
+		} catch (final ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+	}
+	public static void setCompressOutputFiles(boolean selected) {
+
+
+		try {
+			getClientConfiguration().setProperty(COMPRESS_OUTPUT_FILES_KEY,
+					new Boolean(selected).toString());
+			getClientConfiguration().save();
+
+			EventBus.publish(new ClientPropertiesEvent(COMPRESS_OUTPUT_FILES_KEY,
+					new Boolean(selected).toString()));
+
+		} catch (final ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+	}
 
 	public static void setConcurrentUploadThreads(int threads) {
 		concurrent_upload_thread_dynamic = threads;
@@ -879,7 +947,7 @@ public final class ClientPropertiesManager {
 	/**
 	 * Sets the path to the executable for the default external application to
 	 * handle this kind of file extension.
-	 * 
+	 *
 	 * @param extension
 	 *            the file extension (e.g. pdf)
 	 * @param path
@@ -899,7 +967,7 @@ public final class ClientPropertiesManager {
 	/**
 	 * Sets the ServiceInterface url that was used the last time the user
 	 * successfully connected to one.
-	 * 
+	 *
 	 * @param serviceInterfaceUrl
 	 *            the url of the ServiceInterface
 	 */
