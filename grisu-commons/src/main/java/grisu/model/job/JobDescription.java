@@ -220,6 +220,11 @@ public class JobDescription {
 
     }
 
+    public void addInputFileUrls(String urlFile) {
+        File f = FileManager.getFileFromUriOrPath(urlFile);
+        addInputFileUrls(f);
+    }
+
     public void addInputFileUrls(File urlFile) {
 
         try {
