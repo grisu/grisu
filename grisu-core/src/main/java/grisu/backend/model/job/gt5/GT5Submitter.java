@@ -75,12 +75,14 @@ public class GT5Submitter extends JobSubmitter {
 		} catch (final GramException ex) {
 			myLogger.info("pinging " + contact + " failed. Returning status 'Unsubmitted'.", ex);
 			// have no idea what the status is, gateway is down:
-			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED,
-					ex.getErrorCode(), 0);
+			//return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED,
+            //ex.getErrorCode(), 0);
+            return JobConstants.UNDEFINED;
 		} catch (final GSSException ex) {
 			myLogger.info("pinging " + contact + " failed. Returning status 'Unsubmitted'.", ex);
-			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0,
-					0);
+			//return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0,
+			//		0);
+            return JobConstants.UNDEFINED;
 		}
 
 		try {
@@ -90,6 +92,7 @@ public class GT5Submitter extends JobSubmitter {
 			jobStatus = job.getStatus();
 			if ((jobStatus == GRAMConstants.STATUS_DONE)
 					|| (jobStatus == GRAMConstants.STATUS_FAILED)) {
+                myLogger.debug("Signaling commit_end to gram job.");
 				job.signal(GRAMConstants.SIGNAL_COMMIT_END);
 			}
 			return translateToGrisuStatus(jobStatus, job.getError(),
@@ -119,18 +122,21 @@ public class GT5Submitter extends JobSubmitter {
 					}
 				} catch (final GramException ex1) {
 					if (ex1.getErrorCode() == 131) {
+                        myLogger.debug("Job still running but proxy expired");
 						// job is still running but proxy expired
 						return translateToGrisuStatus(
 								GRAMConstants.STATUS_ACTIVE, 131, 0);
 					}
 					// something is really wrong
-					myLogger.error("restarting job " + handle + " failed. returning status 'Failed'.", ex1);
-					return translateToGrisuStatus(GRAMConstants.STATUS_FAILED,
-							restartJob.getError(), 0);
+					myLogger.error("restarting job " + handle + " failed. returning status 'Undefined'.", ex1);
+					//return translateToGrisuStatus(GRAMConstants.STATUS_FAILED,
+                    // restartJob.getError(), 0);
+                    return JobConstants.UNDEFINED;
 				} catch (final GSSException ex1) {
-					myLogger.error("restarting job " + handle + " failed. returning status 'Unsubmitted'.", ex1);
-					return translateToGrisuStatus(
-							GRAMConstants.STATUS_UNSUBMITTED, 0, 0);
+					myLogger.error("restarting job " + handle + " failed. returning status 'Undefined'.", ex1);
+					//return translateToGrisuStatus(
+					//		GRAMConstants.STATUS_UNSUBMITTED, 0, 0);
+                    return JobConstants.UNDEFINED;
 				}
 
 				grisuJob.setJobhandle(restartJob.getIDAsString());
@@ -142,24 +148,29 @@ public class GT5Submitter extends JobSubmitter {
 			} else if (ex.getErrorCode() == 156) {
 				// second restart didn't work - assume the job is done
 				// this bit is only needed during transition between releases
-				return translateToGrisuStatus(GRAMConstants.STATUS_DONE, 0, 0);
+				//return translateToGrisuStatus(GRAMConstants.STATUS_DONE, 0, 0);
+                //return translateToGrisuStatus(GRAMConstants.STATUS_DONE, 0, 0);
+                return JobConstants.UNDEFINED;
 
 			} else {
 				myLogger.error("something else is wrong. error code is "
 						+ ex.getErrorCode());
 				myLogger.error(ex.getLocalizedMessage());
-				return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED,
-						0, 0);
+				//return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED,
+				//		0, 0);
+                return JobConstants.UNDEFINED;
 			}
 
 		} catch (final GSSException ex) {
 			myLogger.error(ex.getLocalizedMessage(), ex);
-			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0,
-					0);
+			//return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0,
+			//		0);
+            return JobConstants.UNDEFINED;
 		} catch (final MalformedURLException ex) {
 			myLogger.error(ex.getLocalizedMessage(), ex);
-			return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0,
-					0);
+			//return translateToGrisuStatus(GRAMConstants.STATUS_UNSUBMITTED, 0,
+            //0);
+            return JobConstants.UNDEFINED;
 		}
 
 	}
@@ -282,11 +293,11 @@ public class GT5Submitter extends JobSubmitter {
 		} else {
 			// needed for transition period to deal with jobs submitted without
 			// two-phase commit
-			if (failureCode == 156) {
-				grisu_status = JobConstants.DONE;
-			} else {
-				grisu_status = JobConstants.UNSUBMITTED;
-			}
+//			if (failureCode == 156) {
+//				grisu_status = JobConstants.DONE;
+//			} else {
+				grisu_status = JobConstants.UNDEFINED;
+//			}
 		}
 		return grisu_status;
 
