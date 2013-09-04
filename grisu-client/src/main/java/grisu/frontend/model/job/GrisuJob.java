@@ -128,7 +128,7 @@ public class GrisuJob extends JobDescription implements
 
         for (int i = 0; i < retries; i++) {
             try {
-                File file = downloadAndCacheOutputFile(path);
+                result = downloadAndCacheOutputFile(path);
                 downloaded = true;
                 break;
             } catch (Exception e) {
@@ -835,6 +835,20 @@ public class GrisuJob extends JobDescription implements
         }
 
         return jobDirectory;
+    }
+
+     /**
+     * Returns the absolute url to the specified file within the job directory.
+     * <p/>
+     * It only makes sense to call this method of the job was already created on
+     * the backend.
+     *
+     * @return the url to the file within the job (working-) directory
+     */
+    public final String getFileUrl(String relativePath) {
+
+        return FileManager.removeDoubleSlashes(getJobDirectoryUrl()+"/"+relativePath);
+
     }
 
     /**
@@ -1641,9 +1655,13 @@ public class GrisuJob extends JobDescription implements
 
         if (getWalltimeInSeconds() > 36000) {
             interval = 600; // 10 mins
+        } else if (getWalltimeInSeconds() <= 600) {
+            interval = 5;
         } else if (getWalltimeInSeconds() <= 3000) {
             interval = getWalltimeInSeconds() / 10;
         }
+
+        myLogger.debug("Waiting for the job to finish, wait interval: "+interval+" seconds");
 
         return waitForJobToFinish(interval);
 
