@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
 import grisu.jcommons.constants.Constants;
-import grisu.utils.LogPanel;
+import grisu.jcommons.utils.swing.LogPanel;
 
 import javax.swing.*;
 import java.awt.*;

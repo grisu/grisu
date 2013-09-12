@@ -8,13 +8,12 @@ import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.model.job.GrisuJob;
-import grisu.frontend.view.swing.jobmonitoring.single.SingleJobTabbedDialog;
+import grisu.frontend.view.swing.jobmonitoring.single.SingleJobTabbedFrame;
 import grisu.jcommons.constants.Constants;
 import grisu.settings.ClientPropertiesManager;
 import org.apache.commons.io.FileUtils;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -47,7 +46,7 @@ public class MonitoringDaemon {
     private final RunningJobManager rjm;
 
     private final boolean displayDialog;
-    private final SingleJobTabbedDialog dialog;
+    private final SingleJobTabbedFrame dialog;
 
     private final Map<Long, String> log = Collections.synchronizedMap(new TreeMap<Long, String>());
 
@@ -57,19 +56,17 @@ public class MonitoringDaemon {
         this.displayDialog = displayDialog;
 
         if (displayDialog) {
-            dialog = new SingleJobTabbedDialog(si, Constants.ALLJOBS_KEY);
-            dialog.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    System.exit(0);
-                }
-            });
+
+            dialog = new SingleJobTabbedFrame(si, Constants.ALLJOBS_KEY);
+            dialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            dialog.pack();
+
             new Thread() {
                 public void run() {
-                    dialog.pack();
                     dialog.setVisible(true);
                 }
             }.start();
+
         } else {
             dialog = null;
         }
@@ -141,7 +138,7 @@ public class MonitoringDaemon {
                     String value = j.getJobProperty(processed_tag, true);
                     if (Boolean.parseBoolean(value)) {
                         ignoreList.add(j);
-                        addLog("Ignoring because already tagged: " + j.getJobname());
+                        addLog("Ignoring because already processed: " + j.getJobname());
                         continue;
                     }
 

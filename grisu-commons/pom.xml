@@ -362,6 +362,6 @@
 
 	<properties>
 		<jgrith.version>1.0.2</jgrith.version>
-		<grid-jcommons.version>2.9</grid-jcommons.version>
+		<grid-jcommons.version>2.10-SNAPSHOT</grid-jcommons.version>
 	</properties>
 </project>
