@@ -56,6 +56,13 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 		return grid;
 	}
 
+    public void addTab(String title, JPanel panel, int index) {
+
+        getJideTabbedPane().insertTab(title, null, panel, null, index);
+        getJideTabbedPane().setSelectedIndex(index);
+        jideTabbedPane.setTabClosableAt(index, false);
+    }
+
 	private JideTabbedPane getJideTabbedPane() {
 		if (jideTabbedPane == null) {
 			jideTabbedPane = new JideTabbedPane();

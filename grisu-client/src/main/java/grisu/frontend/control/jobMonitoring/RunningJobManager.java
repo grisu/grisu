@@ -23,6 +23,7 @@ import grisu.model.dto.DtoJobs;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.DtoStringList;
 import grisu.model.status.StatusObject;
+import grisu.settings.ClientPropertiesManager;
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
@@ -63,7 +64,7 @@ public class RunningJobManager implements EventSubscriber {
 
 				if (!stop) {
 					updateTimer.schedule(new UpdateTimerTask(),
-							UPDATE_TIME_IN_SECONDS * 1000);
+							updateTimeInSeconds * 1000);
 				} else {
 					updateTimer.cancel();
 				}
@@ -113,9 +114,10 @@ public class RunningJobManager implements EventSubscriber {
 
 	}
 
-	private final int UPDATE_TIME_IN_SECONDS = 360;
+	private int updateTimeInSeconds = ClientPropertiesManager.getDefaultJobStatusRecheckInterval();
 
-	private static Map<ServiceInterface, RunningJobManager> cachedRegistries = new HashMap<ServiceInterface, RunningJobManager>();
+
+    private static Map<ServiceInterface, RunningJobManager> cachedRegistries = new HashMap<ServiceInterface, RunningJobManager>();
 
 	public static RunningJobManager getDefault(final ServiceInterface si) {
 
@@ -336,7 +338,7 @@ public class RunningJobManager implements EventSubscriber {
 							refreshOnBackend);
 					cachedAllSingleJobs.put(jobname, temp);
 				} catch (final RuntimeException e) {
-					myLogger.error(e.getLocalizedMessage(), e);
+					myLogger.debug(e.getLocalizedMessage());
 					return null;
 				}
 

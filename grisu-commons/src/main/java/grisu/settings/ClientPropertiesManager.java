@@ -29,7 +29,10 @@ public final class ClientPropertiesManager {
 	public static final int DEFAULT_JOBSUBMIT_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 
 	private static final int DEFAULT_FILE_UPLOAD_THREADS = 1;
-	private static final int DEFAULT_FILE_UPLOAD_RETRIES = 5;
+    private static final int DEFAULT_FILE_UPLOAD_RETRIES = 5;
+
+    private static final int DEFAULT_FILE_DOWNLOAD_RETRIES = 5;
+    private static final int DEFAULT_FILE_DOWNLOAD_RETRY_INTERVAL = 15;
 
 	private static int concurrent_upload_thread_dynamic = -1;
 
@@ -57,7 +60,8 @@ public final class ClientPropertiesManager {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(ClientPropertiesManager.class);
-	private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
+    private static final int DEFAULT_ACTION_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
+    private static final int DEFAULT_JOB_STATUS_RECHECK_INTERVAL_IN_SECONDS = 5;
 
 	public static final String AUTO_LOGIN_KEY = "autoLogin";
 	public static final String ADMIN_KEY = "admin";
@@ -326,6 +330,25 @@ public final class ClientPropertiesManager {
 
 	}
 
+    	public static int getDefaultJobStatusRecheckInterval() {
+
+		int intervalInSeconds = -1;
+		try {
+			intervalInSeconds = Integer.parseInt(getClientConfiguration()
+					.getString("jobStatusRecheckInterval"));
+
+		} catch (final Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_JOB_STATUS_RECHECK_INTERVAL_IN_SECONDS;
+		}
+		if (intervalInSeconds == -1) {
+			return DEFAULT_JOB_STATUS_RECHECK_INTERVAL_IN_SECONDS;
+		}
+
+		return intervalInSeconds;
+
+	}
+
 	/**
 	 * Returns the full path to the executable that is used as a default to
 	 * handle files with the specified extension.
@@ -438,6 +461,42 @@ public final class ClientPropertiesManager {
 		}
 		if (retries == -1) {
 			return DEFAULT_FILE_UPLOAD_RETRIES;
+		}
+
+		return retries;
+	}
+
+    	public static int getFileDownloadRetries() {
+
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getClientConfiguration().getString(
+					"fileDownloadRetries"));
+
+		} catch (final Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_DOWNLOAD_RETRIES;
+		}
+		if (retries == -1) {
+			return DEFAULT_FILE_DOWNLOAD_RETRIES;
+		}
+
+		return retries;
+	}
+
+       public static int getFileDownloadRetryInterval() {
+
+		int retries = -1;
+		try {
+			retries = Integer.parseInt(getClientConfiguration().getString(
+					"fileDownloadRetryInterval"));
+
+		} catch (final Exception e) {
+			// myLogger.debug("Problem with config file: " + e.getMessage());
+			return DEFAULT_FILE_DOWNLOAD_RETRY_INTERVAL;
+		}
+		if (retries == -1) {
+			return DEFAULT_FILE_DOWNLOAD_RETRY_INTERVAL;
 		}
 
 		return retries;
@@ -906,7 +965,7 @@ public final class ClientPropertiesManager {
 		}
 
 	}
-	
+
 	public static void setCompressInputFiles(boolean selected) {
 
 

@@ -191,6 +191,7 @@ public class GrisuJob extends JobDescription implements
     private Date lastStatusUpdate = new Date();
 
 
+
     /**
      * Use this constructor if you want to create a new job.
      *
@@ -697,7 +698,17 @@ public class GrisuJob extends JobDescription implements
 
         if (other instanceof GrisuJob) {
             final GrisuJob otherJob = (GrisuJob) other;
-            return getJobname().equals(otherJob.getJobname());
+            boolean jobnameEqual = getJobname().equals(otherJob.getJobname());
+
+            if ( ! jobnameEqual ) {
+                return false;
+            }
+
+            String jobSubmissionTime = getJobProperty(Constants.SUBMISSION_TIME_KEY, false);
+            String otherJobSubmissionTime = otherJob.getJobProperty(Constants.SUBMISSION_TIME_KEY, false);
+
+            return StringUtils.equals(jobSubmissionTime, otherJobSubmissionTime);
+
         } else {
             return false;
         }
@@ -1096,7 +1107,15 @@ public class GrisuJob extends JobDescription implements
 
     @Override
     public int hashCode() {
-        return 73 * getJobname().hashCode();
+
+
+
+        String jobSubmissionTime = getJobProperty(Constants.SUBMISSION_TIME_KEY, false);
+        if ( jobSubmissionTime == null ) {
+            jobSubmissionTime = "XXXXXXX";
+        }
+
+        return 73 * getJobname().hashCode() * jobSubmissionTime.hashCode();
     }
 
     public boolean isArchived() {
