@@ -71,13 +71,13 @@ import com.google.common.collect.Sets;
  * The User class holds all the relevant data a job could want to know from the
  * user it is running under. This class belongs to the three central classes of
  * grisu (the other two are {@link ServiceInterface} and {@link Job}.
- * 
+ *
  * At the moment it holds filesystem information which can be used to stage
  * files from the desktop. Also it has got information about vo memberships of
  * the user.
- * 
+ *
  * @author Markus Binsteiner
- * 
+ *
  */
 @Entity
 @Table(name = "users")
@@ -235,7 +235,7 @@ public class User {
 
 	/**
 	 * Constructs a user using and associates a (default) credential with it.
-	 * 
+	 *
 	 * @param cred
 	 *            the credential
 	 * @throws FileSystemException
@@ -252,7 +252,7 @@ public class User {
 
 	/**
 	 * Constructs a User object not using an associated credential.
-	 * 
+	 *
 	 * @param dn
 	 *            the dn of the user
 	 */
@@ -278,7 +278,7 @@ public class User {
 
 	/**
 	 * Not used yet.
-	 * 
+	 *
 	 * @param vo
 	 */
 	public void addFqan(final String fqan, final VO vo) {
@@ -552,7 +552,7 @@ public class User {
 
 	/**
 	 * Gets all mountpoints for this fqan.
-	 * 
+	 *
 	 * @param fqan
 	 *            the fqan
 	 * @return the mountpoints
@@ -573,7 +573,7 @@ public class User {
 	 * Calculates all mountpoints that are automatically mounted using mds. At
 	 * the moment, the port part of the gridftp url share is ignored. Maybe I'll
 	 * change that later.
-	 * 
+	 *
 	 * @param sites
 	 *            the sites that should be used
 	 * @return all MountPoints
@@ -640,7 +640,7 @@ public class User {
 						// AbstractServiceInterface.informationManager
 						// .getDataLocationsForVO(fqan);
 						myLogger.debug("Getting datalocations for vo " + fqan
-								+ " finished.");
+								+ " finished: "+StringUtils.join(dirs, ", "));
 
 						for (final Directory dir : dirs) {
 
@@ -823,7 +823,7 @@ public class User {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -918,7 +918,7 @@ public class User {
 
 	/**
 	 * Returns all mountpoints (including automounted ones for this session.
-	 * 
+	 *
 	 * @return all mountpoints for this session
 	 */
 	@Transient
@@ -939,7 +939,7 @@ public class User {
 
 	/**
 	 * Gets a map of this users bookmarks.
-	 * 
+	 *
 	 * @return the users' properties
 	 */
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -961,7 +961,7 @@ public class User {
 
 	/**
 	 * Gets a map of this users bookmarks.
-	 * 
+	 *
 	 * @return the users' properties
 	 */
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -971,7 +971,7 @@ public class User {
 
 	/**
 	 * Returns the default credential of the user (if any).
-	 * 
+	 *
 	 * @return the default credential or null if there is none
 	 */
 	@Transient
@@ -1108,7 +1108,7 @@ public class User {
 
 	/**
 	 * Returns the users dn.
-	 * 
+	 *
 	 * @return the dn
 	 */
 	@Column(nullable = false)
@@ -1193,7 +1193,7 @@ public class User {
 
 	/**
 	 * Getter for the users' fqans.
-	 * 
+	 *
 	 * @return all fqans as map with the fqan as key and the vo as value
 	 */
 	@Transient
@@ -1297,7 +1297,7 @@ public class User {
 	/**
 	 * Checks whether the filesystem of any of the users' mountpoints contains
 	 * the specified file.
-	 * 
+	 *
 	 * @param file
 	 *            the file
 	 * @return the mountpoint of null if no filesystem contains this file
@@ -1348,7 +1348,7 @@ public class User {
 
 	/**
 	 * Checks whether any of the users' mountpoints contain the specified file.
-	 * 
+	 *
 	 * @param file
 	 *            the file
 	 * @return the mountpoint or null if the file is not on any of the
@@ -1394,7 +1394,7 @@ public class User {
 	/**
 	 * Gets a map of this users properties. These properties can be used to
 	 * store anything you can think of. Usful for history and such.
-	 * 
+	 *
 	 * @return the users' properties
 	 */
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -1404,7 +1404,7 @@ public class User {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -1451,7 +1451,7 @@ public class User {
 
 	/**
 	 * Mounts a filesystem using the default credential of a user.
-	 * 
+	 *
 	 * @param root
 	 *            the filesystem to mount (something like:
 	 *            gsiftp://ngdata.vapc.org/home/san04/markus)
@@ -1476,10 +1476,10 @@ public class User {
 	 * an alias to make the urls shorter and easier to read/remember. You only
 	 * need to mount a filesystem once. After you persisted the user (with
 	 * hibernate) the alias and rootUrl of the filesystem are persisted as well.
-	 * 
+	 *
 	 * A mountpoint always has to be in the root directory (for example: /local
 	 * or /remote -- never /remote/ng2.vpac.org )
-	 * 
+	 *
 	 * @param uri
 	 *            the filesystem to mount (something like:
 	 *            gsiftp://ngdata.vapc.org/home/san04/markus)
@@ -1543,7 +1543,7 @@ public class User {
 
 	/**
 	 * Not used yet.
-	 * 
+	 *
 	 * @param vo
 	 */
 	public void removeFqan(final String fqan) {
@@ -1569,7 +1569,7 @@ public class User {
 
 	/**
 	 * Translates an absolute file url into an "user-space" one.
-	 * 
+	 *
 	 * @param file
 	 *            an absolute file url
 	 *            (gsiftp://ngdata.vpac.org/home/san04/markus/test.txt)
@@ -1587,7 +1587,7 @@ public class User {
 	/**
 	 * Set's additional mountpoints that the user did not explicitly mount
 	 * manually.
-	 * 
+	 *
 	 * @param amps
 	 *            the mountpoints to add (for this session)
 	 */
@@ -1612,7 +1612,7 @@ public class User {
 	/**
 	 * Sets the default credential for the user. The default credential is used
 	 * mostly as convenience.
-	 * 
+	 *
 	 * @param cred
 	 *            the credential to use as default
 	 */
@@ -1630,7 +1630,7 @@ public class User {
 
 	/**
 	 * For hibernate.
-	 * 
+	 *
 	 * @param dn
 	 *            the dn of the user
 	 */
@@ -1640,7 +1640,7 @@ public class User {
 
 	/**
 	 * Setter for the users' fqans.
-	 * 
+	 *
 	 * @param fqans
 	 *            all fqans as map with the fqan as key and the vo as value
 	 */
@@ -1698,7 +1698,7 @@ public class User {
 
 	/**
 	 * Unmounts a filesystem.
-	 * 
+	 *
 	 * @param mountPointName
 	 *            the name of the mountpoint (/local or /remote or something)
 	 * @throws FileSystemException

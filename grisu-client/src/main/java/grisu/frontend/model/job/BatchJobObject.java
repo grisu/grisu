@@ -12,7 +12,7 @@ import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.control.exceptions.StatusException;
 import grisu.frontend.control.clientexceptions.FileTransactionException;
-import grisu.frontend.control.jobMonitoring.RunningJobManager;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerOld;
 import grisu.frontend.model.events.BatchJobEvent;
 import grisu.frontend.model.events.BatchJobKilledEvent;
 import grisu.frontend.model.events.NewBatchJobEvent;
@@ -142,7 +142,7 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * Use this constructor to create a BatchJobObject for a batchjob that
 	 * already exists on the backend.
-	 * 
+	 *
 	 * @param serviceInterface
 	 *            the serviceinterface
 	 * @param batchJobname
@@ -150,7 +150,7 @@ Comparable<BatchJobObject>, Listener {
 	 * @param refreshJobStatusOnBackend
 	 *            whether to refresh the status of the jobs on the backend.
 	 *            might take quite a while...
-	 * 
+	 *
 	 * @throws BatchJobException
 	 *             if one of the jobs of the batchjob doesn't exist on the
 	 *             backend
@@ -188,10 +188,10 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Use this constructor if you want to create a new batchjob.
-	 * 
+	 *
 	 * This constructor creates a batchjob using the
 	 * {@link Constants#UNIQUE_NUMBER_METHOD} to calculate the batchjob name.
-	 * 
+	 *
 	 * @param serviceInterface
 	 *            the serviceinterface
 	 * @param batchJobname
@@ -229,10 +229,10 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * Use this constructor if you want to create a new batchjob and specify the
 	 * way the batchjobname is created.
-	 * 
+	 *
 	 * Look up the {@link Constants} class to see available jobname creation
 	 * methods.
-	 * 
+	 *
 	 * @param serviceInterface
 	 *            the serviceinterface
 	 * @param batchJobnameBase
@@ -270,19 +270,19 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Adds an input file to the pool of shared input files for this batchjob.
-	 * 
+	 *
 	 * Those get staged in to the common directory on every site that runs parts
 	 * of this batchjob. You can access the relative path from each job
 	 * directory via the {@link #pathToInputFiles()} method. The original
 	 * filename is used.
-	 * 
+	 *
 	 * Be aware that, if you are specifying a folder here, the containing files
 	 * will not be uploaded concurrently (for reference:
 	 * {@link #setConcurrentInputFileUploadThreads(int)}) but one after another
 	 * If you would specify 2 folders as input, those, however, would be
 	 * uploaded in parallel (if the concurrentUploadThreads parameter is set of
 	 * course).
-	 * 
+	 *
 	 * @param inputFile
 	 *            the input file
 	 */
@@ -302,19 +302,19 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Adds an input file to the pool of shared input files for this batchjob.
-	 * 
+	 *
 	 * Those get staged in to the common directory on every site that runs parts
 	 * of this batchjob. You can access the relative path from each job
 	 * directory via the {@link #pathToInputFiles()} method.
-	 * 
+	 *
 	 * Be aware that, if you are specifying a folder here, the containing files
 	 * will not be uploaded concurrently (for reference:
 	 * {@link #setConcurrentInputFileUploadThreads(int)}) but one after another
 	 * If you would specify 2 folders as input, those, however, would be
 	 * uploaded in parallel (if the concurrentUploadThreads parameter is set of
 	 * course).
-	 * 
-	 * 
+	 *
+	 *
 	 * @param inputFile
 	 *            the input file
 	 * @param targetFilename
@@ -328,7 +328,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Adds a new job object to this batchjob.
-	 * 
+	 *
 	 * @param job
 	 *            the new job object
 	 */
@@ -387,7 +387,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Adds a job property to this job.
-	 * 
+	 *
 	 * @param key
 	 *            the key
 	 * @param value
@@ -493,7 +493,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Downloads all the required results for this batch job.
-	 * 
+	 *
 	 * @param onlyDownloadWhenFinished
 	 *            only download results if the (single) job is finished.
 	 * @param parentFolder
@@ -606,7 +606,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Downloads all the required results for this batch job.
-	 * 
+	 *
 	 * @param onlyDownloadWhenFinished
 	 *            only download results if the (single) job is finished.
 	 * @param parentFolder
@@ -670,7 +670,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all failed jobs.
-	 * 
+	 *
 	 * @return all failed jobs
 	 */
 	public SortedSet<DtoJob> failedJobs() {
@@ -683,7 +683,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all finished jobs.
-	 * 
+	 *
 	 * @return all finished jobs
 	 */
 	public SortedSet<DtoJob> finishedJobs() {
@@ -705,7 +705,7 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * This method returns how many input file upload threads run at the same
 	 * time.
-	 * 
+	 *
 	 * @return the number of threads
 	 */
 	public int getConcurrentInputFileUploadThreads() {
@@ -718,7 +718,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * This method returns how many job submission threads run at the same time.
-	 * 
+	 *
 	 * @return the number of threads
 	 */
 	public int getConcurrentJobCreationThreads() {
@@ -748,7 +748,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns the default application for this batchjob.
-	 * 
+	 *
 	 * @return the default application
 	 */
 	public String getDefaultApplication() {
@@ -757,9 +757,9 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Gets the default number of cpus.
-	 * 
+	 *
 	 * This is used internally to use mds to calculate job distribution.
-	 * 
+	 *
 	 * @return the default number of cpus across jobs
 	 */
 	public int getDefaultNoCpus() {
@@ -769,9 +769,9 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Gets the default version for this batchjob.
-	 * 
+	 *
 	 * This is used internally to use mds to calculate job distribution.
-	 * 
+	 *
 	 * @return the default version
 	 */
 	public String getDefaultVersion() {
@@ -780,7 +780,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * If a defaultWalltime is set, this method returns it.
-	 * 
+	 *
 	 * @return the default walltime.
 	 */
 	public int getDefaultWalltime() {
@@ -789,7 +789,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * A summary of the status of this job.
-	 * 
+	 *
 	 * @return a job status detail string
 	 */
 	public String getDetails() {
@@ -855,7 +855,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns the fqan that is used for this batchjob.
-	 * 
+	 *
 	 * @return the fqan
 	 */
 	public String getFqan() {
@@ -865,7 +865,7 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * Returns all the input files that are shared among the jobs of this
 	 * batchjob.
-	 * 
+	 *
 	 * @return the urls of all the input files (local & remote)
 	 */
 	public Map<String, String> getInputFiles() {
@@ -874,7 +874,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * The name of this batchjob.
-	 * 
+	 *
 	 * @return the id
 	 */
 	public String getJobname() {
@@ -883,7 +883,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Retrieves a list of all jobs that are part of this batchjob.
-	 * 
+	 *
 	 * @return all jobs
 	 */
 	public EventList<GrisuJob> getJobs() {
@@ -920,7 +920,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all the log messages for this batchjob.
-	 * 
+	 *
 	 * @param refresh
 	 *            whether to refresh the job on the backend or not
 	 * @return the log messages
@@ -937,10 +937,10 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Gets the maximum walltime for this batchjob.
-	 * 
+	 *
 	 * This is used internally to calculate the job distribution. If it is not
 	 * set manually the largest single job walltime is used.
-	 * 
+	 *
 	 * @return the max walltime in seconds
 	 */
 	public int getMaxWalltimeInSeconds() {
@@ -955,7 +955,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * The number of failed jobs for this batchjob.
-	 * 
+	 *
 	 * @return the number of failed jobs
 	 */
 	public int getNumberOfFailedJobs() {
@@ -968,7 +968,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * The number of finished jobs for this batchjob.
-	 * 
+	 *
 	 * @return the number of finished jobs
 	 */
 	public int getNumberOfFinishedJobs() {
@@ -981,7 +981,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * The number of running jobs for this batchjob.
-	 * 
+	 *
 	 * @return the number of running jobs
 	 */
 	public int getNumberOfRunningJobs() {
@@ -994,7 +994,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * The number of successful jobs for this batchjob.
-	 * 
+	 *
 	 * @return the number of successful jobs
 	 */
 	public int getNumberOfSuccessfulJobs() {
@@ -1007,7 +1007,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * The number of unsubmitted jobs for this batchjob.
-	 * 
+	 *
 	 * @return the number of unsubmitted jobs
 	 */
 	public int getNumberOfUnsubmittedJobs() {
@@ -1020,7 +1020,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * The number of waiting jobs for this batchjob.
-	 * 
+	 *
 	 * @return the number of waiting jobs
 	 */
 	public int getNumberOfWaitingJobs() {
@@ -1033,12 +1033,12 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Info about how many jobs were submitted to which submission location.
-	 * 
+	 *
 	 * You need to call this sometime after the
 	 * {@link #prepareAndCreateJobs(boolean)} method. You need to use the same
 	 * BatchJobObject object where you called this method. If you re-create the
 	 * object, this info will be lost.
-	 * 
+	 *
 	 * @return info about job distribution
 	 */
 	public String getOptimizationResult() {
@@ -1047,7 +1047,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Displays a summary of the job status.
-	 * 
+	 *
 	 * @param restarter
 	 *            an (optional) FailedJobRestarter to restart failed jobs or
 	 *            null
@@ -1088,10 +1088,10 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all the properties for this batchjob.
-	 * 
+	 *
 	 * This method doesn't refresh the underlying object, you might want to do
 	 * that yourself in some cases.
-	 * 
+	 *
 	 * @return the properties
 	 */
 	public Map<String, String> getProperties() {
@@ -1104,7 +1104,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Gets a job property for this job.
-	 * 
+	 *
 	 * @param key
 	 *            the key
 	 * @return the value
@@ -1241,8 +1241,8 @@ Comparable<BatchJobObject>, Listener {
 									oldUnsubmittedJobs,
 									dtoBatchJob.numberOfUnsubmittedJobs());
 
-							RunningJobManager.updateJobList(serviceInterface,
-									getJobs(), dtoBatchJob.getJobs());
+							RunningJobManagerOld.updateJobList(serviceInterface,
+                                    getJobs(), dtoBatchJob.getJobs());
 
 						} catch (final NoSuchJobException e) {
 							if (isBeingKilled || isKilled) {
@@ -1281,7 +1281,7 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * Returns whether all jobs within this batchjob are finished (failed or
 	 * not).
-	 * 
+	 *
 	 * @param refresh
 	 *            whether to refresh all jobs on the backend
 	 * @return whether all jobs are finished or not.
@@ -1316,7 +1316,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns whether all jobs within this batchjob finished successfully.
-	 * 
+	 *
 	 * @param refresh
 	 *            whether to refresh all jobs on the backend
 	 * @return whether all jobs finished successfully
@@ -1397,10 +1397,10 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Monitors the status of all jobs of this batchjob.
-	 * 
+	 *
 	 * If you want to restart failed jobs while this is running, provide a
 	 * {@link FailedJobRestarter}. Prints out a lot of verbose information.
-	 * 
+	 *
 	 * @param sleeptimeinseconds
 	 *            how long between monitor runs
 	 * @param enddate
@@ -1413,7 +1413,7 @@ Comparable<BatchJobObject>, Listener {
 	 * @param restarter
 	 *            the restarter (or null if you don't want to restart failed
 	 *            jobs while monitoring)
-	 * 
+	 *
 	 */
 	public void monitorProgress(int sleeptimeinseconds, Date enddate,
 			boolean forceSuccess) {
@@ -1460,9 +1460,9 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * Calculates the relative path from each of the job directories to the
 	 * common input file directory for this batchjob.
-	 * 
+	 *
 	 * This can be used to create the commandline for each of the part jobs.
-	 * 
+	 *
 	 * @return the absolute path
 	 */
 	public String pathToInputFiles() {
@@ -1476,13 +1476,13 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Prepares all jobs and creates them on the backend.
-	 * 
+	 *
 	 * Internally, this method first adds all the jobs to the batchjob on the
 	 * backend. Then you can choose to optimize the batchpart job which means
 	 * the backend will recalulate all the submission locations based on the
 	 * number of total jobs and it will try to distribute them according to load
 	 * to all the available sites. After that all the input files are staged in.
-	 * 
+	 *
 	 * @param optimize
 	 *            whether to optimize the job distribution (true) or use the
 	 *            submission locations you specified (or which are set by
@@ -1715,7 +1715,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Refresh all jobs on the backend.
-	 * 
+	 *
 	 * Waits for the refresh to finish.
 	 */
 	public void refresh() {
@@ -1844,7 +1844,7 @@ Comparable<BatchJobObject>, Listener {
 	 * Wrapper method for the 2 most commonly used restart methods: Restarting
 	 * failed jobs and restarting jobs that are still in the queue (on locations
 	 * where no job is started yet).
-	 * 
+	 *
 	 * @param restartFailedJobs
 	 *            restart jobs that failed (those jobs are moved to locations
 	 *            where jobs have successfully finished -- if possible)
@@ -1886,7 +1886,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Restarts the batchjob using the specified ResubmitPolicy
-	 * 
+	 *
 	 * @param policy
 	 * @param waitForRestartToFinish
 	 * @return
@@ -1986,7 +1986,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all running jobs.
-	 * 
+	 *
 	 * @return all running jobs
 	 */
 	public SortedSet<DtoJob> runningJobs() {
@@ -1997,7 +1997,7 @@ Comparable<BatchJobObject>, Listener {
 	 * In this method you can specify how many input files are uploaded at the
 	 * same time. This can increase job submission time quite considerably.
 	 * Default is 1.
-	 * 
+	 *
 	 * @param threads
 	 *            the number of threads
 	 */
@@ -2008,10 +2008,10 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * In this method you can specify how many jobs should be created at the
 	 * same time.
-	 * 
+	 *
 	 * Normally you don't need that. But you may experience a bit if you have a
 	 * lot of jobs to create.
-	 * 
+	 *
 	 * @param threads
 	 *            the number of threads
 	 */
@@ -2021,9 +2021,9 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Sets the default application for this batchjob.
-	 * 
+	 *
 	 * This is used internally to use mds to calculate the job distribution.
-	 * 
+	 *
 	 * @param defaultApplication
 	 *            the default application
 	 */
@@ -2044,14 +2044,14 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * In this method you can set the default number of cpus.
-	 * 
+	 *
 	 * All cpu properties for all jobs that are added at this stage are
 	 * overwritten.
-	 * 
+	 *
 	 * It is used to calculate job distribution. You can have different numbers
 	 * of cpus for each single job, but the metascheduling might become a tad
 	 * unpredictable/sub-optimal.
-	 * 
+	 *
 	 * @param defaultNoCpus
 	 *            the default number of cups
 	 */
@@ -2074,7 +2074,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Sets the default version for this batchjob.
-	 * 
+	 *
 	 * @param defaultVersion
 	 */
 	private void setDefaultVersion(String defaultVersion) {
@@ -2095,7 +2095,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * A convenience method to set the same walltime to all jobs.
-	 * 
+	 *
 	 * @param walltimeInSeconds
 	 *            the walltime.
 	 */
@@ -2124,9 +2124,9 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Sets the method to distribute the job.
-	 * 
+	 *
 	 * Possible methods are: "percentage" (default) and "equal"
-	 * 
+	 *
 	 * @param method
 	 *            the method
 	 */
@@ -2143,11 +2143,11 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Sets a filter to only run jobs at sites that don't match.
-	 * 
+	 *
 	 * You can either set use this method or the
 	 * {@link #setLocationsToInclude(String[])} one. Only the last one set is
 	 * used.
-	 * 
+	 *
 	 * @param sites
 	 *            a list of simple patterns that specify on which
 	 *            submissionlocations to exclude to run jobs
@@ -2173,11 +2173,11 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Sets a filter to only run jobs at the specified submissionlocations.
-	 * 
+	 *
 	 * You can either set use this method or the
 	 * {@link #setLocationsToExclude(String[])} one. Only the last one set is
 	 * used.
-	 * 
+	 *
 	 * @param locationPatterns
 	 *            a list of simple pattern that specify on which submission
 	 *            locations to run jobs
@@ -2223,8 +2223,8 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * Tells the backend to submit this batchjob. Waits for the submission to
 	 * finish.
-	 * 
-	 * 
+	 *
+	 *
 	 * @throws JobSubmissionException
 	 *             if the jobsubmission fails
 	 * @throws NoSuchJobException
@@ -2239,13 +2239,13 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Tells the backend to submit this batchjob.
-	 * 
+	 *
 	 * @param waitForSubmissionToFinish
 	 *            whether to wait for the submission to finish or not
-	 * 
+	 *
 	 * @return an {@link DtoActionStatus} object that can be used to monitor the
 	 *         submission progress
-	 * 
+	 *
 	 * @throws JobSubmissionException
 	 *             if the jobsubmission fails
 	 * @throws NoSuchJobException
@@ -2385,7 +2385,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all successful jobs.
-	 * 
+	 *
 	 * @return all successful jobs
 	 */
 	public SortedSet<DtoJob> successfulJobs() {
@@ -2403,7 +2403,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all unsubmitted jobs.
-	 * 
+	 *
 	 * @return all unsubmitted jobs
 	 */
 	public SortedSet<DtoJob> unsubmittedJobs() {
@@ -2546,22 +2546,22 @@ Comparable<BatchJobObject>, Listener {
 	/**
 	 * You can use this method to wait for the job to finish (either
 	 * successfully or not) on the endpoint resource.
-	 * 
+	 *
 	 * This will check the status of all jobs and will return once all of them
 	 * are finished one way or the other. You'll still have to check whether all
 	 * jobs were successful yourself and maybe restart the ones that failed.
-	 * 
+	 *
 	 * This method is a convenience method and might not be the best way to do
 	 * that. It would be more efficient if you would check for failed jobs with
 	 * every statuscheck and resubmit those failed jobs instantly and not wait
 	 * until everything else is finished (like this method does).
-	 * 
+	 *
 	 * But it should be good enough for most cases.
-	 * 
+	 *
 	 * Use the int parameter to specify the sleep interval inbetween status
 	 * checks. Don't use a low number here please (except for testing) because
 	 * it could possibly cause a high load for the backend.
-	 * 
+	 *
 	 * @param checkIntervallInSeconds
 	 *            the interval inbetween status checks
 	 * @return whether the job is actually finished (true) or the this
@@ -2601,7 +2601,7 @@ Comparable<BatchJobObject>, Listener {
 
 	/**
 	 * Returns all waiting jobs.
-	 * 
+	 *
 	 * @return all waiting jobs
 	 */
 	public SortedSet<DtoJob> waitingJobs() {

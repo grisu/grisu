@@ -2,7 +2,7 @@ package grisu.frontend.view.swing.jobmonitoring.single;
 
 import com.jidesoft.swing.JideTabbedPane;
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.jobMonitoring.RunningJobManager;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerImpl;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.model.events.JobCleanedEvent;
 import grisu.frontend.model.job.GrisuJob;
@@ -90,7 +90,7 @@ SingleJobSelectionListener, EventSubscriber<JobCleanedEvent> {
 
 				public void actionPerformed(ActionEvent e) {
 
-					RunningJobManager.getDefault(si).updateJobnameList(null, true);
+					RunningJobManagerImpl.getDefault(si).updateJobnameList(null, true);
 
 				}
 			});

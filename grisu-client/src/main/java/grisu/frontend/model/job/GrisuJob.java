@@ -833,11 +833,11 @@ public class GrisuJob extends JobDescription implements
      */
     public final String getJobDirectoryUrl() {
 
-        if (this.getStatus(false) == JobConstants.UNDEFINED) {
-            throw new IllegalStateException("Job status "
-                    + JobConstants.translateStatus(JobConstants.UNDEFINED)
-                    + ". Can't get jobdirectory yet.");
-        }
+//        if (this.getStatus(false) == JobConstants.UNDEFINED) {
+//            throw new IllegalStateException("Job status "
+//                    + JobConstants.translateStatus(JobConstants.UNDEFINED)
+//                    + ". Can't get jobdirectory yet.");
+//        }
 
         if (jobDirectory == null) {
             final String url = getAllJobProperties(false).get(
@@ -939,13 +939,18 @@ public class GrisuJob extends JobDescription implements
 
         if (forceRefresh && !isArchived) {
 
+            if ( this.status >= JobConstants.FINISHED_EITHER_WAY ) {
+                myLogger.debug("Job {} already finished, not getting status from backend.", getJobname());
+                return this.status;
+            }
+
             synchronized (this) {
 
                 final Date now = new Date();
                 if ((this.status >= JobConstants.ACTIVE)
-                        && ((lastStatusUpdate.getTime() + 2000) >= now
+                        && ((lastStatusUpdate.getTime() + 5000) >= now
                         .getTime())) {
-                    myLogger.debug("Less than 2 seconds between status updates. Returning old status...");
+                    myLogger.debug("Less than 5 seconds between status updates for job {}. Returning old status...", getJobname());
                     return this.status;
                 }
 
@@ -1219,11 +1224,11 @@ public class GrisuJob extends JobDescription implements
      */
     public final void kill(final boolean clean) {
 
-        if (getStatus(false) == JobConstants.UNDEFINED) {
-            throw new IllegalStateException("Job status "
-                    + JobConstants.translateStatus(JobConstants.UNDEFINED)
-                    + ". Can't kill job yet.");
-        }
+//        if (getStatus(false) == JobConstants.UNDEFINED) {
+//            throw new IllegalStateException("Job status "
+//                    + JobConstants.translateStatus(JobConstants.UNDEFINED)
+//                    + ". Can't kill job yet.");
+//        }
 
         try {
             if (clean) {

@@ -1,7 +1,12 @@
 package grisu.frontend.view.swing;
 
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
+import com.jgoodies.forms.layout.RowSpec;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerImpl;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
@@ -9,23 +14,15 @@ import grisu.frontend.view.swing.jobmonitoring.batch.MultiBatchJobMonitoringGrid
 import grisu.frontend.view.swing.jobmonitoring.single.MultiSingleJobMonitoringGrid;
 import grisu.model.dto.GridFile;
 import grisu.settings.ClientPropertiesManager;
+import org.apache.commons.lang.StringUtils;
 
-import java.awt.CardLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.FormSpecs;
-import com.jgoodies.forms.layout.RowSpec;
 
 public class GrisuCenterPanel extends JPanel {
 
@@ -54,7 +51,7 @@ public class GrisuCenterPanel extends JPanel {
 	 */
 	public GrisuCenterPanel(ServiceInterface si) {
 		this.si = si;
-		this.rjm = RunningJobManager.getDefault(si);
+		this.rjm = RunningJobManagerImpl.getDefault(si);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("219px:grow"),
@@ -244,14 +241,16 @@ public class GrisuCenterPanel extends JPanel {
 			return;
 		} else if (GrisuMonitorNavigationTaskPaneBatch.BATCH_JOB_LIST
 				.equals(command[0])) {
-			displayBatchJobGrid(command[1]);
-			new Thread() {
-				@Override
-				public void run() {
-					rjm.updateBatchJobList(command[1]);
-				}
-			}.start();
-			return;
+
+            throw new RuntimeException("Batchjobs not implemented.");
+//			displayBatchJobGrid(command[1]);
+//			new Thread() {
+//				@Override
+//				public void run() {
+//					rjm.updateBatchJobList(command[1]);
+//				}
+//			}.start();
+//			return;
 		} else if (GrisuFileNavigationTaskPane.DEFAULT_FILE_MANAGEMENT
 				.equals(command[0])) {
 			displayFileManagement();
