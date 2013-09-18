@@ -125,7 +125,7 @@ public class RunningJobManagerImpl implements RunningJobManager {
     public GrisuJob getJob(String jobname, boolean refreshOnBackend)
             throws NoSuchJobException {
 
-        synchronized (jobname) {
+        synchronized (jobname.intern()) {
 
             if (cachedAllSingleJobs.get(jobname) == null) {
 
