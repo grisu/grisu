@@ -66,7 +66,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	 * Resolves the provided filename into a FileObject. If the filename starts
 	 * with "/" a file on one of the "mounted" filesystems is looked up. Else it
 	 * has to start with the name of a (supported) protocol (like: gsiftp:///).
-	 * 
+	 *
 	 * @param urlOrPath
 	 *            the filename
 	 * @param cred
@@ -489,7 +489,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.backend.model.fs.FileSystemInfoPlugin#getInputStream(java
 	 * .lang.String)
 	 */
@@ -576,10 +576,10 @@ FileSystemInfoPlugin, FileTransferPlugin {
 	 * an alias to make the urls shorter and easier to read/remember. You only
 	 * need to mount a filesystem once. After you persisted the user (with
 	 * hibernate) the alias and rootUrl of the filesystem are persisted as well.
-	 * 
+	 *
 	 * A mountpoint always has to be in the root directory (for example: /local
 	 * or /remote -- never /remote/ng2.vpac.org )
-	 * 
+	 *
 	 * @param uri
 	 *            the filesystem to mount (something like:
 	 *            gsiftp://ngdata.vapc.org/home/san04/markus)
@@ -646,7 +646,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 				// if vo user, use $VOHOME/<DN> as homedirectory
 				if (cred.getFqan() != null) {
 					uri = uri + File.separator
-							+ User.get_vo_dn_path(cred.getDN());
+							+ User.NAME_CALCULATOR.getSubfolderName(cred);
 					fileSystem.resolveFile(
 							((String) fileSystem.getAttribute("HOME_DIRECTORY")
 									+ File.separator + cred.getDN()
@@ -726,7 +726,7 @@ FileSystemInfoPlugin, FileTransferPlugin {
 		try {
 //			final String parent = filename.substring(0,
 //					filename.lastIndexOf(File.separator));
-			
+
 			final String parent = filename.substring(0,
 					filename.lastIndexOf("/"));
 

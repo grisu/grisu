@@ -1,8 +1,13 @@
 package grisu.backend.model;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import grisu.backend.hibernate.BatchJobDAO;
 import grisu.backend.hibernate.JobDAO;
 import grisu.backend.hibernate.UserDAO;
+import grisu.backend.model.fs.DnSubfolderCalculator;
+import grisu.backend.model.fs.SharedSubfolderNameCalculator;
 import grisu.backend.model.fs.UserFileManager;
 import grisu.backend.model.job.Job;
 import grisu.backend.model.job.JobSubmitter;
@@ -27,44 +32,18 @@ import grisu.settings.ServerPropertiesManager;
 import grisu.utils.MountPointHelpers;
 import grith.jgrith.cred.Cred;
 import grith.jgrith.vomsProxy.VomsException;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import net.sf.ehcache.util.NamedThreadFactory;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import javax.persistence.*;
+import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -85,6 +64,8 @@ public class User {
 
 	private final static boolean ENABLE_FILESYSTEM_CACHE = ServerPropertiesManager
 			.useFileSystemCache();
+
+    public final static SharedSubfolderNameCalculator NAME_CALCULATOR = new DnSubfolderCalculator();
 
 	public final boolean checkFileSystemsBeforeUse = false;
 	public static final int DEFAULT_JOB_SUBMISSION_RETRIES = 5;
@@ -172,9 +153,7 @@ public class User {
 
 	}
 
-	public static String get_vo_dn_path(final String dn) {
-		return dn.replace("=", "_").replace(",", "_").replace(" ", "_");
-	}
+
 
 
 	protected final BatchJobDAO batchJobDao = new BatchJobDAO();
@@ -226,6 +205,7 @@ public class User {
 	// private final MatchMaker matchmaker;
 
 	private UserBatchJobManager batchjobmanager = null;
+
 
 	// for hibernate
 	public User() {
@@ -451,7 +431,8 @@ public class User {
 		// add dn dir if necessary
 
 		if (userDnPath) {
-			url = url + "/" + User.get_vo_dn_path(getCredential().getDN());
+            String temp = FileManager.removeDoubleSlashes("/" + NAME_CALCULATOR.getSubfolderName(getCredential()));
+			url = FileManager.removeTrailingSlash(url) + temp;
 
 			// try to connect to filesystem in background and store in database
 			// if not successful, so next time won't be tried again...
@@ -574,8 +555,6 @@ public class User {
 	 * the moment, the port part of the gridftp url share is ignored. Maybe I'll
 	 * change that later.
 	 *
-	 * @param sites
-	 *            the sites that should be used
 	 * @return all MountPoints
 	 */
 	protected Set<MountPoint> df_auto_mds() {
@@ -1544,7 +1523,7 @@ public class User {
 	/**
 	 * Not used yet.
 	 *
-	 * @param vo
+	 * @param fqan the group
 	 */
 	public void removeFqan(final String fqan) {
 		fqans.remove(fqan);

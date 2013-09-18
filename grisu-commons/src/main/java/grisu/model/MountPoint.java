@@ -29,9 +29,9 @@ import com.google.common.collect.ComparisonChain;
  * unix filesystem. A logical name should contain the site where the filesystem
  * sits and the VO that has got access to this filesystem so that the user can
  * recognise which one is meant when looking at the name in a file browser.
- * 
+ *
  * @author Markus Binsteiner
- * 
+ *
  */
 @Entity
 @XmlRootElement(name = "mountpoint")
@@ -88,7 +88,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	/**
 	 * This is used primarily to create a "dummy" mountpoint to be able to use
 	 * the {@link User#unmountFileSystem(String)} method.
-	 * 
+	 *
 	 * @param dn
 	 *            the dn of the user
 	 * @param mountpoint
@@ -101,7 +101,7 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	/**
 	 * Creates a MountPoint. Sets automount property to false.
-	 * 
+	 *
 	 * @param dn
 	 *            the dn of the user
 	 * @param fqan
@@ -123,7 +123,7 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	/**
 	 * Creates a Mountpoint.
-	 * 
+	 *
 	 * @param dn
 	 *            the dn of the user
 	 * @param fqan
@@ -181,7 +181,7 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	/**
 	 * The fqan that is used to create a voms proxy to access this mountpoint.
-	 * 
+	 *
 	 * @return the fqan
 	 */
 	@XmlElement(name = "fqan")
@@ -197,7 +197,7 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	@Transient
 	public String getPath() {
-		return FileSystemHelpers.getPath(getRootUrl());
+		return FileManager.removeDoubleSlashes(FileSystemHelpers.getPath(getRootUrl()));
 	}
 
 	@Transient
@@ -219,7 +219,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	/**
 	 * Returns the path of the specified file relative to the root of this
 	 * mountpoint.
-	 * 
+	 *
 	 * @param url
 	 *            the file
 	 * @return the relative path or null if the file is not within the
@@ -233,9 +233,9 @@ public class MountPoint implements Comparable<MountPoint> {
 			} else {
 				final String path = url.substring(getAlias().length());
 				if (path.startsWith("/")) {
-					return path.substring(1);
+					return FileManager.removeDoubleSlashes(path.substring(1));
 				} else {
-					return path;
+					return FileManager.removeDoubleSlashes(path);
 				}
 			}
 		} else {
@@ -244,9 +244,9 @@ public class MountPoint implements Comparable<MountPoint> {
 			} else {
 				final String path = url.substring(getRootUrl().length());
 				if (path.startsWith("/")) {
-					return path.substring(1);
+					return FileManager.removeDoubleSlashes(path.substring(1));
 				} else {
-					return path;
+					return FileManager.removeDoubleSlashes(path);
 				}
 			}
 		}
@@ -291,7 +291,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	/**
 	 * Checks whether the "userspace" url (/ngdata.vpac/file.txt) contains the
 	 * file.
-	 * 
+	 *
 	 * @param file
 	 *            the file
 	 * @return true - if it contains it; false - if not.
@@ -313,7 +313,7 @@ public class MountPoint implements Comparable<MountPoint> {
 	/**
 	 * Checks whether the "userspace" url (/ngdata.vpac/file.txt) contains the
 	 * file.
-	 * 
+	 *
 	 * @param file
 	 *            the file
 	 * @return true - if it contains it; false - if not.
@@ -353,7 +353,7 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	/**
 	 * Translates an absolute file url to a "mounted" file url.
-	 * 
+	 *
 	 * @param file
 	 *            the absolute file
 	 *            (gsiftp://ngdata.vpac.org/home/sano4/markus/test.txt)
@@ -424,7 +424,7 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
