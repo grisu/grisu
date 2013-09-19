@@ -2,7 +2,7 @@ package grisu.frontend.view.swing;
 
 import com.google.common.collect.Lists;
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.jobMonitoring.RunningJobManagerImpl;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerManager;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.model.events.NewJobEvent;
 import grisu.jcommons.constants.Constants;
@@ -99,7 +99,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		}
 
 		if (Constants.ALLJOBS_KEY.equals(app)) {
-			RunningJobManagerImpl.getDefault(si).getAllJobs();
+			RunningJobManagerManager.getDefault(si).getAllJobs();
 		}
 
 		if (actions.get(app) == null) {

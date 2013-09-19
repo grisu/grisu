@@ -7,7 +7,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 import com.beust.jcommander.internal.Lists;
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.jobMonitoring.RunningJobManagerImpl;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerManager;
 import grisu.frontend.model.job.GrisuJob;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
@@ -103,7 +103,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	public SimpleSingleJobsGrid(ServiceInterface si, String application) {
 
-		this(si, RunningJobManagerImpl.getDefault(si).getJobs(application));
+		this(si, RunningJobManagerManager.getDefault(si).getJobs(application));
 
 	}
 
@@ -355,7 +355,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 				jobs.add(job);
 			}
 
-			RunningJobManagerImpl.getDefault(si).killJobs(jobs, clean);
+			RunningJobManagerManager.getDefault(si).killJobs(jobs, clean);
 
 			//lockUI(false);
 

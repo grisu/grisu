@@ -6,7 +6,7 @@ import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
-import grisu.frontend.control.jobMonitoring.RunningJobManagerImpl;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerManager;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.view.swing.files.virtual.GridFileManagementPanel;
 import grisu.frontend.view.swing.jobcreation.JobCreationPanel;
@@ -51,7 +51,7 @@ public class GrisuCenterPanel extends JPanel {
 	 */
 	public GrisuCenterPanel(ServiceInterface si) {
 		this.si = si;
-		this.rjm = RunningJobManagerImpl.getDefault(si);
+		this.rjm = RunningJobManagerManager.getDefault(si);
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("219px:grow"),
