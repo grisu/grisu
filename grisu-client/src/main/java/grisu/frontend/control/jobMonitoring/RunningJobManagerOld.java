@@ -225,7 +225,7 @@ public class RunningJobManagerOld implements RunningJobManager {
 
 	public BatchJobObject getBatchJob(String jobname) throws NoSuchJobException {
 
-		synchronized (jobname) {
+		synchronized (jobname.intern()) {
 
 			if (cachedAllBatchJobs.get(jobname) == null) {
 

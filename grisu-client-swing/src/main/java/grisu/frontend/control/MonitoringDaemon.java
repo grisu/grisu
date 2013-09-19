@@ -6,7 +6,7 @@ import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.control.jobMonitoring.RunningJobManager;
-import grisu.frontend.control.jobMonitoring.RunningJobManagerImpl;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerManager;
 import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.model.job.GrisuJob;
 import grisu.frontend.view.swing.jobmonitoring.single.SingleJobTabbedFrame;
@@ -71,7 +71,7 @@ public class MonitoringDaemon {
     public MonitoringDaemon(ServiceInterface si, boolean displayDialog) {
         executor = Executors.newFixedThreadPool(10);
         this.si = si;
-        this.rjm = RunningJobManagerImpl.getDefault(si);
+        this.rjm = RunningJobManagerManager.getDefault(si);
         this.displayDialog = displayDialog;
 
         if (displayDialog) {

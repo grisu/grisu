@@ -1,7 +1,7 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.jobMonitoring.RunningJobManagerImpl;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -36,7 +36,7 @@ public class JobListDialog extends JDialog {
 					@Override
 					public void windowClosed(WindowEvent e) {
 
-						RunningJobManagerImpl.getDefault(si).stopUpdate();
+						RunningJobManagerManager.getDefault(si).stopUpdate();
 					}
 
 				});

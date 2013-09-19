@@ -29,7 +29,6 @@ public class RunningJobManagerImpl implements RunningJobManager {
 
     static final Logger myLogger = LoggerFactory
             .getLogger(RunningJobManagerImpl.class.getName());
-    private static Map<ServiceInterface, RunningJobManager> cachedRegistries = new HashMap<ServiceInterface, RunningJobManager>();
     private final UserEnvironmentManager em;
     private final FileManager fm;
     private final ServiceInterface si;
@@ -62,22 +61,7 @@ public class RunningJobManagerImpl implements RunningJobManager {
     }
 
 
-    public static RunningJobManager getDefault(final ServiceInterface si) {
 
-        if (si == null) {
-            throw new RuntimeException(
-                    "ServiceInterface not initialized yet. Can't get default registry...");
-        }
-
-        synchronized (si) {
-            if (cachedRegistries.get(si) == null) {
-                final RunningJobManager m = new RunningJobManagerImpl(si);
-                cachedRegistries.put(si, m);
-            }
-        }
-
-        return cachedRegistries.get(si);
-    }
 
     public void setUpdateTimeInSeconds(int updateTimeInSeconds) {
         this.updateTimeInSeconds = updateTimeInSeconds;
