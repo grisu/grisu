@@ -939,10 +939,10 @@ public class GrisuJob extends JobDescription implements
 
         if (forceRefresh && !isArchived) {
 
-            if ( this.status >= JobConstants.FINISHED_EITHER_WAY ) {
-                myLogger.debug("Job {} already finished, not getting status from backend.", getJobname());
-                return this.status;
-            }
+//            if ( this.status >= JobConstants.FINISHED_EITHER_WAY ) {
+//                myLogger.debug("Job {} already finished, not getting status from backend.", getJobname());
+//                return this.status;
+//            }
 
             synchronized (this) {
 
