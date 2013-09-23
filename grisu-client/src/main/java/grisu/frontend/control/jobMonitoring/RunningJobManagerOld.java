@@ -139,6 +139,8 @@ public class RunningJobManagerOld implements RunningJobManager {
 
 	private final Timer updateTimer = new Timer();;
 
+    private final Set<GrisuJob> jobsToUpdate = Collections.synchronizedSet(new LinkedHashSet<GrisuJob>());
+
 	// private final boolean checkForNewApplicationsForSingleJobs = false;
 
 	private boolean stop = false;

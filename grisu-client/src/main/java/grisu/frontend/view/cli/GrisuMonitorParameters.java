@@ -76,4 +76,9 @@ public class GrisuMonitorParameters extends GrisuCliCommand {
         monitoringDaemon.monitor(configs);
 
     }
+
+    @Override
+    public boolean exitAfterExecution() {
+        return false;
+    }
 }

@@ -18,4 +18,8 @@ public abstract class GrisuCliCommand {
     public void setServiceInterface(ServiceInterface si) {
         this.si = si;
     }
+
+    public boolean exitAfterExecution() {
+        return true;
+    }
 }
