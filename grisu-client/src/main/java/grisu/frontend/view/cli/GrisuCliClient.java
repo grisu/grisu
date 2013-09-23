@@ -49,13 +49,11 @@ public class GrisuCliClient<T extends GrisuCliParameters> extends GridClient {
 	public String[] getNonGridCliArguments() {
 		return CommandlineArgumentHelpers.extractNonGridParameters(this.cliParams, args);
 	}
-	
+
 	public T getCliParameters() {
 
 		return this.cliParams;
 	}
-
-
 
 	public ServiceInterface getServiceInterface() throws LoginException {
 		if ((si == null) || getLoginParameters().isNologin()) {

@@ -1,4 +1,5 @@
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.MissingCommandException;
 import com.google.common.collect.Maps;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
@@ -39,7 +40,14 @@ public class Grisu extends GrisuCliClient<GrisuMultiCliParameters> {
             jc.addCommand(key, this.commands.get(key));
         }
 
-        jc.parse(args);
+        try {
+            jc.parse(args);
+        } catch (MissingCommandException mce) {
+            System.err.println("Command not supported in this configuration.");
+            jc.usage();
+            System.exit(1);
+        }
+
 
         command = jc.getParsedCommand();
 
@@ -57,7 +65,7 @@ public class Grisu extends GrisuCliClient<GrisuMultiCliParameters> {
         commands.put("wait",  new GrisuWaitParameters());
         commands.put("status", new GrisuStatusCliParameters());
         commands.put("view", new GrisuViewCliParameters());
-
+        commands.put("monitor", new GrisuMonitorParameters());
 
         Grisu s = null;
         try {
