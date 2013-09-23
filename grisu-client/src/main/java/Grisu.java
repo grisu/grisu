@@ -109,16 +109,16 @@ public class Grisu extends GrisuCliClient<GrisuMultiCliParameters> {
                     c.execute();
                 }
 
-                System.exit(0);
+//                System.exit(0);
 
             }
         } catch (Exception e) {
             System.err.println("Error: " + e.getLocalizedMessage());
 //            e.printStackTrace();
             System.exit(2);
+
         }
 
-        System.exit(0);
     }
 
 }

@@ -7,7 +7,6 @@ import grisu.frontend.view.swing.jobmonitoring.single.SingleJobTabbedFrame;
 import grisu.jcommons.constants.Constants;
 
 import javax.swing.*;
-import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class MonitoringDaemonSwing extends MonitoringDaemon {
 
         ServiceInterface si = LoginManager.login("nesi");
 
-        MonitoringDaemonSwing md = new MonitoringDaemonSwing(si, true);
+        MonitoringDaemonSwing md = new MonitoringDaemonSwing(si);
         md.setVerbose(true);
         List<String> files = Lists.newArrayList();
 //        files.add("stdout.txt");
@@ -36,7 +35,7 @@ public class MonitoringDaemonSwing extends MonitoringDaemon {
         List<String> command = Lists.newArrayList();
         command.add("sh");
         command.add("/home/markus/local/bin/test_script.sh");
-        md.monitor("Java", "processed", files, new File("/home/markus/Desktop/joboutput"), true, command);
+//        md.monitor("Java", "processed", files, new File("/home/markus/Desktop/joboutput"), true, command);
 
     }
 
@@ -45,9 +44,9 @@ public class MonitoringDaemonSwing extends MonitoringDaemon {
     private final SingleJobTabbedFrame dialog;
 
 
-    public MonitoringDaemonSwing(ServiceInterface si, Boolean displayDialog) {
+    public MonitoringDaemonSwing(ServiceInterface si) {
         super(si);
-        this.displayDialog = displayDialog;
+        this.displayDialog = true;
 
         if (displayDialog) {
 
@@ -83,10 +82,13 @@ public class MonitoringDaemonSwing extends MonitoringDaemon {
                 dialog.addMessage(msg);
             }
         } else {
-            System.out.println(msg);
+            if ( error ) {
+                System.err.println(msg);
+            } else {
+                System.out.println(msg);
+            }
         }
 
-        System.out.println(error + ": " + msg);
     }
 
 }
