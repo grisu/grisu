@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
 import grisu.frontend.view.cli.*;
+import grisu.settings.ClientPropertiesManager;
 import grith.jgrith.cred.Cred;
 
 import java.util.Map;
@@ -66,6 +67,10 @@ public class Grisu extends GrisuCliClient<GrisuMultiCliParameters> {
         commands.put("status", new GrisuStatusCliParameters());
         commands.put("view", new GrisuViewCliParameters());
         commands.put("monitor", new GrisuMonitorParameters());
+
+        if (ClientPropertiesManager.isAdmin()) {
+            commands.put("clearCache", new ClearUserCacheCliParameters());
+        }
 
         Grisu s = null;
         try {
