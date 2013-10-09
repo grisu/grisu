@@ -60,7 +60,7 @@ public class GrisuMonitorParameters extends GrisuCliCommand {
             Constructor monitoringDaemonConstructor = monitor.getConstructor(ServiceInterface.class);
             monitoringDaemon = (MonitoringDaemon) monitoringDaemonConstructor.newInstance(si);
         } catch (Exception e) {
-            myLogger.debug("grisu-client-swing not in path, using non-gui monitoring daemon");
+            myLogger.debug("grisu-client-swing not in path, using non-gui monitoring daemon: {}", e.getLocalizedMessage(), e);
             monitoringDaemon = new MonitoringDaemonCli(si);
         }
 
