@@ -958,7 +958,12 @@ public class GrisuJob extends JobDescription implements
                 // addJobLogMessage("Getting new job status. Old status: "
                 // + JobConstants.translateStatus(oldStatus));
                 final boolean oldFinished = isFinished(false);
-                this.status = serviceInterface.getJobStatus(getJobname());
+                try {
+                    this.status = serviceInterface.getJobStatus(getJobname());
+                } catch (Exception e) {
+                    myLogger.error("Error getting job status for job {}", new String[]{getJobname()}, e);
+                    return this.status;
+                }
 
                 pcs.firePropertyChange("status", oldStatus, this.status);
                 pcs.firePropertyChange("statusString",
