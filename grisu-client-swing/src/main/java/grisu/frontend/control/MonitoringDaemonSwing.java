@@ -19,14 +19,14 @@ import java.util.List;
  */
 public class MonitoringDaemonSwing extends MonitoringDaemon {
 
-    public static void main(String[] args) throws Exception {
+    public static void edmain(String[] args) throws Exception {
 
         ServiceInterface si = LoginManager.login("nesi");
 
         MonitoringDaemonSwing md = new MonitoringDaemonSwing(si);
         md.setVerbose(true);
         List<String> files = Lists.newArrayList();
-//        files.add("stdout.txt");
+//        files.add("stdout.txt");g
 //        files.add("stderr.txt");
 //        files.add(".job.ll");
         files.add("output.zip");
