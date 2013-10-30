@@ -70,6 +70,8 @@ public class Grisu extends GrisuCliClient<GrisuMultiCliParameters> {
 
         if (ClientPropertiesManager.isAdmin()) {
             commands.put("clearCache", new ClearUserCacheCliParameters());
+            commands.put("reloadInfo", new GrisuReloadInfoCliParameters());
+            commands.put("reloadTemplates", new GrisuReloadTemplatesCliParameters());
         }
 
         Grisu s = null;
