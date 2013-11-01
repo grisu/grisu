@@ -41,7 +41,7 @@ public class LoginManager {
 					"https://compute.services.bestgrid.org/soap/GrisuService")
 			.put("nesi", "https://compute.nesi.org.nz/soap/GrisuService")
 			.put("dev",
-					"https://compute-dev.services.bestgrid.org/soap/GrisuService")
+					"https://compute.dev.nesi.org.nz/soap/GrisuService")
 			.put("bestgrid-test",
 					"https://compute-test.services.bestgrid.org/soap/GrisuService")
 			.put("local_ws_jetty", "http://localhost:8080/soap/GrisuService")
