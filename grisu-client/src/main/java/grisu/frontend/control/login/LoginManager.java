@@ -1,11 +1,12 @@
 package grisu.frontend.control.login;
 
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.ServiceInterfaceException;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.GridEnvironment;
 import grisu.jcommons.dependencies.ClasspathHacker;
-import grisu.jcommons.utils.EnvironmentVariableHelpers;
 import grisu.jcommons.view.cli.CliHelpers;
 import grisu.model.GrisuRegistryManager;
 import grisu.settings.ClientPropertiesManager;
@@ -15,18 +16,13 @@ import grith.jgrith.cred.AbstractCred;
 import grith.jgrith.cred.Cred;
 import grith.jgrith.cred.ProxyCred;
 import grith.jgrith.cred.callbacks.CliCallback;
-import grith.jgrith.utils.CertificateFiles;
-
-import java.io.IOException;
-import java.util.Date;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
+import java.io.IOException;
+import java.util.Date;
 
 public class LoginManager {
 

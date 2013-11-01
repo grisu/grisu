@@ -1,23 +1,19 @@
 package grisu.frontend.view.swing;
 
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.model.events.NewBatchJobEvent;
 import grisu.jcommons.constants.Constants;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
+import org.bushe.swing.event.EventSubscriber;
+import org.jdesktop.swingx.JXTaskPane;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
-import org.bushe.swing.event.EventSubscriber;
-import org.jdesktop.swingx.JXTaskPane;
 
 public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements
 		EventSubscriber<NewBatchJobEvent> {
@@ -72,9 +68,9 @@ public class GrisuMonitorNavigationTaskPaneBatch extends JXTaskPane implements
 
 		final String app = application.toLowerCase();
 
-		if (Constants.ALLJOBS_KEY.equals(app)) {
-			RunningJobManager.getDefault(si).getAllBatchJobs();
-		}
+//		if (Constants.ALLJOBS_KEY.equals(app)) {
+//			RunningJobManagerOld.getDefault(si).getAllBatchJobs();
+//		}
 
 		if (actions.get(app) == null) {
 			final Action temp = new AbstractAction() {

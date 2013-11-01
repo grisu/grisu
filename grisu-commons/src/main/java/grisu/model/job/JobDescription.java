@@ -4,54 +4,33 @@ import grisu.control.JobnameHelpers;
 import grisu.control.exceptions.JobPropertiesException;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
-import grisu.jcommons.utils.JsdlHelpers;
-import grisu.jcommons.utils.MemoryUtils;
-import grisu.jcommons.utils.OutputHelpers;
-import grisu.jcommons.utils.PackageFileHelper;
-import grisu.jcommons.utils.WalltimeUtils;
+import grisu.jcommons.utils.*;
 import grisu.model.FileManager;
 import grisu.utils.SeveralXMLHelpers;
 import grisu.utils.SimpleJsdlBuilder;
 import grisu.utils.StringHelpers;
 import groovy.util.ConfigSlurper;
-
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Transient;
-
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.Ostermiller.util.LineEnds;
+import javax.persistence.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * A class that helps creating a job.
- * 
+ *
  * This class is extended by the JobObject class in the grisu-client package
  * which includes methods to create the job on the serviceinterface, submit and
  * monitor/control it.
- * 
+ *
  * @author Markus Binsteiner
  */
 @Entity
@@ -62,7 +41,7 @@ public class JobDescription {
 
 	/**
 	 * Extracts the executable (first string) from a commandline.
-	 * 
+	 *
 	 * @param commandline
 	 *            the commandline
 	 * @return the executable
@@ -155,7 +134,7 @@ public class JobDescription {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 */
 	public JobDescription() {
 	}
@@ -163,7 +142,7 @@ public class JobDescription {
 	/**
 	 * Constructor to clone a JobSubmissionObjectImpl from an existing jsdl
 	 * document.
-	 * 
+	 *
 	 * @param jsdl
 	 *            a (valid) jsdl document
 	 */
@@ -180,7 +159,7 @@ public class JobDescription {
 	/**
 	 * Constructor to clone a JobSubmissionObjectImpl from a set of job
 	 * properties.
-	 * 
+	 *
 	 * @param jobProperties
 	 *            the properties
 	 */
@@ -193,7 +172,7 @@ public class JobDescription {
 	 * {@link JobDescription#JobSubmissionObjectImpl(Document)} or
 	 * {@link JobDescription#JobSubmissionObjectImpl(Map)}, depending on the
 	 * type of Object you provide.
-	 * 
+	 *
 	 * @param o
 	 *            either a jsdl document or a Map of job properties
 	 */
@@ -207,7 +186,7 @@ public class JobDescription {
 
 	/**
 	 * Adds an environment variable for the job environment.
-	 * 
+	 *
 	 * @param key
 	 *            the key of the variable
 	 * @param value
@@ -218,24 +197,48 @@ public class JobDescription {
 		envVariables.put(key, value);
 		pcs.firePropertyChange("environmentVariables", null, this.envVariables);
 	}
-	
+
 	/**
 	 * Creates a temporary text file from the text content and adds it to the job.
-	 * 
+	 *
 	 * @param content the content
 	 * @param filename the filename
 	 */
 	public void addInputTextFile(String content, String filename) {
-		
+
 		File tempFile = PackageFileHelper.createTempFile(content, filename);
-		
+
 		addInputFile(tempFile);
-		
+
 	}
+
+    public void addInputFileUrls(Collection<String> urls) {
+
+        for ( String url : urls ) {
+            addInputFileUrl(url);
+        }
+
+    }
+
+    public void addInputFileUrls(String urlFile) {
+        File f = FileManager.getFileFromUriOrPath(urlFile);
+        addInputFileUrls(f);
+    }
+
+    public void addInputFileUrls(File urlFile) {
+
+        try {
+            List<String> urls = FileUtils.readLines(urlFile);
+            addInputFileUrls(urls);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
 	/**
 	 * Adds a local input file to this job.
-	 * 
+	 *
 	 * @param file
 	 *            the file to add
 	 */
@@ -245,13 +248,13 @@ public class JobDescription {
 
 	/**
 	 * Adds an input file to this job.
-	 * 
+	 *
 	 * You can provide a url
 	 * (gsiftp://ng2.ceres.auckland.ac.nz/home/markus/test.txt), a local path
 	 * (/home/markus/test.txt) or a local url (file:///home/markus/test.txt)
 	 * here. The file will be attached to the job and either uploaded or copied
 	 * across into the root of the job directory with the original name.
-	 * 
+	 *
 	 * @param url
 	 *            a remote url, local path or local url
 	 */
@@ -262,12 +265,12 @@ public class JobDescription {
 
 	/**
 	 * Adds an input file to this job.
-	 * 
+	 *
 	 * Works like {@link #addInputFileUrl(String)} except that you can specify
 	 * the new name/path the file will have in the job directory. If you, for
 	 * example, upload a file "test.txt" and specify "/inputFiles/file1.txt" the
 	 * file will be in a folder "inputFiles" and named file1.txt".
-	 * 
+	 *
 	 * @param url
 	 *            a remote or local url or a local path
 	 * @param targetPath
@@ -287,13 +290,13 @@ public class JobDescription {
 	/**
 	 * Adds a module to the modules you want to load for this job (on the
 	 * compute resource).
-	 * 
+	 *
 	 * For that, generally, you need to specify a fixed submissionLocation and
 	 * you also need to know the exact name of the module you want to load (the
 	 * names of a module to load for the same application can differ from site
 	 * to site). Usually you would only specify application name and version and
 	 * let Grisu figure out the name of the module...
-	 * 
+	 *
 	 * @param module
 	 */
 	public void addModule(final String module) {
@@ -303,11 +306,11 @@ public class JobDescription {
 
 	/**
 	 * Adds a property change listener.
-	 * 
+	 *
 	 * Usually used in GUIs to re-validate a jobsubmission object for certain
 	 * applications, i.e. whether the provided input parameters for a job make
 	 * sense for this application.
-	 * 
+	 *
 	 * @param listener
 	 *            the property change listener
 	 */
@@ -353,7 +356,7 @@ public class JobDescription {
 	/**
 	 * This method parses the currently set commandline and extracts the name of
 	 * the executable.
-	 * 
+	 *
 	 * @return the name of the currently set executable
 	 */
 	public String extractExecutable() {
@@ -362,7 +365,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the name of the currently set application.
-	 * 
+	 *
 	 * @return the applicationname
 	 */
 	public String getApplication() {
@@ -371,7 +374,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the currently set application version.
-	 * 
+	 *
 	 * @return the application version
 	 */
 	public String getApplicationVersion() {
@@ -383,7 +386,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the currently set commandline of the job.
-	 * 
+	 *
 	 * @return the commandline
 	 */
 	@Column(nullable = false)
@@ -393,7 +396,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the currently set number of cpus.
-	 * 
+	 *
 	 * @return the number of cpus to be used for this job
 	 */
 	public Integer getCpus() {
@@ -403,7 +406,7 @@ public class JobDescription {
 	/**
 	 * Gets the email address to be used if this job is configured to send
 	 * emails when starting/finished.
-	 * 
+	 *
 	 * @return the email address or null
 	 */
 	public String getEmail_address() {
@@ -417,7 +420,7 @@ public class JobDescription {
 
 	/**
 	 * Extracts the executable from the commandline.
-	 * 
+	 *
 	 * @return the executable
 	 */
 	@Transient
@@ -427,11 +430,11 @@ public class JobDescription {
 
 	/**
 	 * Returns the currently set hostcount.
-	 * 
+	 *
 	 * You can use this to force the job to be run on only 1 node (to use the
 	 * shared memory). Often used in combination with {@link #force_single} and
 	 * {@link #force_mpi}.
-	 * 
+	 *
 	 * @return the host count
 	 */
 	public Integer getHostCount() {
@@ -448,7 +451,7 @@ public class JobDescription {
 	 * Returns all input files associated with this job, with they keys being
 	 * the source urls and values are the remote paths for the files (or null
 	 * for default remote path).
-	 * 
+	 *
 	 * @return the input files
 	 */
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -458,7 +461,7 @@ public class JobDescription {
 
 	/**
 	 * Creates a jsdl document for the currently set job properties.
-	 * 
+	 *
 	 * @return a jsdl document.
 	 * @throws JobPropertiesException
 	 *             if the jsdl document can't be created because of incorrect
@@ -481,7 +484,7 @@ public class JobDescription {
 	/**
 	 * Convenience method to get the output of
 	 * {@link #getJobDescriptionDocument()} as a string.
-	 * 
+	 *
 	 * @return the jsdl document as a string
 	 * @throws JobPropertiesException
 	 *             if the jsdl document can't be created because of incorrect
@@ -499,7 +502,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the currently set name of the job.
-	 * 
+	 *
 	 * @return the jobname
 	 */
 	public String getJobname() {
@@ -566,7 +569,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the currently set amount of memory for the job (in bytes).
-	 * 
+	 *
 	 * @return the memory
 	 */
 	public Long getMemory() {
@@ -575,7 +578,7 @@ public class JobDescription {
 
 	/**
 	 * Returns all currently set modules for this job.
-	 * 
+	 *
 	 * @return the modules
 	 */
 	public String[] getModules() {
@@ -585,7 +588,7 @@ public class JobDescription {
 	/**
 	 * Convenience method that returns the output of {@link #getModules()} as a
 	 * comma seperated string.
-	 * 
+	 *
 	 * @return the modules as a string
 	 */
 	@Transient
@@ -599,7 +602,7 @@ public class JobDescription {
 
 	/**
 	 * Returns whether the pbsDebug value is set or not.
-	 * 
+	 *
 	 * @return the pbsDebug value
 	 */
 	public String getPbsDebug() {
@@ -608,7 +611,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the name of the currently set name of the stderr file.
-	 * 
+	 *
 	 * @return the stderr file
 	 */
 	public String getStderr() {
@@ -617,7 +620,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the name of the currently set name of the stdin file.
-	 * 
+	 *
 	 * @return the stdin file
 	 */
 	public String getStdin() {
@@ -626,7 +629,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the name of the currently set name of the stdout file.
-	 * 
+	 *
 	 * @return the stdout file
 	 */
 	public String getStdout() {
@@ -637,7 +640,7 @@ public class JobDescription {
 	 * Convenience method to return the result of the
 	 * {@link #getJobSubmissionPropertyMap()} as a map with the keys being
 	 * stings.
-	 * 
+	 *
 	 * @return the job properties
 	 */
 	@Transient
@@ -664,7 +667,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the currently set submission location.
-	 * 
+	 *
 	 * @return the submission location
 	 */
 	public String getSubmissionLocation() {
@@ -673,7 +676,7 @@ public class JobDescription {
 
 	/**
 	 * The virtal memory for the job in bytes.
-	 * 
+	 *
 	 * @return the virtual memory
 	 */
 	public Long getVirtualMemory() {
@@ -682,7 +685,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the walltime in seconds.
-	 * 
+	 *
 	 * @return the walltime in seconds
 	 * @deprecated use {@link #getWalltimeInSeconds()} instead
 	 */
@@ -693,7 +696,7 @@ public class JobDescription {
 
 	/**
 	 * Returns the walltime in seconds.
-	 * 
+	 *
 	 * @return the walltime in seconds
 	 */
 	public int getWalltimeInSeconds() {
@@ -823,7 +826,7 @@ public class JobDescription {
 			// try walltimeUtils
 				this.walltime_in_seconds = WalltimeUtils.fromShortStringToSeconds(temp_walltime);
 			} catch (Exception e2) {
-				this.walltime_in_seconds = 0;				
+				this.walltime_in_seconds = 0;
 			}
 
 		}
@@ -868,12 +871,12 @@ public class JobDescription {
 
 		this.pbsDebug = jobProperties.get(JobSubmissionProperty.PBSDEBUG
 				.toString());
-		
+
 	}
 
 	/**
 	 * Returns whether this job is configured to send an email when it finishes.
-	 * 
+	 *
 	 * @return whether to send an email when job is finished (true) or not
 	 *         (false)
 	 */
@@ -884,7 +887,7 @@ public class JobDescription {
 	/**
 	 * Returns whether this job is configured to send an email when it starts on
 	 * the compute resource.
-	 * 
+	 *
 	 * @return whether to send an email when job starts (true) or not (false)
 	 */
 	public Boolean isEmail_on_job_start() {
@@ -893,10 +896,10 @@ public class JobDescription {
 
 	/**
 	 * Whether this job is forced to be an mpi job or not.
-	 * 
+	 *
 	 * This overrides Grisus' auto-jobtype determination which selects "single"
 	 * for 1 cpu and "mpi" for >1 cpu jobs.
-	 * 
+	 *
 	 * @return the force mpi value
 	 */
 	public Boolean isForce_mpi() {
@@ -905,10 +908,10 @@ public class JobDescription {
 
 	/**
 	 * Whether this job is forced to be of the "single" jobtype or not.
-	 * 
+	 *
 	 * This overrides Grisus' auto-jobtype determination which selects "single"
 	 * for 1 cpu and "mpi" for >1 cpu jobs.
-	 * 
+	 *
 	 * @return the force single value
 	 */
 	public Boolean isForce_single() {
@@ -917,7 +920,7 @@ public class JobDescription {
 
 	/**
 	 * Removes the specified environment variable from the job.
-	 * 
+	 *
 	 * @param var
 	 *            the key of the variable to remove
 	 */
@@ -932,7 +935,7 @@ public class JobDescription {
 
 	/**
 	 * Removes the specified url/path from the input values.
-	 * 
+	 *
 	 * @param selectedFile
 	 *            the url/path to remove
 	 */
@@ -947,7 +950,7 @@ public class JobDescription {
 
 	/**
 	 * Removes a property change listener.
-	 * 
+	 *
 	 * @param listener
 	 *            the listener
 	 */
@@ -957,10 +960,10 @@ public class JobDescription {
 
 	/**
 	 * Sets the name of the application to use for this job.
-	 * 
+	 *
 	 * You need to specify the exact same name that is used to publish this
 	 * application in mds/bdii.
-	 * 
+	 *
 	 * @param app
 	 *            the application name
 	 */
@@ -973,10 +976,10 @@ public class JobDescription {
 
 	/**
 	 * Sets the version of the application to use for this job.
-	 * 
+	 *
 	 * You need to specify the exact same name that is used to publish this
 	 * applicationversion in mds/bdii.
-	 * 
+	 *
 	 * @param appVersion
 	 *            the version of the application
 	 */
@@ -989,11 +992,11 @@ public class JobDescription {
 
 	/**
 	 * Sets the commandline to be used for this job.
-	 * 
+	 *
 	 * Set the commandline like you would when running the application on your
 	 * local machine. For example: "cat test.txt". Don't specify any possible
 	 * mpi commands, that is done automatically for you.
-	 * 
+	 *
 	 * @param commandline
 	 *            the commandline
 	 */
@@ -1010,10 +1013,10 @@ public class JobDescription {
 
 	/**
 	 * Sets the number of cpus to use for this job.
-	 * 
+	 *
 	 * This also determines the job type (if not force by {@link #force_single}
 	 * or {@link #force_mpi}): single for 1 and mpi for >1.
-	 * 
+	 *
 	 * @param cpus
 	 *            the number of cpus
 	 */
@@ -1025,10 +1028,10 @@ public class JobDescription {
 
 	/**
 	 * Sets the email address to send emails to when job is started/finished.
-	 * 
+	 *
 	 * Only useful in combination with {@link #setEmail_on_job_start(Boolean)}
 	 * and/or {@link #setEmail_on_job_finish(Boolean)}.
-	 * 
+	 *
 	 * @param email_address
 	 *            the email address
 	 */
@@ -1040,10 +1043,10 @@ public class JobDescription {
 
 	/**
 	 * Sets whether to send an email once the job finished.
-	 * 
+	 *
 	 * Sends an email to the address configured in
 	 * {@link #setEmail_address(String)}.
-	 * 
+	 *
 	 * @param email_on_job_finish
 	 *            whether to send an email when job is finished (true) or not
 	 *            (false)
@@ -1058,10 +1061,10 @@ public class JobDescription {
 	/**
 	 * Sets whether to send an email once the job is started on the compute
 	 * resource.
-	 * 
+	 *
 	 * Sends an email to the address configured in
 	 * {@link #setEmail_address(String)}.
-	 * 
+	 *
 	 * @param email_on_job_start
 	 *            whether to send an email when job is started (true) or not
 	 *            (false)
@@ -1081,7 +1084,7 @@ public class JobDescription {
 	/**
 	 * Sets whether to force the jobtype to be "mpi" even if the cpu count is
 	 * configured to be 1.
-	 * 
+	 *
 	 * @param force_mpi
 	 *            whether to force the jobtype to be "mpi"
 	 */
@@ -1100,10 +1103,10 @@ public class JobDescription {
 	/**
 	 * Sets whether to force the jobtype to be "single" even if the cpu count is
 	 * configured to be >1.
-	 * 
+	 *
 	 * Mostly used in combination with setting the hostcount to 1 so that the
 	 * job is run "threaded".
-	 * 
+	 *
 	 * @param force_single
 	 *            whether to force the jobtype to be "single"
 	 */
@@ -1118,10 +1121,10 @@ public class JobDescription {
 
 	/**
 	 * Sets the amount of nodes the job is allowed to run on.
-	 * 
+	 *
 	 * Mostly used to run a "threaded" job (a job that is run on 1 host but
 	 * multiple cpus).
-	 * 
+	 *
 	 * @param hc
 	 *            the host count
 	 */
@@ -1147,11 +1150,11 @@ public class JobDescription {
 
 	/**
 	 * Sets all input files in one go.
-	 * 
+	 *
 	 * Keys are the source urls/paths, values are the target paths. You can also
 	 * use the {@link JobDescription#addInputFileUrl(String)} or
 	 * {@link #addInputFileUrl(String, String)} methods.
-	 * 
+	 *
 	 * @param inputfiles
 	 */
 	public void setInputFiles(final Map<String, String> inputfiles) {
@@ -1163,7 +1166,7 @@ public class JobDescription {
 
 	/**
 	 * Sets the name of the job.
-	 * 
+	 *
 	 * @param jobname
 	 *            the jobname
 	 */
@@ -1175,7 +1178,7 @@ public class JobDescription {
 
 	/**
 	 * Sets the memory to be used for this job (in bytes).
-	 * 
+	 *
 	 * @param memory
 	 *            the memory
 	 */
@@ -1193,12 +1196,12 @@ public class JobDescription {
 
 	/**
 	 * Sets the modules to be used for this job.
-	 * 
+	 *
 	 * Usually, when setting this you need to have a fixed submission location
 	 * and you also have to know the exact name of the modules on this
 	 * submission location. It is recommended that you only set application name
 	 * and version and let Grisu figure out the module names automaticatlly.
-	 * 
+	 *
 	 * @param modules
 	 *            the module names
 	 */
@@ -1214,11 +1217,11 @@ public class JobDescription {
 
 	/**
 	 * Whether to enable the pbsdebug option for this job.
-	 * 
+	 *
 	 * This is only useful for jobs to submission location which support the pbs
 	 * debug option. Basically, the generated pbs script is written into the job
 	 * directory.
-	 * 
+	 *
 	 * @param pbsDebug
 	 */
 	public void setPbsDebug(String pbsDebug) {
@@ -1229,7 +1232,7 @@ public class JobDescription {
 
 	/**
 	 * Sets the name of the stderr file for this job.
-	 * 
+	 *
 	 * @param stderr
 	 *            the stderr file
 	 */
@@ -1241,7 +1244,7 @@ public class JobDescription {
 
 	/**
 	 * Sets the name of the stdin file for this job.
-	 * 
+	 *
 	 * @param stdin
 	 *            the stdin file
 	 */
@@ -1253,7 +1256,7 @@ public class JobDescription {
 
 	/**
 	 * Sets the name of the stdout file for this job.
-	 * 
+	 *
 	 * @param stdout
 	 *            the stdout file.
 	 */
@@ -1265,12 +1268,12 @@ public class JobDescription {
 
 	/**
 	 * Sets a fixed submission location for this job.
-	 * 
+	 *
 	 * This is optional, if not set, Grisu auto-calculates the
 	 * submissionlocation using the VO that is used to submit it along with the
 	 * application name and version. If no application version is set Grisu
 	 * tries to figure it out parsing the executable from the commandline.
-	 * 
+	 *
 	 * @param submissionLocation
 	 *            the submissionlocation in the format queue:host[#factorytype]
 	 */
@@ -1284,7 +1287,7 @@ public class JobDescription {
 	/**
 	 * Convenience method to create a unique jobname by appending a timestamp to
 	 * the jobname.
-	 * 
+	 *
 	 * @param jobname
 	 *            the base-jobname
 	 */
@@ -1296,7 +1299,7 @@ public class JobDescription {
 	/**
 	 * Convenience method to create a unique jobname by appending a timestamp
 	 * with configurable format to the jobname.
-	 * 
+	 *
 	 * @param jobname
 	 *            the base-jobname
 	 * @param format
@@ -1313,7 +1316,7 @@ public class JobDescription {
 	/**
 	 * Convenience method to create a unique jobname by appending a uuid to the
 	 * jobname.
-	 * 
+	 *
 	 * @param jobname
 	 *            the base jobname
 	 */
@@ -1336,7 +1339,7 @@ public class JobDescription {
 
 	/**
 	 * Sets the walltime for the job (in seconds).
-	 * 
+	 *
 	 * @param walltimeInSeconds
 	 *            the walltime in seconds
 	 * @deprecated use {@link #setWalltimeInSeconds(Integer)} instead
@@ -1349,9 +1352,9 @@ public class JobDescription {
 
 	/**
 	 * Set walltime as a short string.
-	 * 
+	 *
 	 * Examples: 2d10h30m, 20d, 10h
-	 * 
+	 *
 	 * @param walltime
 	 *            the walltime string
 	 * @throws Exception
@@ -1370,7 +1373,7 @@ public class JobDescription {
 
 	/**
 	 * Sets the walltime for the job (in seconds).
-	 * 
+	 *
 	 * @param walltime
 	 *            the walltime in seconds
 	 */

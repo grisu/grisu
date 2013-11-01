@@ -4,7 +4,7 @@
 	<groupId>grisu</groupId>
 	<artifactId>grisu</artifactId>
 	<packaging>pom</packaging>
-	<version>0.7.1</version>
+	<version>0.7.11</version>
 	<name>Grisu</name>
 	<description>Grisu is an open source framework to help grid admins and developers to support end users in a grid environment. Grisu publishes an easy-to-use service interface which can be deployed in different ways by implementing different backend modules. This service interface contains a set of methods that are usually needed to submit jobs to the grid, including providing information about the grid and the staging of input/output files from/to the users desktop. </description>
 	<url>http://maven.apache.org</url>
@@ -67,7 +67,7 @@
 		<connection>scm:git:git://github.com/grisu/grisu.git</connection>
 		<developerConnection>scm:git:git@github.com:grisu/grisu.git</developerConnection>
 		<url>https://github.com/grisu/grisu</url>
-	  <tag>0.7.1</tag>
+	  <tag>0.7.11</tag>
   </scm>
 	<organization>
 		<name>Grisu open source project</name>
@@ -81,6 +81,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
+                    <use>false</use>
 					<aggregate>true</aggregate>
 					<linksource>true</linksource>
 <!-- 					<excludePackageNames>org.vpac.grisu.grisuBatch.*:org.vpac.grisu.examples.*:cct.*:org.vpac.grisu.plugins.*:com.swtdesigner.*</excludePackageNames> -->
@@ -90,7 +91,7 @@
 					<source>1.5</source>
 				<detectLinks>true</detectLinks>
 					<links>
- 						<link>https://code.ceres.auckland.ac.nz/jenkins/job/Grid-Jcommons-SNAPSHOT/javadoc/</link> 
+ 						<link>https://code.ceres.auckland.ac.nz/jenkins/job/Grid-Jcommons-SNAPSHOT/javadoc/</link>
 					</links>
 				</configuration>
 			</plugin>
@@ -105,7 +106,7 @@
 					<localCheckout>true</localCheckout>
 					<tagNameFormat>@{project.version}</tagNameFormat>
 				</configuration>
-			</plugin>	
+			</plugin>
 
 		</plugins>
 	</build>

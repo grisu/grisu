@@ -1,8 +1,5 @@
 package grisu.backend.model.job.gt5;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.globus.gram.Gram;
 import org.globus.gram.GramException;
 import org.globus.gram.GramJob;
@@ -11,6 +8,9 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class Gram5Client {
 
@@ -39,18 +39,18 @@ public class Gram5Client {
         private int[] getJobStatus(String handle, GSSCredential cred, boolean restart) {
 
 		final int[] results = new int[2];
-		final Gram5JobListener l = Gram5JobListener.getJobListener();
+//		final Gram5JobListener l = Gram5JobListener.getJobListener();
 
 		// we need this to catch quick failure
 		// Integer status = l.getStatus(handle);
 		Integer status = null;
 
-		myLogger.debug("job status is " + status);
-		if (status != null) {
-			results[0] = status;
-			results[1] = l.getError(handle);
-			return results;
-		}
+//		myLogger.debug("job status is " + status);
+//		if (status != null) {
+//			results[0] = status;
+//			results[1] = l.getError(handle);
+//			return results;
+//		}
 
 		final String contact = getContactString(handle);
 		final GramJob job = new GramJob(null);
@@ -158,9 +158,9 @@ public class Gram5Client {
 
 	public String submit(String rsl, String endPoint, GSSCredential cred) {
 		final GramJob job = new GramJob(rsl);
-		final Gram5JobListener l = Gram5JobListener.getJobListener();
+//		final Gram5JobListener l = Gram5JobListener.getJobListener();
 		job.setCredentials(cred);
-		job.addListener(l);
+//		job.addListener(l);
 		try {
 			job.request(endPoint, false);
 			job.bind();

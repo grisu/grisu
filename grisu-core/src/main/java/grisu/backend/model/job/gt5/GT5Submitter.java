@@ -6,10 +6,6 @@ import grisu.backend.model.job.JobSubmitter;
 import grisu.backend.model.job.ServerJobSubmissionException;
 import grisu.control.JobConstants;
 import grith.jgrith.cred.Cred;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.globus.gram.Gram;
 import org.globus.gram.GramException;
 import org.globus.gram.GramJob;
@@ -22,6 +18,9 @@ import org.perf4j.StopWatch;
 import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class GT5Submitter extends JobSubmitter {
 
@@ -50,7 +49,7 @@ public class GT5Submitter extends JobSubmitter {
 
 		final String handle = grisuJob.getJobhandle();
 
-		final Gram5JobListener l = Gram5JobListener.getJobListener();
+//		final Gram5JobListener l = Gram5JobListener.getJobListener();
 
 		final String contact = getContactString(handle);
 		final GramJob job = new GramJob(null);
@@ -58,14 +57,17 @@ public class GT5Submitter extends JobSubmitter {
 		final GSSCredential cred = credential.getGSSCredential();
 
 		// try to get the state from the notification listener cache
-		Integer jobStatus = l.getStatus(handle);
-		Integer error = l.getError(handle);
-		Integer exitCode = l.getExitCode(handle);
-		if ((jobStatus != null) &&
-				((jobStatus == GRAMConstants.STATUS_DONE) ||
-						(jobStatus == GRAMConstants.STATUS_FAILED))) {
-			return translateToGrisuStatus(jobStatus, error, exitCode);
-		}
+//        Integer jobStatus = l.getStatus(handle);
+//        Integer error = l.getError(handle);
+//        Integer exitCode = l.getExitCode(handle);
+        Integer jobStatus = -1;
+        Integer error = -1;
+        Integer exitCode = -1;
+//		if ((jobStatus != null) &&
+//				((jobStatus == GRAMConstants.STATUS_DONE) ||
+//						(jobStatus == GRAMConstants.STATUS_FAILED))) {
+//			return translateToGrisuStatus(jobStatus, error, exitCode);
+//		}
 
 		try {
 			// lets try to see if gateway is working first...
@@ -194,7 +196,7 @@ public class GT5Submitter extends JobSubmitter {
 	@Override
 	protected String submit(String host,
 			String factoryType, Job job) throws ServerJobSubmissionException {
-		
+
 		StopWatch sw = new Slf4JStopWatch(myLogger);
 		sw.start();
 
@@ -209,7 +211,7 @@ public class GT5Submitter extends JobSubmitter {
 			sw.stop("Grisu.Jobsubmission.GT5.failed");
 		}
 
-		
+
 		String rsl_pretty = rsl.replace(") (", ")\n\t(");
 		rsl_pretty = rsl_pretty.replace(")(", ")\n\t(");
 		myLogger.debug("RSL is:\n" + rsl_pretty);
@@ -222,9 +224,9 @@ public class GT5Submitter extends JobSubmitter {
 			credential = job.getCredential().getGSSCredential();
 
 			final GramJob gt5Job = new GramJob(rsl);
-			final Gram5JobListener l = Gram5JobListener.getJobListener();
+//			final Gram5JobListener l = Gram5JobListener.getJobListener();
 			gt5Job.setCredentials(credential);
-			gt5Job.addListener(l);
+//			gt5Job.addListener(l);
 
 			try {
 				gt5Job.request(host, false);
@@ -255,7 +257,7 @@ public class GT5Submitter extends JobSubmitter {
 		if ( exitCode == null ) {
 			exitCode = 0;
 		}
-		
+
 		int grisu_status = Integer.MIN_VALUE;
 		if (status == GRAMConstants.STATUS_DONE) {
 			grisu_status = JobConstants.DONE + exitCode;

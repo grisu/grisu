@@ -1,13 +1,21 @@
 package grisu.frontend.view.swing.jobmonitoring.batch;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.swing.EventTableModel;
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.jobMonitoring.RunningJobManager;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerOld;
 import grisu.frontend.model.job.BatchJobObject;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
+import javax.swing.*;
+import javax.swing.table.TableColumn;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -15,24 +23,6 @@ import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
-
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.table.TableColumn;
-
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.EventTableModel;
 
 public class BatchJobMonitoringGrid extends JPanel {
 
@@ -73,7 +63,7 @@ public class BatchJobMonitoringGrid extends JPanel {
 	private final ServiceInterface si;
 	private final UserEnvironmentManager em;
 
-	private final RunningJobManager rjm;
+	private final RunningJobManagerOld rjm;
 	// ---------------------------------------------------------------------------------------
 	// Event stuff
 	private Vector<BatchJobSelectionListener> listeners;
@@ -89,21 +79,22 @@ public class BatchJobMonitoringGrid extends JPanel {
 		this.si = si;
 		this.em = GrisuRegistryManager.getDefault(si)
 				.getUserEnvironmentManager();
-		this.rjm = RunningJobManager.getDefault(si);
+		//this.rjm = RunningJobManagerOld.getDefault(si);
 
-		batchJobs = rjm.getBatchJobs(application);
-		final ObservableElementList.Connector<BatchJobObject> bjoConnector = GlazedLists
-				.beanConnector(BatchJobObject.class);
-		observedBatchJobs = new ObservableElementList<BatchJobObject>(
-				batchJobs, bjoConnector);
-
-		sortedBatchJobList = new SortedList<BatchJobObject>(observedBatchJobs,
-				new BatchJobObjectComparator());
-		batchJobModel = new EventTableModel<BatchJobObject>(sortedBatchJobList,
-				new BatchJobTableFormat());
-
-		setLayout(new BorderLayout(0, 0));
-		add(getScrollPane(), BorderLayout.CENTER);
+//		batchJobs = rjm.getBatchJobs(application);
+//		final ObservableElementList.Connector<BatchJobObject> bjoConnector = GlazedLists
+//				.beanConnector(BatchJobObject.class);
+//		observedBatchJobs = new ObservableElementList<BatchJobObject>(
+//				batchJobs, bjoConnector);
+//
+//		sortedBatchJobList = new SortedList<BatchJobObject>(observedBatchJobs,
+//				new BatchJobObjectComparator());
+//		batchJobModel = new EventTableModel<BatchJobObject>(sortedBatchJobList,
+//				new BatchJobTableFormat());
+//
+//		setLayout(new BorderLayout(0, 0));
+//		add(getScrollPane(), BorderLayout.CENTER);
+        throw new RuntimeException("Batchjobs not implemented anymore");
 
 	}
 

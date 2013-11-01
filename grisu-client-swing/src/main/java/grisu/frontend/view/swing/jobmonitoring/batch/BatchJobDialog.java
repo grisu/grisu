@@ -2,16 +2,11 @@ package grisu.frontend.view.swing.jobmonitoring.batch;
 
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
-import grisu.frontend.control.jobMonitoring.RunningJobManager;
 import grisu.frontend.model.job.BatchJobObject;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 public class BatchJobDialog extends JDialog {
 
@@ -30,17 +25,19 @@ public class BatchJobDialog extends JDialog {
 	public static void open(final ServiceInterface si, final String batchJobName)
 			throws NoSuchJobException {
 
-		final BatchJobObject bj = RunningJobManager.getDefault(si).getBatchJob(
-				batchJobName);
+        throw new RuntimeException("Batchjobs not implemented anymore.");
 
-		EventQueue.invokeLater(new Runnable() {
-
-			public void run() {
-
-				final BatchJobDialog dialog = new BatchJobDialog(si, bj);
-				dialog.setVisible(true);
-			}
-		});
+//		final BatchJobObject bj = RunningJobManagerOld.getDefault(si).getBatchJob(
+//				batchJobName);
+//
+//		EventQueue.invokeLater(new Runnable() {
+//
+//			public void run() {
+//
+//				final BatchJobDialog dialog = new BatchJobDialog(si, bj);
+//				dialog.setVisible(true);
+//			}
+//		});
 
 	}
 

@@ -1,37 +1,24 @@
 package grisu.frontend.view.swing.utils;
 
+import com.jgoodies.forms.factories.FormFactory;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
 import grisu.control.ServiceInterface;
 import grisu.frontend.view.swing.ServiceInterfacePanel;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.GridEnvironment;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-
+import grisu.settings.ClientPropertiesManager;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.FormSpecs;
-import com.jgoodies.forms.layout.RowSpec;
+import javax.swing.*;
+import java.awt.event.*;
 
 public class AdvancedSettingsPanel extends JPanel implements
 ServiceInterfacePanel {
-	
+
 	public static final Logger myLogger = LoggerFactory.getLogger(AdvancedSettingsPanel.class);
 
 	private JLabel lblClearFilesystemCache;
@@ -43,35 +30,64 @@ ServiceInterfacePanel {
 	private JButton btnApply;
 	private JCheckBox chckbxAllowRemoteSupport;
 	private JLabel lblNewLabel_1;
+	private JLabel lblNewLabel_2;
+	private JLabel lblZipResultFiles;
+	private JCheckBox inputFileCheckBox;
+	private JCheckBox outputFilesCheckBox;
 
 	/**
 	 * Create the panel.
 	 */
 	public AdvancedSettingsPanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
-				FormSpecs.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),
-				FormSpecs.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("max(70dlu;default)"),
-				FormSpecs.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),
-				FormSpecs.RELATED_GAP_COLSPEC,
-				FormSpecs.DEFAULT_COLSPEC,
-				FormSpecs.RELATED_GAP_COLSPEC,},
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				ColumnSpec.decode("119px"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("153px:grow"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("46px"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,},
 			new RowSpec[] {
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,}));
-		add(getLblNewLabel_1(), "2, 2, 5, 1");
-		add(getChckbxAllowRemoteSupport(), "8, 2, center, default");
-		add(getLblClearFilesystemCache(), "2, 4, 3, 1");
-		add(getBtnClear(), "8, 4, fill, default");
-		add(getLblNewLabel(), "2, 6, left, default");
-		add(getTextField(), "4, 6, 3, 1, fill, default");
-		add(getBtnApply(), "8, 6, fill, default");
+				FormFactory.LINE_GAP_ROWSPEC,
+				RowSpec.decode("25px"),
+				FormFactory.LINE_GAP_ROWSPEC,
+				RowSpec.decode("25px"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,}));
+//		setLayout(new FormLayout(new ColumnSpec[] {
+//				FormSpecs.RELATED_GAP_COLSPEC,
+//				ColumnSpec.decode("default:grow"),
+//				FormSpecs.RELATED_GAP_COLSPEC,
+//				ColumnSpec.decode("max(70dlu;default)"),
+//				FormSpecs.RELATED_GAP_COLSPEC,
+//				ColumnSpec.decode("default:grow"),
+//				FormSpecs.RELATED_GAP_COLSPEC,
+//				FormSpecs.DEFAULT_COLSPEC,
+//				FormSpecs.RELATED_GAP_COLSPEC,},
+//			new RowSpec[] {
+//				FormSpecs.RELATED_GAP_ROWSPEC,
+//				FormSpecs.DEFAULT_ROWSPEC,
+//				FormSpecs.RELATED_GAP_ROWSPEC,
+//				FormSpecs.DEFAULT_ROWSPEC,
+//				FormSpecs.RELATED_GAP_ROWSPEC,
+//				FormSpecs.DEFAULT_ROWSPEC,}));
+		add(getLblNewLabel_1(), "2, 2, 5, 1, left, center");
+		add(getChckbxAllowRemoteSupport(), "8, 2, right, center");
+		add(getLblClearFilesystemCache(), "2, 4, 5, 1, left, center");
+		add(getBtnClear(), "8, 4, right, top");
+		add(getLblNewLabel_2(), "2, 6, 5, 1");
+		add(getInputFileCheckBox(), "8, 6, right, default");
+		add(getLblZipResultFiles(), "2, 8, 5, 1");
+		add(getOutputFilesCheckBox(), "8, 8, right, default");
+		add(getLblNewLabel(), "2, 10, left, center");
+		add(getTextField(), "4, 10, 3, 1, fill, center");
+		add(getBtnApply(), "8, 10, right, top");
 	}
 
 	private JButton getBtnApply() {
@@ -166,13 +182,13 @@ ServiceInterfacePanel {
 		if (si != null) {
 			getBtnClear().setEnabled(true);
 			getChckbxAllowRemoteSupport().setEnabled(true);
-			
+
 			String enableRemoteAccess = si.getUserProperty(Constants.ALLOW_REMOTE_SUPPORT);
-			
+
 			if ( Boolean.TRUE.toString().equals(enableRemoteAccess) ) {
 				getChckbxAllowRemoteSupport().setSelected(true);
 			}
-			
+
 		} else {
 			getBtnClear().setEnabled(false);
 			getChckbxAllowRemoteSupport().setEnabled(false);
@@ -185,18 +201,18 @@ ServiceInterfacePanel {
 			chckbxAllowRemoteSupport = new JCheckBox("");
 			chckbxAllowRemoteSupport.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
-					
+
 					if (si == null) {
 						myLogger.debug("No serviceinterface set, not enabling/disabling remote access.");
 						return;
 					}
-					
+
 					if (ItemEvent.SELECTED == e.getStateChange()) {
 						si.setUserProperty(Constants.ALLOW_REMOTE_SUPPORT, Boolean.TRUE.toString());
 					} else {
 						si.setUserProperty(Constants.ALLOW_REMOTE_SUPPORT, Boolean.FALSE.toString());
 					}
-					
+
 				}
 			});
 			chckbxAllowRemoteSupport.setEnabled(false);
@@ -210,5 +226,56 @@ ServiceInterfacePanel {
 			lblNewLabel_1 = new JLabel("Allow remote support");
 		}
 		return lblNewLabel_1;
+	}
+	private JLabel getLblNewLabel_2() {
+		if (lblNewLabel_2 == null) {
+			lblNewLabel_2 = new JLabel("Zip input file before uploading");
+		}
+		return lblNewLabel_2;
+	}
+	private JLabel getLblZipResultFiles() {
+		if (lblZipResultFiles == null) {
+			lblZipResultFiles = new JLabel("Zip result files when job is finished");
+		}
+		return lblZipResultFiles;
+	}
+
+	private JCheckBox getInputFileCheckBox() {
+		if (inputFileCheckBox == null) {
+			inputFileCheckBox = new JCheckBox("");
+			boolean set = ClientPropertiesManager.isCompressInputFiles();
+			inputFileCheckBox.setSelected(set);
+
+			inputFileCheckBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if ( ItemEvent.SELECTED == e.getStateChange() ) {
+						ClientPropertiesManager.setCompressInputFiles(true);
+					} else {
+						ClientPropertiesManager.setCompressInputFiles(false);
+					}
+				}
+			});
+		}
+		return inputFileCheckBox;
+	}
+
+
+	private JCheckBox getOutputFilesCheckBox() {
+		if (outputFilesCheckBox == null) {
+			outputFilesCheckBox = new JCheckBox("");
+			boolean set = ClientPropertiesManager.isCompressOutputFiles();
+			outputFilesCheckBox.setSelected(set);
+
+			outputFilesCheckBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if ( ItemEvent.SELECTED == e.getStateChange() ) {
+						ClientPropertiesManager.setCompressOutputFiles(true);
+					} else {
+						ClientPropertiesManager.setCompressOutputFiles(false);
+					}
+				}
+			});
+		}
+		return outputFilesCheckBox;
 	}
 }

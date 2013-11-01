@@ -5,12 +5,11 @@ import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
 import grisu.model.info.UserApplicationInformation;
 import grith.jgrith.cred.Cred;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GrisuRegistryManager {
 
@@ -31,7 +30,7 @@ public class GrisuRegistryManager {
 	public static Cred getCredential(ServiceInterface si) {
 		return getDefault(si).getCredential();
 	}
-	
+
 	public static ServiceInterface getDefaultServiceInterface() {
 		if ( cachedRegistries == null || cachedRegistries.size() == 0 ) {
 			return null;
@@ -59,6 +58,7 @@ public class GrisuRegistryManager {
 
 		return cachedRegistries.get(serviceInterface);
 	}
+
 
 	public static FileManager getFileManager(ServiceInterface si) {
 		return getDefault(si).getFileManager();

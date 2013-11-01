@@ -1,5 +1,7 @@
 package grisu.backend.model.job;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 import grisu.backend.hibernate.JobDAO;
 import grisu.backend.hibernate.JobStatDAO;
 import grisu.backend.model.RemoteFileTransferObject;
@@ -8,11 +10,7 @@ import grisu.backend.model.fs.GrisuInputStream;
 import grisu.backend.model.fs.GrisuOutputStream;
 import grisu.control.JobConstants;
 import grisu.control.ServiceInterface;
-import grisu.control.exceptions.BatchJobException;
-import grisu.control.exceptions.JobPropertiesException;
-import grisu.control.exceptions.JobSubmissionException;
-import grisu.control.exceptions.NoSuchJobException;
-import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.control.exceptions.*;
 import grisu.control.serviceInterfaces.AbstractServiceInterface;
 import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
@@ -32,28 +30,8 @@ import grisu.settings.ServerPropertiesManager;
 import grisu.utils.ServiceInterfaceUtils;
 import grisu.utils.SeveralXMLHelpers;
 import grith.jgrith.cred.Cred;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import javax.activation.DataHandler;
-import javax.persistence.Transient;
-
 import net.sf.ehcache.util.NamedThreadFactory;
-
 import org.apache.commons.lang.StringUtils;
-import org.globus.rsl.Binding;
-import org.globus.rsl.Bindings;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.slf4j.Logger;
@@ -61,17 +39,21 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
+import javax.activation.DataHandler;
+import javax.persistence.Transient;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The JobSubmissionManager class provides an interface between grisu and the
  * several grid middlewares. It takes a jsdl document as input, converts it into
  * the proper format and then submits the job to the proper endpoint. At the
  * moment only gt4 job submission is supported.
- * 
+ *
  * @author Markus Binsteiner
- * 
+ *
  */
 public class UserJobManager {
 
@@ -102,7 +84,7 @@ public class UserJobManager {
 	/**
 	 * Initializes the JobSubmissionManager with all supported
 	 * {@link JobSubmitter}s.
-	 * 
+	 *
 	 * @param submitters
 	 *            the supported JobSubmitters
 	 */
@@ -542,7 +524,7 @@ public class UserJobManager {
 
 		jobstatdao.saveOrUpdate(job, true);
 		jobdao.saveOrUpdate(job);
-		
+
 		return jobname;
 	}
 
@@ -738,9 +720,9 @@ public class UserJobManager {
 
 	/**
 	 * Searches for the job with the specified jobname for the current user.
-	 * 
-	 * @param jobname
-	 *            the name of the job (which is unique within one user)
+	 *
+	 * @param jobnameOrUrl
+	 *            the name of the job (which is unique within one user) or the (gsiftp:// or grid://) url to the directory where it is archived
 	 * @return the job
 	 */
 	@Transient
@@ -753,7 +735,7 @@ public class UserJobManager {
 			return job;
 		} catch (final NoSuchJobException nsje) {
 
-			if (jobnameOrUrl.startsWith("gridftp://")) {
+			if (jobnameOrUrl.startsWith("gsiftp://") || jobnameOrUrl.startsWith(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME)) {
 
 				for (final Job archivedJob : getArchivedJobs(null)) {
 					if (job.getJobProperty(Constants.JOBDIRECTORY_KEY).equals(
@@ -772,7 +754,7 @@ public class UserJobManager {
 	 * Monitors the status of a job. Since the {@link JobSubmitter} that was
 	 * used to submit the job is stored in the {@link Job#getSubmissionType()}
 	 * property it does not have to be specified here again.
-	 * 
+	 *
 	 * @param job
 	 *            the job
 	 * @return the status of the job (have a look at
@@ -935,9 +917,9 @@ public class UserJobManager {
 	 * Kills the job with the specified jobname. Before it does that it checks
 	 * the database whether the job may be already finished. In that case it
 	 * doesn't need to contact globus, which is much faster.
-	 * 
-	 * @param jobname
-	 *            the name of the job
+	 *
+	 * @param job
+	 *            the job
 	 * @return the new status of the job
 	 */
 	int kill(final Job job) {
@@ -1032,6 +1014,21 @@ public class UserJobManager {
 					myLogger.debug("Killing job " + job.getJobname()
 							+ "through jobsubmitter finished.");
 
+                    final String jobdirectory = job.getJobProperty(Constants.JOBDIRECTORY_KEY);
+                    final String jobname = job.getJobname();
+
+                    if (! job.isBatchJob() && removeFromDB) {
+                        status.addLogMessage("Removing job from db...");
+                        myLogger.debug("Removing job " + job.getJobname()
+                                + " from db.");
+                        jobstatdao.saveOrUpdate(job, false);
+                        jobdao.delete(job);
+                        myLogger.debug("Removing job " + job.getJobname()
+                                + " from db finished.");
+                        status.addElement("Job removed from db.");
+
+                    }
+
 					if (delteJobDirectory) {
 
 						if (job.isBatchJob()) {
@@ -1045,6 +1042,17 @@ public class UserJobManager {
 								mpj.removeJob(job);
 								getUser().getBatchJobManager()
 								.saveOrUpdate(mpj);
+
+                                status.addLogMessage("Removing job from db...");
+                                myLogger.debug("Removing job " + job.getJobname()
+                                        + " from db.");
+                                jobstatdao.saveOrUpdate(job, false);
+                                jobdao.delete(job);
+                                myLogger.debug("Removing job " + job.getJobname()
+                                        + " from db finished.");
+                                status.addElement("Job removed from db.");
+                                status.addElement("Job killed.");
+
 							} catch (final Exception e) {
 								// e.printStackTrace();
 								// doesn't matter
@@ -1052,19 +1060,19 @@ public class UserJobManager {
 
 						}
 						status.addLogMessage("Removing job directory.");
-						if (job.getJobProperty(Constants.JOBDIRECTORY_KEY) != null) {
+						if (StringUtils.isNotBlank(jobdirectory)) {
 
 							try {
 								myLogger.debug("Deleting jobdir for "
-										+ job.getJobname());
+										+ jobname);
 
 								getUser()
 								.getFileManager()
 								.deleteFile(
-										job.getJobProperty(Constants.JOBDIRECTORY_KEY),
+										jobdirectory,
 										true);
 								myLogger.debug("Deleting success for jobdir for "
-										+ job.getJobname());
+										+ jobname);
 							} catch (final Exception e) {
 								myLogger.error("Could not delete jobdirectory: "
 										+ e.getMessage()
@@ -1074,19 +1082,7 @@ public class UserJobManager {
 						status.addElement("Job directory deleted.");
 					}
 
-					if (removeFromDB) {
-						status.addLogMessage("Removing job from db...");
-						myLogger.debug("Removing job " + job.getJobname()
-								+ " from db.");
-						jobstatdao.saveOrUpdate(job, false);
-						jobdao.delete(job);
-						myLogger.debug("Removing job " + job.getJobname()
-								+ " from db finished.");
-						status.addElement("Job removed from db.");
-
-					}
-
-					status.addElement("Job killed.");
+                    status.addElement("Job killed.");
 					status.setFinished(true);
 					status.setFailed(false);
 				} catch (final Throwable e) {
@@ -1158,7 +1154,7 @@ public class UserJobManager {
 	 * Kills the job. Since the {@link JobSubmitter} that was used to submit the
 	 * job is stored in the {@link Job#getSubmissionType()} property it does not
 	 * have to be specified here again.
-	 * 
+	 *
 	 * @param job
 	 *            the job to kill
 	 * @return the new status of the job. It may be worth checking whether the
@@ -1369,7 +1365,7 @@ public class UserJobManager {
 	/**
 	 * Prepares the environment for the job. Mainly it creates the job directory
 	 * remotely.
-	 * 
+	 *
 	 * @param job
 	 *            the name of the job
 	 * @throws RemoteFileSystemException
@@ -2291,6 +2287,7 @@ public class UserJobManager {
 
 		}
 		workingDirectory = FileManager.ensurePrependingSlash(workingDirectory);
+        workingDirectory = FileManager.removeDoubleSlashes(workingDirectory);
 		myLogger.debug("Calculated workingdirectory: {}", workingDirectory);
 
 		final String newJobdir = FileManager
@@ -2394,14 +2391,14 @@ public class UserJobManager {
 		job.addJobProperty(Constants.JOBDIRECTORY_KEY, newJobdir);
 		job.addJobProperty(Constants.SUBMISSIONBACKEND_KEY,
 				AbstractServiceInterface.getBackendInfo());
-		
+
 		final Map<String, String> env = JsdlHelpers
 				.getPosixApplicationEnvironment(jsdl);
 		if ((env != null) && (env.size() > 0)) {
 			String envVars = Joiner.on("|").withKeyValueSeparator("=").join(env);
 			job.addJobProperty(Constants.ENVIRONMENT_VARIABLES_KEY, envVars);
 		}
-		
+
 
 
 		myLogger.debug("Preparing job done.");
@@ -2413,7 +2410,7 @@ public class UserJobManager {
 	/**
 	 * Just a method to refresh the status of all jobs. Could be used by
 	 * something like a cronjob as well. TODO: maybe change to public?
-	 * 
+	 *
 	 * @param jobs
 	 *            a list of jobs you want to have refreshed
 	 */
@@ -2578,7 +2575,7 @@ public class UserJobManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#stageFiles(java.lang.String)
 	 */
 	public void stageFiles(final Job job, final DtoActionStatus optionalStatus)
@@ -2637,7 +2634,7 @@ public class UserJobManager {
 
 	/**
 	 * Submits the job to the specified {@link JobSubmitter}.
-	 * 
+	 *
 	 * @param submitter_name
 	 *            the JobSubmitter
 	 * @param job
@@ -2789,7 +2786,7 @@ public class UserJobManager {
 				e.setTextContent(value);
 			}
 		}
-		
+
 		job.setJobDescription(oldJsdl);
 
 		String handle = null;

@@ -1,13 +1,22 @@
 package grisu.frontend.view.swing.jobmonitoring.single;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.swing.EventTableModel;
+import com.beust.jcommander.internal.Lists;
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.jobMonitoring.RunningJobManager;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerManager;
 import grisu.frontend.model.job.GrisuJob;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
+import javax.swing.*;
+import javax.swing.table.TableColumn;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -16,28 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.table.TableColumn;
-
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.EventTableModel;
-
-import com.beust.jcommander.internal.Lists;
 
 public class SimpleSingleJobsGrid extends JPanel {
 
@@ -80,7 +67,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 	private JPopupMenu popupMenu;
 
 	private boolean enableSingleMouseClick = false;
-	
+
 	private final JobNameCellRenderer renderer = new JobNameCellRenderer();
 
 	// ---------------------------------------------------------------------------------------
@@ -116,7 +103,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 
 	public SimpleSingleJobsGrid(ServiceInterface si, String application) {
 
-		this(si, RunningJobManager.getDefault(si).getJobs(application));
+		this(si, RunningJobManagerManager.getDefault(si).getJobs(application));
 
 	}
 
@@ -130,15 +117,15 @@ public class SimpleSingleJobsGrid extends JPanel {
 	}
 
 	private void fireJobSelected(GrisuJob j) {
-		
+
 
 		if ( j.isBeingCleaned() ) {
 			myLogger.debug("Selected job is being cleaned, not opening it.");
 			return;
 		}
-		
 
-		
+
+
 		// if we have no mountPointsListeners, do nothing...
 		if ((listeners != null) && !listeners.isEmpty()) {
 
@@ -328,7 +315,7 @@ public class SimpleSingleJobsGrid extends JPanel {
 		if (selRow >= 0) {
 
 			final GrisuJob sel = (GrisuJob) jobModel.getValueAt(selRow, 0);
-			
+
 			fireJobSelected(sel);
 		}
 
@@ -367,8 +354,8 @@ public class SimpleSingleJobsGrid extends JPanel {
 			for (final GrisuJob job : getSelectedJobs()) {
 				jobs.add(job);
 			}
-			
-			RunningJobManager.getDefault(si).killJobs(jobs, clean);
+
+			RunningJobManagerManager.getDefault(si).killJobs(jobs, clean);
 
 			//lockUI(false);
 

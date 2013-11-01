@@ -1,24 +1,13 @@
 package grisu.frontend.view.swing;
 
+import com.google.common.collect.Lists;
 import grisu.control.ServiceInterface;
-import grisu.frontend.control.jobMonitoring.RunningJobManager;
+import grisu.frontend.control.jobMonitoring.RunningJobManagerManager;
 import grisu.frontend.control.utils.ApplicationsManager;
 import grisu.frontend.model.events.NewJobEvent;
 import grisu.jcommons.constants.Constants;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
-
-import java.awt.event.ActionEvent;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
@@ -26,27 +15,29 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.util.*;
 
 public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		EventSubscriber<NewJobEvent> {
-	
+
 	private class ApplicationComparator implements Comparator<String> {
 
 		public int compare(String arg0, String arg1) {
-			
+
 			if (Constants.ALLJOBS_KEY.equals(arg0) && Constants.ALLJOBS_KEY.equals(arg1)) {
 				return 0;
 			}
 			if (Constants.ALLJOBS_KEY.equals(arg0) ) {
 				return -1;
-			} 
+			}
 			if (Constants.ALLJOBS_KEY.equals(arg1) ) {
 				return 1;
-			} 
+			}
 			return arg0.compareToIgnoreCase(arg1);
 		}
-		
+
 	}
 
 	static final Logger myLogger = LoggerFactory
@@ -83,9 +74,9 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		this.displayAllJobsItem = displayAllJobsItem;
 		this.displayApplicationSpecificItems = displayApplicationSpecificItems;
 		setTitle("Monitor jobs");
-		
+
 		updateApplications();
-		
+
 
 
 
@@ -108,7 +99,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		}
 
 		if (Constants.ALLJOBS_KEY.equals(app)) {
-			RunningJobManager.getDefault(si).getAllJobs();
+			RunningJobManagerManager.getDefault(si).getAllJobs();
 		}
 
 		if (actions.get(app) == null) {
@@ -161,16 +152,16 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 			if (StringUtils.isBlank(application)) {
 				return;
 			}
-			
+
 			addApplication(application);
 
 		}
 
 	}
-	
+
 	private void updateApplications() {
 		List<String> applications = Lists.newArrayList();
-		
+
 		if (displayAllJobsItem) {
 			applications.add(Constants.ALLJOBS_KEY);
 		}
@@ -193,7 +184,7 @@ public class GrisuMonitorNavigationTaskPane extends JXTaskPane implements
 		}
 
 		Collections.sort(applications, new ApplicationComparator());
-		
+
 		for ( String app : applications ) {
 			addApplication(app);
 		}

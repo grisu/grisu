@@ -52,11 +52,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A class to make file-related stuff like transfers from/to the backend easier.
- * 
+ *
  * It also manages an internal cache.
- * 
+ *
  * @author Markus Binsteiner
- * 
+ *
  */
 public class FileManager {
 
@@ -80,7 +80,7 @@ public class FileManager {
 
 	/**
 	 * Convenience method to create a datahandler out of a file.
-	 * 
+	 *
 	 * @param file
 	 *            the file
 	 * @return the datahandler
@@ -93,7 +93,7 @@ public class FileManager {
 
 	/**
 	 * Convenience method to create a datahandler out of a file.
-	 * 
+	 *
 	 * @param pathOrUri
 	 *            the file
 	 * @return the datahandler
@@ -117,6 +117,7 @@ public class FileManager {
 	}
 
 	public static String ensureTrailingSlash(String url) {
+
 		if (StringUtils.isBlank(url)) {
 			return "";
 		} else if (url.equals(ServiceInterface.VIRTUAL_GRID_PROTOCOL_NAME
@@ -137,9 +138,9 @@ public class FileManager {
 	 * Convenience method that basically converts normal local paths to files
 	 * into a url format. It also supports virtual filesystems, so if your path
 	 * for example starts with "/groups", it'll prepend "grid://" to it.
-	 * 
+	 *
 	 * For already vaild urls it does nothing.
-	 * 
+	 *
 	 * @param inputFile
 	 *            the input file path or url
 	 * @return a valid url to the file, be it local or remote
@@ -180,7 +181,7 @@ public class FileManager {
 	/**
 	 * Replaces all special charactes in a url with "_" in order to be able to
 	 * store it in the local cache (in .grisu/cache).
-	 * 
+	 *
 	 * @param url
 	 *            the url
 	 * @return the "clean" string
@@ -194,10 +195,10 @@ public class FileManager {
 	/**
 	 * Returns the configured size up to which Grisu downloads remote files for
 	 * preview without asking the user.
-	 * 
+	 *
 	 * That is implemented so a user doesn't accidently double clicks a 2 GB
 	 * file and downloads it into the local cache.
-	 * 
+	 *
 	 * @return the treshhold in bytes
 	 */
 	public static long getDownloadFileSizeThreshold() {
@@ -214,7 +215,7 @@ public class FileManager {
 
 	/**
 	 * Convenience method to get a {@link File} object form a local path or url.
-	 * 
+	 *
 	 * @param uriOrPath
 	 *            the path or url
 	 * @return the file object
@@ -236,7 +237,7 @@ public class FileManager {
 
 	/**
 	 * Helper method to extract the filename out of an url.
-	 * 
+	 *
 	 * @param url
 	 *            the url
 	 * @return the filename
@@ -270,7 +271,7 @@ public class FileManager {
 
 	/**
 	 * Convenience method to extract hostname from an url.
-	 * 
+	 *
 	 * @param url
 	 *            the url
 	 * @return the hostname or null if hostname couldn't be found
@@ -291,7 +292,7 @@ public class FileManager {
 	/**
 	 * Returns a human readable String that indicates the last modified date of
 	 * a file (out of a unix time long).
-	 * 
+	 *
 	 * @param date
 	 *            the date in unix time
 	 * @return the human readable date string
@@ -309,7 +310,7 @@ public class FileManager {
 	/**
 	 * Returns all local filesystems (mainly for windows, returns drive names:
 	 * C:\, D:\, etc...)
-	 * 
+	 *
 	 * @return the local filesytem roots
 	 */
 	public static Set<GridFile> getLocalFileSystems() {
@@ -330,7 +331,7 @@ public class FileManager {
 
 	/**
 	 * Convenience method to extract the protocol out of a url.
-	 * 
+	 *
 	 * @param parent
 	 *            the url;
 	 * @return the protocol
@@ -343,11 +344,11 @@ public class FileManager {
 
 	/**
 	 * Convenience method to check whether a local file exists.
-	 * 
+	 *
 	 * Beware, this method also returns true if the url is not local. That is
 	 * because it is used to only check local file, sometimes it takes to long
 	 * to check remote files for existence.
-	 * 
+	 *
 	 * @param url
 	 *            the url
 	 * @return true if the url is local and file exists or url is not local,
@@ -377,7 +378,7 @@ public class FileManager {
 	/**
 	 * Convenience method to ensure that the specified url doesn't end with a
 	 * slash.
-	 * 
+	 *
 	 * @param url
 	 *            the url
 	 * @return the url without a trailing slash
@@ -403,11 +404,11 @@ public class FileManager {
 	/**
 	 * Sets the treshhold up to which Grisu doesn't complain when downloading a
 	 * file into the local cache.
-	 * 
+	 *
 	 * That is implemented so that a used doesn't accidently double-clicks a 2
 	 * GB file which gets automatically downloaded in the local cache for
 	 * preview purposes.
-	 * 
+	 *
 	 * @param t
 	 *            the threshold size in bytes
 	 */
@@ -421,7 +422,7 @@ public class FileManager {
 
 	/**
 	 * Convenience method to calculate the parent of a url.
-	 * 
+	 *
 	 * @param rootUrl
 	 *            the url
 	 * @return the parent url
@@ -450,7 +451,7 @@ public class FileManager {
 	/**
 	 * Helper method to check whether the provided url is for a local file or
 	 * not.
-	 * 
+	 *
 	 * @param file
 	 *            the url of the file
 	 * @return whether the file is local or not.
@@ -480,7 +481,7 @@ public class FileManager {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param si
 	 *            the serviceInterface
 	 */
@@ -490,14 +491,14 @@ public class FileManager {
 
 	/**
 	 * Copies local files.
-	 * 
+	 *
 	 * @param sourceFile
 	 *            the source
 	 * @param targetFile
 	 *            the target
 	 * @param overwrite
 	 *            whether to overwrite the target if it already exists.
-	 * 
+	 *
 	 * @throws FileTransactionException
 	 *             if the copying fails (for example because overwrite is false
 	 *             and target exists).
@@ -545,7 +546,7 @@ public class FileManager {
 
 	/**
 	 * Copies local files.
-	 * 
+	 *
 	 * @param sourceUrl
 	 *            the path or url of the source file
 	 * @param targetDirUrl
@@ -568,9 +569,9 @@ public class FileManager {
 
 	/**
 	 * Copies remote files.
-	 * 
+	 *
 	 * Waits for transfer to finsh before returning.
-	 * 
+	 *
 	 * @param sourceUrl
 	 *            the source url
 	 * @param targetDirUrl
@@ -588,7 +589,7 @@ public class FileManager {
 
 	/**
 	 * Copies or uploads a local file.
-	 * 
+	 *
 	 * @param sourceFile
 	 *            the source file
 	 * @param targetDirUrl
@@ -615,7 +616,7 @@ public class FileManager {
 
 	/**
 	 * Copies {@link GridFile} grid files (remote or local).
-	 * 
+	 *
 	 * @param source
 	 *            the source file
 	 * @param targetDir
@@ -635,7 +636,7 @@ public class FileManager {
 
 	/**
 	 * Copies a set of {@link GridFile}s to a target directory.
-	 * 
+	 *
 	 * @param sources
 	 *            the source files
 	 * @param targetDirectory
@@ -656,7 +657,7 @@ public class FileManager {
 
 	/**
 	 * Copies a set of urls or paths to a target directory.
-	 * 
+	 *
 	 * @param sources
 	 *            the source files
 	 * @param targetDirectory
@@ -676,7 +677,7 @@ public class FileManager {
 
 	/**
 	 * Copies a url or path to a target directory.
-	 * 
+	 *
 	 * @param sources
 	 *            the source file
 	 * @param targetDirectory
@@ -723,7 +724,7 @@ public class FileManager {
 
 	/**
 	 * Copies remote files.
-	 * 
+	 *
 	 * @param sourceUrl
 	 *            the source url
 	 * @param targetDirUrl
@@ -773,7 +774,7 @@ public class FileManager {
 
 	/**
 	 * Create a new folder in a parent directory
-	 * 
+	 *
 	 * @param parent
 	 *            the parent directory
 	 * @param s
@@ -832,10 +833,10 @@ public class FileManager {
 
 	/**
 	 * Creates a {@link GridFile} object from a url.
-	 * 
+	 *
 	 * This might involve contacting the backend and can therefor be a bit
 	 * timeconsuming, so don't use that if you have 1000s of files...
-	 * 
+	 *
 	 * @param url
 	 *            the url
 	 * @return the GridFile object
@@ -860,7 +861,7 @@ public class FileManager {
 
 	/**
 	 * Deletes the remote file and a possible local cache file.
-	 * 
+	 *
 	 * @param url
 	 *            the url of the remote file
 	 * @throws RemoteFileSystemException
@@ -895,7 +896,7 @@ public class FileManager {
 	/**
 	 * Downloads the file with the specified url into the local cache and
 	 * returns a file object for it.
-	 * 
+	 *
 	 * @param url
 	 *            the source url
 	 * @return the file object for the cached file
@@ -910,11 +911,11 @@ public class FileManager {
 	/**
 	 * Downloads the file with the specified url into the local cache and
 	 * returns a file object for it.
-	 * 
+	 *
 	 * This one throws an exception if forceDownload is false and file is bigger
 	 * than filesize download threshold (@link
 	 * {@link #getDownloadFileSizeThreshold()}.
-	 * 
+	 *
 	 * @param url
 	 *            the source url
 	 * @param forceDownload
@@ -1083,12 +1084,12 @@ public class FileManager {
 
 	/**
 	 * Downloads a remote file to the specified target.
-	 * 
+	 *
 	 * If the target is an existing directory, the file will be put in there, if
 	 * not, a file with that name will be created (along with all intermediate
 	 * directories). If the target file already exists then you need to specify
 	 * overwrite=true.
-	 * 
+	 *
 	 * @param url
 	 *            the url of the source file
 	 * @param targetDir
@@ -1168,12 +1169,12 @@ public class FileManager {
 
 	/**
 	 * Downloads a remote file to the specified target.
-	 * 
+	 *
 	 * If the target is an existing directory, the file will be put in there, if
 	 * not, a file with that name will be created (along with all intermediate
 	 * directories). If the target file already exists then you need to specify
 	 * overwrite=true.
-	 * 
+	 *
 	 * @param url
 	 *            the url of the source file
 	 * @param target
@@ -1195,7 +1196,7 @@ public class FileManager {
 
 	/**
 	 * Checks whether a file exists or not.
-	 * 
+	 *
 	 * @param file
 	 *            the file url or path
 	 * @return whether the file exists (true) or not (false)
@@ -1209,7 +1210,7 @@ public class FileManager {
 
 	/**
 	 * Checks whether a file exists or not.
-	 * 
+	 *
 	 * @param file
 	 *            the file url or path
 	 * @return whether the file exists (true) or not (false)
@@ -1228,7 +1229,7 @@ public class FileManager {
 
 	/**
 	 * Returns the size of the file in bytes.
-	 * 
+	 *
 	 * @param url
 	 *            the url or path
 	 * @return the filesize in bytes
@@ -1247,7 +1248,7 @@ public class FileManager {
 
 	/**
 	 * Returns a parent file for all virtual remote filesystems.
-	 * 
+	 *
 	 * @return a virtual grid root file
 	 */
 	public GridFile getGridRoot() {
@@ -1263,10 +1264,10 @@ public class FileManager {
 	 * Returns a {@link File} object that denotes the location of the specified
 	 * (remote) file in the local cache folder. Or the file directly in case the
 	 * url is local.
-	 * 
+	 *
 	 * Be aware that this method doesn't download the file into the cache, you
 	 * need to do that using {@link FileManager#downloadFile(String)}.
-	 * 
+	 *
 	 * @param url
 	 *            the url or path of the file
 	 * @return a {@link File} object
@@ -1290,7 +1291,7 @@ public class FileManager {
 
 	/**
 	 * Returns a virtual file that has got all local roots as children.
-	 * 
+	 *
 	 * @return the virtual local root file
 	 */
 	public GridFile getLocalRoot() {
@@ -1316,11 +1317,11 @@ public class FileManager {
 	/**
 	 * Checks whether the actual file a specified url points to is bigger than
 	 * the specified download treshhold.
-	 * 
+	 *
 	 * The download treshhold is a value up to which Grisu automatically
 	 * downloads files into the local cache (for file preview purposes), without
 	 * asking the user.
-	 * 
+	 *
 	 * @param url
 	 *            the url
 	 * @return whether the file associated with the specified url is bigger than
@@ -1343,7 +1344,7 @@ public class FileManager {
 
 	/**
 	 * Checks whether the specified url or path is a file or folder.
-	 * 
+	 *
 	 * @param file
 	 *            the file url or path
 	 * @return whether url is file (true)
@@ -1367,7 +1368,7 @@ public class FileManager {
 
 	/**
 	 * Checks whether the specified url or path is a folder.
-	 * 
+	 *
 	 * @param file
 	 *            the file url or path
 	 * @return whether url is folder (true)
@@ -1392,10 +1393,10 @@ public class FileManager {
 	/**
 	 * Returns a list of urls of all files that sit under the folder specified,
 	 * including all sub-folders.
-	 * 
+	 *
 	 * This method can take quite a while to execute, depending how many
 	 * sub-folder the folder has.
-	 * 
+	 *
 	 * @param folderUrl
 	 *            the url of the folder
 	 * @return a list of children file urls
@@ -1418,9 +1419,9 @@ public class FileManager {
 
 	/**
 	 * Returns the children of the specified folder.
-	 * 
+	 *
 	 * Uses the local cache.
-	 * 
+	 *
 	 * @param parent
 	 *            the folder to list
 	 * @param forceRefresh
@@ -1449,7 +1450,7 @@ public class FileManager {
 
 	/**
 	 * Returns the children of the specified folder.
-	 * 
+	 *
 	 * @param parent
 	 *            the folder to list
 	 * @param forceRefresh
@@ -1478,9 +1479,9 @@ public class FileManager {
 
 	/**
 	 * Returns the children of the specified folder.
-	 * 
+	 *
 	 * Doesn't force a refresh (means: uses cache)
-	 * 
+	 *
 	 * @param url
 	 *            the url of the folder to list
 	 * @return the children of the folder
@@ -1493,7 +1494,7 @@ public class FileManager {
 
 	/**
 	 * Returns the children of the specified folder.
-	 * 
+	 *
 	 * @param url
 	 *            the url of the folder to list
 	 *            @param forceRefresh whether to use the file listing cache (false) or not (true)
@@ -1508,10 +1509,10 @@ public class FileManager {
 	/**
 	 * Returns a filesystem structure of a configurable level below a specified
 	 * root folder url.
-	 * 
+	 *
 	 * Be aware, values of more than 1 recursion levels are probably not
 	 * supported by most filesystem plugins yet.
-	 * 
+	 *
 	 * @param url
 	 *            the url of the root folder
 	 * @param forceRefresh
@@ -1568,7 +1569,7 @@ public class FileManager {
 
 	/**
 	 * Checks whether the specified url is in the local cache and up to date.
-	 * 
+	 *
 	 * @param url
 	 *            the url
 	 * @return whether the local cache file exists and is up to date (false) or
@@ -1624,7 +1625,7 @@ public class FileManager {
 
 	/**
 	 * Uploads a file to the specified target url.
-	 * 
+	 *
 	 * @param file
 	 *            the source file object
 	 * @param targetFile
@@ -1727,7 +1728,7 @@ public class FileManager {
 	/**
 	 * Uploads a file to the backend which forwards it to it's target
 	 * destination.
-	 * 
+	 *
 	 * @param file
 	 *            the source file
 	 * @param sourcePath
@@ -1760,7 +1761,7 @@ public class FileManager {
 
 	/**
 	 * Uploads a folder recursively into a target directory.
-	 * 
+	 *
 	 * @param folder
 	 *            the source folder
 	 * @param targetDirectory
@@ -2076,7 +2077,7 @@ public class FileManager {
 	/**
 	 * Uploads input file for an already created (but not submitted) job on the
 	 * backend.
-	 * 
+	 *
 	 * @param job
 	 *            the name of the job
 	 * @param uriOrPath
@@ -2121,7 +2122,7 @@ public class FileManager {
 	/**
 	 * Uploads a file to the backend which forwards it to it's target
 	 * destination.
-	 * 
+	 *
 	 * @param uriOrPath
 	 *            the path to the local file
 	 * @param targetDirectory
@@ -2200,7 +2201,7 @@ public class FileManager {
 	/**
 	 * Checks whether an up to date replica of a remote file exists in the local
 	 * cache or not.
-	 * 
+	 *
 	 * @param url
 	 *            the remote file url (for local files this will always return
 	 *            true)

@@ -1,14 +1,13 @@
 package grisu.backend.model;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import grisu.model.MountPoint;
 import grisu.model.info.dto.Directory;
 import grisu.model.info.dto.FileSystem;
 
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class UserInfoManager {
 
