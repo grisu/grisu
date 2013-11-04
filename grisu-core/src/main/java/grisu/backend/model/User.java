@@ -318,7 +318,7 @@ public class User {
 		}
 
 		final Map<String, String> properties = new HashMap<String, String>();
-		boolean userDnPath = Directory.isShared(dir);
+		boolean isShared = Directory.isShared(dir);
 		if (StringUtils.isNotBlank(propString)) {
 
 			final String[] parts = propString.split(";");
@@ -361,14 +361,14 @@ public class User {
 			alias = properties.get(MountPoint.ALIAS_KEY);
 
 			try {
-				userDnPath = Boolean.parseBoolean(properties
+				isShared = Boolean.parseBoolean(properties
 						.get(MountPoint.USER_SUBDIR_KEY));
 			} catch (final Exception e) {
 				// that's ok
 				myLogger.debug("Could not find or parse"
 						+ MountPoint.USER_SUBDIR_KEY
 						+ " key. Using user subdirs..");
-				userDnPath = true;
+				isShared = true;
 			}
 
 		}
@@ -410,7 +410,7 @@ public class User {
 			try {
 				url = getFileSystemHomeDirectory(server,
 						fqan) + "/.globus/scratch";
-				userDnPath = false;
+				isShared = false;
 			} catch (final Exception e) {
 				// myLogger.error(e.getLocalizedMessage(), e);
 				throw e;
@@ -430,82 +430,82 @@ public class User {
 
 		// add dn dir if necessary
 
-		if (userDnPath) {
-            String temp = FileManager.removeDoubleSlashes("/" + NAME_CALCULATOR.getSubfolderName(getCredential()));
-			url = FileManager.removeTrailingSlash(url) + temp;
-
-			// try to connect to filesystem in background and store in database
-			// if not successful, so next time won't be tried again...
-			if (executor != null) {
-
-				final String urlTemp = url;
-				final Thread t = new Thread() {
-					@Override
-					public void run() {
-						final String key = urlTemp + fqan;
-						try {
-							// try to create the dir if it doesn't exist
-
-							// checking whether subfolder exists
-							if (StringUtils.isNotBlank(getMountPointCache()
-									.get(key)) && !NOT_ACCESSIBLE.equals(key)) {
-								// exists apparently, don't need to create
-								// folder...
-								return;
-							}
-
-							if (NOT_ACCESSIBLE.equals(key)) {
-								myLogger.debug(getDn()
-										+ ": FS cache indicates that url "
-										+ urlTemp
-										+ " / "
-										+ fqan
-										+ "is not accessible. Clear FS cache if you think that has changed.");
-								return;
-							}
-							// myLogger.debug("Did not find "
-							// + urlTemp
-							// + "in cache, trying to access/create folder...");
-							final boolean exists = getFileManager()
-									.fileExists(urlTemp);
-							if (!exists) {
-								myLogger.debug("Mountpoint does not exist. Trying to create non-exitent folder: "
-										+ urlTemp);
-								getFileManager().createFolder(urlTemp);
-								// } else {
-								// myLogger.debug("MountPoint " + urlTemp
-								// + " exists.");
-							}
-
-							getMountPointCache().put(key, ACCESSIBLE);
-
-						} catch (final Exception e) {
-							myLogger.error("Could not create folder: "
-									+ urlTemp, e);
-
-							if (ENABLE_FILESYSTEM_CACHE) {
-								getMountPointCache().put(key, NOT_ACCESSIBLE);
-							}
-
-						} finally {
-							if (ENABLE_FILESYSTEM_CACHE) {
-								try {
-									userdao.saveOrUpdate(User.this);
-								} catch (final Exception e) {
-									myLogger.debug("Could not save filesystem state for fs "
-											+ urlTemp
-											+ ": "
-											+ e.getLocalizedMessage());
-								}
-							}
-						}
-					}
-				};
-
-				executor.execute(t);
-			}
-
-		}
+//		if (userDnPath) {
+//            String temp = FileManager.removeDoubleSlashes("/" + NAME_CALCULATOR.getSubfolderName(getCredential()));
+//			url = FileManager.removeTrailingSlash(url) + temp;
+//
+//			// try to connect to filesystem in background and store in database
+//			// if not successful, so next time won't be tried again...
+//			if (executor != null) {
+//
+//				final String urlTemp = url;
+//				final Thread t = new Thread() {
+//					@Override
+//					public void run() {
+//						final String key = urlTemp + fqan;
+//						try {
+//							// try to create the dir if it doesn't exist
+//
+//							// checking whether subfolder exists
+//							if (StringUtils.isNotBlank(getMountPointCache()
+//									.get(key)) && !NOT_ACCESSIBLE.equals(key)) {
+//								// exists apparently, don't need to create
+//								// folder...
+//								return;
+//							}
+//
+//							if (NOT_ACCESSIBLE.equals(key)) {
+//								myLogger.debug(getDn()
+//										+ ": FS cache indicates that url "
+//										+ urlTemp
+//										+ " / "
+//										+ fqan
+//										+ "is not accessible. Clear FS cache if you think that has changed.");
+//								return;
+//							}
+//							// myLogger.debug("Did not find "
+//							// + urlTemp
+//							// + "in cache, trying to access/create folder...");
+//							final boolean exists = getFileManager()
+//									.fileExists(urlTemp);
+//							if (!exists) {
+//								myLogger.debug("Mountpoint does not exist. Trying to create non-exitent folder: "
+//										+ urlTemp);
+//								getFileManager().createFolder(urlTemp);
+//								// } else {
+//								// myLogger.debug("MountPoint " + urlTemp
+//								// + " exists.");
+//							}
+//
+//							getMountPointCache().put(key, ACCESSIBLE);
+//
+//						} catch (final Exception e) {
+//							myLogger.error("Could not create folder: "
+//									+ urlTemp, e);
+//
+//							if (ENABLE_FILESYSTEM_CACHE) {
+//								getMountPointCache().put(key, NOT_ACCESSIBLE);
+//							}
+//
+//						} finally {
+//							if (ENABLE_FILESYSTEM_CACHE) {
+//								try {
+//									userdao.saveOrUpdate(User.this);
+//								} catch (final Exception e) {
+//									myLogger.debug("Could not save filesystem state for fs "
+//											+ urlTemp
+//											+ ": "
+//											+ e.getLocalizedMessage());
+//								}
+//							}
+//						}
+//					}
+//				};
+//
+//				executor.execute(t);
+//			}
+//
+//		}
 
 		MountPoint mp = null;
 
@@ -521,6 +521,8 @@ public class User {
 
 		final boolean isVolatile = Directory.isVolatileDirectory(dir);
 		mp.setVolatileFileSystem(isVolatile);
+
+        mp.setShared(isShared);
 
 		return mp;
 
