@@ -530,10 +530,16 @@ public class GrisuJob extends JobDescription implements
         if (compressOutputFiles) {
 
             String existingEpilog = getEnvironmentVariables().get("EPILOG");
+            String command = "zip -qrD9 " + OUTPUTFILES_ZIP_NAME + " * -x nul";
+            if (compressInputFiles) {
+                // create a differential zip instead of including all input files as well
+                command = "zip -qrD9 " + INPUTFILES_ZIP_NAME + " . -DF --out "+OUTPUTFILES_ZIP_NAME+" -x nul";
+            }
+
             if (StringUtils.isNotBlank(existingEpilog)) {
-                existingEpilog = existingEpilog + "; zip -qrD9 " + OUTPUTFILES_ZIP_NAME + " * -x nul";
+                existingEpilog = existingEpilog + "; "+command;
             } else {
-                existingEpilog = "zip -qrD9 " + OUTPUTFILES_ZIP_NAME + " * -x nu";
+                existingEpilog = command;
             }
             addEnvironmentVariable("EPILOG", existingEpilog);
         }
