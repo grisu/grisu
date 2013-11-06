@@ -306,6 +306,8 @@ public class RunningJobManagerImpl implements RunningJobManager {
                         try {
                             myLogger.debug("Refreshing job: " + job.getJobname());
                             job.getStatus(true);
+                        } catch (Exception e) {
+                            myLogger.debug("Refreshing job {} failed: {}", job.getJobname(), e.getLocalizedMessage());
                         } finally {
                             jobsToUpdate.remove(job);
                         }

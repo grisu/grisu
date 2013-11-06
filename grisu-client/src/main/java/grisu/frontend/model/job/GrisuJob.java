@@ -55,7 +55,7 @@ public class GrisuJob extends JobDescription implements
             .getName());
 
     public static final String INPUTFILES_ZIP_NAME = "inputfiles.zip";
-    public static final String OUTPUTFILES_ZIP_NAME = "output.zip";
+    public static final String OUTPUTFILES_ZIP_NAME = "results.zip";
 
 
     public static GrisuJob createJobObject(ServiceInterface si,

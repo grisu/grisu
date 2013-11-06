@@ -190,7 +190,7 @@ public final class ClientPropertiesManager {
 
 		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return false;
+			return true;
 		}
 
 		return compress;
@@ -206,7 +206,7 @@ public final class ClientPropertiesManager {
 
 		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
-			return false;
+			return true;
 		}
 
 		return compress;
