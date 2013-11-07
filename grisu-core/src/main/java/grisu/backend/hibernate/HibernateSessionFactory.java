@@ -8,16 +8,15 @@ import grisu.model.MountPoint;
 import grisu.model.job.JobDescription;
 import grisu.settings.Environment;
 import grisu.settings.ServerPropertiesManager;
-
-import java.io.File;
-import java.net.InetAddress;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.derby.drda.NetworkServerControl;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.InetAddress;
 
 public final class HibernateSessionFactory {
 
@@ -257,6 +256,7 @@ public final class HibernateSessionFactory {
 			configuration.addAnnotatedClass(BatchJob.class);
 			configuration.addAnnotatedClass(MountPoint.class);
 			configuration.addAnnotatedClass(JobDescription.class);
+//            configuration.addAnnotatedClass(DtoMessage.class);
 			// configuration.addAnnotatedClass(DtoActionStatus.class);
 
 			sessionFactory = configuration.buildSessionFactory();

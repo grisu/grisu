@@ -1,5 +1,6 @@
 package grisu.backend.model;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -24,6 +25,7 @@ import grisu.jcommons.utils.FqanHelpers;
 import grisu.model.FileManager;
 import grisu.model.MountPoint;
 import grisu.model.dto.DtoActionStatus;
+import grisu.model.dto.DtoMessage;
 import grisu.model.dto.GridFile;
 import grisu.model.info.dto.Directory;
 import grisu.model.info.dto.VO;
@@ -200,13 +202,21 @@ public class User {
 	private Map<String, JobDescription> jobTemplates = new HashMap<String, JobDescription>();
 	private UserFileManager fsm;
 
+    private List<DtoMessage> messages = Lists.newArrayList();
+
 	// private final InformationManager infoManager;
 
 	// private final MatchMaker matchmaker;
 
 	private UserBatchJobManager batchjobmanager = null;
 
+    public void addMessage(DtoMessage msg) {
+        getMessages().add(msg);
+    }
 
+    public void removeMessage(DtoMessage msg) {
+        getMessages().remove(msg);
+    }
 	// for hibernate
 	public User() {
 		// this.infoManager = AbstractServiceInterface.informationManager;
@@ -1223,10 +1233,15 @@ public class User {
 		return jobmanager;
 	}
 
-	@ElementCollection
-	public Map<String, JobDescription> getJobTemplates() {
-		return jobTemplates;
-	}
+    @Transient
+    public List<DtoMessage> getMessages() {
+        return messages;
+    }
+
+//	@ElementCollection
+//	public Map<String, JobDescription> getJobTemplates() {
+//		return jobTemplates;
+//	}
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Column(length = 400)
@@ -1374,7 +1389,7 @@ public class User {
 
 	/**
 	 * Gets a map of this users properties. These properties can be used to
-	 * store anything you can think of. Usful for history and such.
+	 * store anything you can think of. Useful for history and such.
 	 *
 	 * @return the users' properties
 	 */
@@ -1564,6 +1579,10 @@ public class User {
 	private void setArchiveLocations(final Map<String, String> al) {
 		this.archiveLocations = al;
 	}
+
+    private void setMessages(List<DtoMessage> messages) {
+        this.messages = messages;
+    }
 
 	/**
 	 * Set's additional mountpoints that the user did not explicitly mount

@@ -2,6 +2,7 @@ package grisu.model.dto;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,8 +12,21 @@ import java.util.List;
  * @author Markus Binsteiner
  *
  */
-@XmlRootElement(name = "datalocations")
+@XmlRootElement(name = "messages")
 public class DtoMessages {
+
+
+    public static DtoMessages createDtoMessages(Collection<DtoMessage> messages) {
+
+        DtoMessages result = new DtoMessages();
+        if ( messages == null ) {
+            return result;
+        }
+        for ( DtoMessage m : messages ) {
+            result.addMessage(m);
+        }
+        return result;
+    }
 
 
 	/**
@@ -20,7 +34,7 @@ public class DtoMessages {
 	 */
 	private List<DtoMessage> messages = new LinkedList<DtoMessage>();
 
-	@XmlElement(name = "datalocation")
+	@XmlElement(name = "messages")
 	public List<DtoMessage> getMessages() {
 		return messages;
 	}
