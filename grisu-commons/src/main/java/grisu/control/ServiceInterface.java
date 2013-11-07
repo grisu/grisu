@@ -1297,15 +1297,6 @@ public interface ServiceInterface {
 	String submitJob(@PathParam("jobname") String jobname)
 			throws JobSubmissionException, NoSuchJobException;
 
-	/**
-	 * Submit a support request to the default person.
-	 *
-	 * @param subject
-	 *            a short summary of the problem
-	 * @param description
-	 *            the description of the problem
-	 */
-	void submitSupportRequest(String subject, String description);
 
 	/**
 	 * Unmounts a filesystem.
@@ -1352,7 +1343,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	@Path("/support/upload")
 	@Produces("text/plain")
-	String requestSupport(String title, String message, @XmlMimeType("application/octet-stream") DataHandler file);
+	String requestSupport(@QueryParam("title") String title, @QueryParam("message")String message, @XmlMimeType("application/octet-stream") DataHandler file);
 
     /**
      * Returns all messages for this user.
@@ -1391,7 +1382,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	@Path("/support/messages/send")
 	@Produces("text/plain")
-    String sendMessage(DtoStringList users, DtoMessage message);
+    String sendMessage(@QueryParam("users") DtoStringList users, @QueryParam("message") DtoMessage message);
 
     /**
      * Uploads a file to be shared later.
@@ -1404,7 +1395,7 @@ public interface ServiceInterface {
 	@RolesAllowed("User")
 	@Path("/files/shared/upload")
 	@Produces("text/plain")
-	String uploadSharedFile(@XmlMimeType("application/octet-stream") DataHandler file, DtoStringList allowedUsers);
+	String uploadSharedFile(@XmlMimeType("application/octet-stream") DataHandler file, @QueryParam("users") DtoStringList allowedUsers);
 
 	/**
 	 * Uploads input file for job or distributes an input file to all the
