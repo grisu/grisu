@@ -44,6 +44,8 @@ import org.w3c.dom.Document;
 
 import javax.activation.DataHandler;
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.*;
+import javax.xml.bind.annotation.XmlMimeType;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.URL;
@@ -57,15 +59,15 @@ import java.util.*;
  * specific. Currently there are two classes that extend this abstract class:
  * {@link LocalServiceInterface} and WsServiceInterface (which can be found in
  * the grisu-ws module).
- * 
+ *
  * The {@link LocalServiceInterface} is used to work with a small local database
  * like hsqldb so a user has got the whole grisu framework on his desktop. Of
  * course, all required ports have to be open from the desktop to the grid. On
  * the other hand no web service server is required.
- * 
+ *
  * The WsServiceInterface is the main one and it is used to set up a web service
  * somewhere. So light-weight clients can talk to it.
- * 
+ *
  * @author Markus Binsteiner
  */
 public abstract class AbstractServiceInterface implements ServiceInterface {
@@ -126,10 +128,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 		try {
 //			LocalTemplatesHelper.copyTemplatesAndMaybeGlobusFolder();
 			LocalTemplatesHelper.prepareTemplates();
-			
+
 
 			//String[] vos = ServerPropertiesManager.getVOsToUse();
-			
+
 			AbstractCred.DEFAULT_VO_MANAGER = new VOManager(informationManager);
 
 			Set<VO> vos = informationManager.getAllVOs();
@@ -296,7 +298,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#addJobProperties(java.lang.String ,
 	 * java.util.Map)
 	 */
@@ -308,7 +310,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#addJobProperty(java.lang.String,
 	 * java.lang.String, java.lang.String)
 	 */
@@ -398,7 +400,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#cp(java.lang.String,
 	 * java.lang.String, boolean, boolean)
 	 */
@@ -488,10 +490,10 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/**
 	 * Creates a multipartjob on the server.
-	 * 
+	 *
 	 * A multipartjob is just a collection of jobs that belong together to make
 	 * them more easily managable.
-	 * 
+	 *
 	 * @param batchJobnameBase
 	 *            the id (name) of the multipartjob
 	 * @throws JobPropertiesException
@@ -582,7 +584,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#deleteFile(java.lang.String)
 	 */
 	public String deleteFile(final String file)
@@ -594,7 +596,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#deleteFiles(java.lang.String[])
 	 */
 	public String deleteFiles(final DtoStringList files) {
@@ -605,7 +607,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#df()
 	 */
 	public synchronized DtoMountPoints df() {
@@ -718,7 +720,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#ps()
 	 */
 	public DtoJobs getActiveJobs(String application, boolean refresh) {
@@ -748,7 +750,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getAllAvailableApplications(java
 	 * .lang.String[])
 	 */
@@ -805,7 +807,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getAllSubmissionLocations()
 	 */
 	public synchronized Queue[] getAllSubmissionLocations() {
@@ -823,7 +825,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getAllSubmissionLocations(java
 	 * .lang.String)
 	 */
@@ -842,7 +844,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getApplicationDetails(java.lang
 	 * .String, java.lang.String, java.lang.String)
 	 */
@@ -900,7 +902,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/**
 	 * Returns all multipart jobs for this user.
-	 * 
+	 *
 	 * @return all the multipartjobs of the user
 	 */
 	public DtoBatchJob getBatchJob(String batchJobname)
@@ -957,7 +959,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * Calculates the default version of an application on a site. This is
 	 * pretty hard to do, so, if you call this method, don't expect anything
 	 * that makes 100% sense, I'm afraid.
-	 * 
+	 *
 	 * @param application
 	 *            the name of the application
 	 * @param site
@@ -989,7 +991,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getDN()
 	 */
 	@RolesAllowed("User")
@@ -1003,7 +1005,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getFileSize(java.lang.String)
 	 */
 	public long getFileSize(final String file) throws RemoteFileSystemException {
@@ -1013,7 +1015,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getFqans()
 	 */
 	public DtoStringList getFqans() {
@@ -1102,7 +1104,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getAllJobProperties(java.lang
 	 * .String)
 	 */
@@ -1124,7 +1126,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getJobProperty(java.lang.String,
 	 * java.lang.String)
 	 */
@@ -1149,7 +1151,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getJobStatus(java.lang.String)
 	 */
 	public int getJobStatus(final String jobname) {
@@ -1177,7 +1179,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getMessagesSince(java.util.Date)
 	 */
 	public Document getMessagesSince(final Date date) {
@@ -1188,7 +1190,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getMountPointForUri(java.lang
 	 * .String)
 	 */
@@ -1246,7 +1248,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seeorg.vpac.grisu.control.ServiceInterface#
 	 * getStagingFileSystemForSubmissionLocation(java.lang.String)
 	 */
@@ -1263,7 +1265,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String)
 	 */
@@ -1285,7 +1287,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getSubmissionLocationsForApplication
 	 * (java.lang.String, java.lang.String)
 	 */
@@ -1343,7 +1345,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	/**
 	 * Gets the user of the current session. Also connects the default
 	 * credential to it.
-	 * 
+	 *
 	 * @return the user or null if user could not be created
 	 * @throws NoValidCredentialException
 	 *             if no valid credential could be found to create the user
@@ -1373,7 +1375,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#getUserProperty(java.lang.String)
 	 */
 	public String getUserProperty(final String key) {
@@ -1398,7 +1400,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#isFolder(java.lang.String)
 	 */
 	public boolean isFolder(final String file) throws RemoteFileSystemException {
@@ -1416,7 +1418,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 	 * Tests whether the provided String is a valid submissionLocation. All this
 	 * does at the moment is to check whether there is a ":" within the string,
 	 * so don't depend with your life on the answer to this question...
-	 * 
+	 *
 	 * @param submissionLocation
 	 *            the submission location
 	 * @return whether the string is a submission location or not
@@ -1442,7 +1444,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#lastModified(java.lang.String)
 	 */
 	public long lastModified(final String url) throws RemoteFileSystemException {
@@ -1471,7 +1473,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#mkdir(java.lang.String)
 	 */
 	public boolean mkdir(final String url) throws RemoteFileSystemException {
@@ -1561,7 +1563,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#submitSupportRequest(java.lang
 	 * .String, java.lang.String)
 	 */
@@ -1573,7 +1575,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#umount(java.lang.String)
 	 */
 	public void umount(final String mountpoint) {
@@ -1586,7 +1588,7 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see grisu.control.ServiceInterface#upload(javax.activation.DataSource ,
 	 * java.lang.String)
 	 */
@@ -1603,6 +1605,33 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 		getJobManager().uploadInputFile(jobname, inputFile, relativePath);
 	}
+
+
+    public String requestSupport(String title, String message, DataHandler file) {
+        return "n/a";
+    }
+
+    public DtoMessages getMessages() {
+        return null;
+    }
+
+    public void removeMessage(@PathParam("title") String title) {
+    }
+
+    public DataHandler downloadSharedFile(@PathParam("token") String token)
+            throws RemoteFileSystemException {
+        return null;
+    }
+
+
+    public String sendMessage(DtoStringList users, DtoMessage message) {
+        return "n/a";
+    }
+
+
+    public String uploadSharedFile(@XmlMimeType("application/octet-stream") DataHandler file, DtoStringList allowedUsers) {
+        return "n/a";
+    }
 
 
 }

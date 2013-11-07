@@ -9,12 +9,7 @@ import grisu.control.exceptions.NoValidCredentialException;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.jcommons.constants.Constants;
 import grisu.model.MountPoint;
-import grisu.model.dto.DtoActionStatus;
-import grisu.model.dto.DtoBatchJob;
-import grisu.model.dto.DtoJob;
-import grisu.model.dto.DtoJobs;
-import grisu.model.dto.DtoMountPoints;
-import grisu.model.dto.GridFile;
+import grisu.model.dto.*;
 import grisu.model.info.dto.Application;
 import grisu.model.info.dto.DtoProperties;
 import grisu.model.info.dto.DtoStringList;
@@ -47,9 +42,9 @@ import javax.xml.bind.annotation.XmlMimeType;
  * This is the central interface of grisu. These are the methods the web service
  * provices for the clients to access. I tried to keep the number of methods as
  * small as possible but I'm sure I'll have to add a few methods in the future.
- * 
+ *
  * @author Markus Binsteiner
- * 
+ *
  */
 
 @WebService(targetNamespace = "http://api.grisu", serviceName = "GrisuService")
@@ -69,10 +64,10 @@ public interface ServiceInterface {
 
     /**
 	 * Adds an archive location.
-	 * 
+	 *
 	 * @param alias
 	 *            the alias of the archive location
-	 * 
+	 *
 	 * @param value
 	 *            the url of the archive location (or null to delete an existing
 	 *            one)
@@ -85,10 +80,10 @@ public interface ServiceInterface {
 
 	/**
 	 * Adds a bookmarks.
-	 * 
+	 *
 	 * @param alias
 	 *            the alias of the bookmark
-	 * 
+	 *
 	 * @param value
 	 *            the url of the bookmark (or null to delete an existing one)
 	 */
@@ -100,7 +95,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Adds multiple job propeties in one go.
-	 * 
+	 *
 	 * @param jobname
 	 *            the name of the job
 	 * @param properties
@@ -120,7 +115,7 @@ public interface ServiceInterface {
 	 * after the job is finished. For example the name of an output directory
 	 * that is stored in one of the input files. That way you don't have to
 	 * download the input file again and parse it.
-	 * 
+	 *
 	 * @param jobname
 	 *            the name of the job
 	 * @param key
@@ -139,12 +134,12 @@ public interface ServiceInterface {
 
 	/**
 	 * Adds the specified job to the mulitpartJob.
-	 * 
+	 *
 	 * @param batchjobname
 	 *            the batchjobname
 	 * @param jobdescription
 	 *            the jsdl string
-	 * 
+	 *
 	 * @return the new child-job name
 	 */
 	@POST
@@ -157,7 +152,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Admin method for stuff like reloading config, vos and such...
-	 * 
+	 *
 	 * @param command
 	 *            the command
 	 * @param config
@@ -168,18 +163,18 @@ public interface ServiceInterface {
 
 	/**
 	 * Archives this job to the specified url and deletes it from the database.
-	 * 
+	 *
 	 * If target is null, the user property
 	 * {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} is used. This operation
 	 * will be executed in the background, you can query its status using the
 	 * {@link #getActionStatus(String)} using the return value as handle.
-	 * 
+	 *
 	 * The default {@link Constants#DEFAULT_JOB_ARCHIVE_LOCATION} can be set via
 	 * the {@link #setUserProperty(String, String)} method, you can use the same
 	 * method to add more filesystems that should be used to query archived jobs
 	 * by using {@link Constants#JOB_ARCHIVE_LOCATION} as the key. That'll add
 	 * the specified value (format: alias;url) to the list of archive locations.
-	 * 
+	 *
 	 * @param jobname
 	 *            the jobname
 	 * @param target
@@ -206,9 +201,9 @@ public interface ServiceInterface {
 	/**
 	 * Distributes a remote input file to all the filesystems that are used in
 	 * this batchjob.
-	 * 
+	 *
 	 * Use this after you created all jobs for this batchjob.
-	 * 
+	 *
 	 * @param batchJobname
 	 *            the name of the batchjob
 	 * @param inputFile
@@ -230,7 +225,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Copies one file to another location (recursively if it's a directory).
-	 * 
+	 *
 	 * @param source
 	 *            the source file
 	 * @param target
@@ -257,10 +252,10 @@ public interface ServiceInterface {
 
 	/**
 	 * Creates a batchjob on the server.
-	 * 
+	 *
 	 * A batchjob is just a collection of jobs that belong together to make them
 	 * more easily managable.
-	 * 
+	 *
 	 * @param batchJobname
 	 *            the id (name) of the batchjob
 	 * @param fqan
@@ -285,7 +280,7 @@ public interface ServiceInterface {
 	 * This method calls {@link #createJobUsingMap(Map, String, String)}
 	 * internally with a map of job properties that are extracted from the jsdl
 	 * document.
-	 * 
+	 *
 	 * @param jsdl
 	 *            a jsdl document
 	 * @param fqan
@@ -313,7 +308,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Deletes a remote file.
-	 * 
+	 *
 	 * @param file
 	 *            the file to delete
 	 * @return the handle for the file delete
@@ -328,9 +323,9 @@ public interface ServiceInterface {
 
 	/**
 	 * Deletes a bunch of remote files.
-	 * 
+	 *
 	 * This doesn't throw an exception if the deletion of one file fails.
-	 * 
+	 *
 	 * @param files
 	 *            the files to delete
 	 * @return a handle for the file deletion actionstatus
@@ -343,7 +338,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Lists all the mountpoints of the user's virtual filesystem.
-	 * 
+	 *
 	 * @return all the MountPoints
 	 */
 	@GET
@@ -353,7 +348,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Download a file to the client.
-	 * 
+	 *
 	 * @param url
 	 *            the filename of the file either absolute or "user-space" url
 	 * @return the data
@@ -370,7 +365,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Checks whether the specified file/folder exists.
-	 * 
+	 *
 	 * @param url
 	 *            the file or folder
 	 * @return true - exists, false - doesn't exist
@@ -390,7 +385,7 @@ public interface ServiceInterface {
 	/**
 	 * Takes job properties and returns a list of queues along with information
 	 * how well (or if at all) the specified job would run on each queue.
-	 * 
+	 *
 	 * @param jobProperties
 	 *            the job
 	 * @param fqan
@@ -407,7 +402,7 @@ public interface ServiceInterface {
 	/**
 	 * Takes a job properties and returns a list of submission locations that
 	 * match the requirements.
-	 * 
+	 *
 	 * @param jobProperties
 	 *            the job Properties (have alook at the
 	 *            {@link EnunciateServiceInterface} interface for supported
@@ -417,7 +412,7 @@ public interface ServiceInterface {
 	 * @param include
 	 *            whether to include Queues for that fqan but don't fit one or
 	 *            more of the job properties
-	 * 
+	 *
 	 * @return a list of matching submissionLoctations
 	 */
 	@GET
@@ -429,10 +424,10 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the current status of an ongoing action.
-	 * 
+	 *
 	 * This is not stored in the database, so you can only access a status for
 	 * an action that was created in the same session.
-	 * 
+	 *
 	 * @param actionHandle
 	 *            the (unique) handle of the action (e.g. the jobname or target
 	 *            url)
@@ -446,14 +441,14 @@ public interface ServiceInterface {
 	/**
 	 * Returns a list of all the current (non-archived) jobs of the user with
 	 * details about the jobs.
-	 * 
+	 *
 	 * @param application
 	 *            filter by application or {@link Constants#ALLJOBS_KEY}/null
 	 *            (for all jobs)
 	 * @param refreshJobStatus
 	 *            whether to refresh the status of all the jobs. This can take
 	 *            quite some time.
-	 * 
+	 *
 	 * @return xml formated information about all the users jobs
 	 */
 	@GET
@@ -466,7 +461,7 @@ public interface ServiceInterface {
 	/**
 	 * Returns all applications that are available grid-wide or for a certain
 	 * vo.
-	 * 
+	 *
 	 * @param fqans
 	 *            all the fqans you want to query or null for a grid-wide search
 	 *            (fqan-independent).
@@ -481,7 +476,7 @@ public interface ServiceInterface {
 	/**
 	 * Returns a list of all batch jobnames that are currently stored on this
 	 * backend
-	 * 
+	 *
 	 * @return all batchjobnames
 	 */
 	@RolesAllowed("User")
@@ -494,12 +489,12 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns a list of all jobnames that are currently stored on this backend.
-	 * 
+	 *
 	 * By default it doesn't include batchjobs, but if you specify
 	 * {@link Constants#ALLJOBS_INCL_BATCH_KEY} as parameter, it will return all
 	 * (single-)jobnames. If you specify null or {@link Constants#ALLJOBS_KEY},
 	 * it will return all single jobs excuding childs of batchjobs.
-	 * 
+	 *
 	 * @param application
 	 *            the name of the application of the jobs you are interested or
 	 *            {@link Constants#ALLJOBS_KEY} or null
@@ -515,7 +510,7 @@ public interface ServiceInterface {
 	 * I don't know whether this one should sit on the web service side or the
 	 * client side. Anyway, here it is for now. It tells the client all sites a
 	 * job can be submitted to.
-	 * 
+	 *
 	 * @return all sites
 	 */
 	@GET
@@ -527,7 +522,7 @@ public interface ServiceInterface {
 	 * Queries for all submission locations on the grid. Returns an array of
 	 * Strings in the format: <queuename>:<submissionHost>[#porttype] (porttype
 	 * can be ommitted if it's pbs.
-	 * 
+	 *
 	 * @return all queues grid-wide
 	 */
 	@GET
@@ -538,7 +533,7 @@ public interface ServiceInterface {
 	/**
 	 * Returns all submission locations for this VO. Needed for better
 	 * performance.
-	 * 
+	 *
 	 * @param fqan
 	 *            the VO
 	 * @return all submission locations
@@ -553,7 +548,7 @@ public interface ServiceInterface {
 	 * Returns all the details that are know about this version of the
 	 * application. The return will look something like this: module=namd/2
 	 * executable=/usr/local/bin/namd2 or whatever.
-	 * 
+	 *
 	 * @param application
 	 *            the name of the application
 	 * @param version
@@ -574,11 +569,11 @@ public interface ServiceInterface {
 	/**
 	 * Returns a xml document that contains all the jobs of the user with
 	 * information about the jobs.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param application
 	 *            filter by application or null (for all jobs)
-	 * 
+	 *
 	 * @return xml formated information about all the users jobs
 	 */
 	@GET
@@ -589,10 +584,10 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the users archive locations.
-	 * 
+	 *
 	 * An archive location is an url (along with an alias as the key) where the
 	 * user archived jobs.
-	 * 
+	 *
 	 * @return the archive locations of the current user
 	 */
 	@RolesAllowed("User")
@@ -602,12 +597,12 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the {@link DtoBatchJob} with the specified name.
-	 * 
+	 *
 	 * This method doesn't refresh the jobs that belong to this batchjob. Call
 	 * {@link #refreshBatchJobStatus(String)} and monitor the action status for
 	 * this until it finishes before you retrieve the batchjob if you want an
 	 * up-to-date version of the batchjob.
-	 * 
+	 *
 	 * @return the batchjob
 	 */
 	@RolesAllowed("User")
@@ -618,7 +613,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Gets the users bookmarks
-	 * 
+	 *
 	 * @param alias
 	 */
 	@RolesAllowed("User")
@@ -628,7 +623,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the end time of the credential used.
-	 * 
+	 *
 	 * @return the end time or -1 if the endtime couldn't be determined
 	 */
 	@RolesAllowed("User")
@@ -644,7 +639,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Checks the current certificate and returns its' dn.
-	 * 
+	 *
 	 * @return the dn of the users' certificate
 	 */
 	@GET
@@ -657,7 +652,7 @@ public interface ServiceInterface {
 	 * future version with a more generic method to get file properties.
 	 * Something like public Map<String, String> getFileSize(String[]
 	 * propertyNames)...
-	 * 
+	 *
 	 * @param file
 	 *            the url of the file
 	 * @return the size of the file in bytes
@@ -673,7 +668,7 @@ public interface ServiceInterface {
 	/**
 	 * Returns all fqans of the user for the vo's that are configured on the
 	 * machine where this serviceinterface is hosted.
-	 * 
+	 *
 	 * @return all fqans of the user
 	 */
 	@GET
@@ -684,10 +679,10 @@ public interface ServiceInterface {
 	/**
 	 * Can provide information about the interface (like version, hostname where
 	 * it runs on, load).
-	 * 
+	 *
 	 * Didn't figure out a set of available keys. I would suggest, for now
 	 * implement "VERSION" and "HOSTNAME".
-	 * 
+	 *
 	 * @param key
 	 *            the key
 	 * @return the value
@@ -699,7 +694,7 @@ public interface ServiceInterface {
 
 	/**
 	 * The version of the serviceInterface for this backend.
-	 * 
+	 *
 	 * @return the version
 	 */
 	@GET
@@ -709,9 +704,9 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the job details.
-	 * 
+	 *
 	 * Does not refresh the job status.
-	 * 
+	 *
 	 * @param jobname
 	 *            the name of the job
 	 * @return the job properties
@@ -726,9 +721,9 @@ public interface ServiceInterface {
 
 	/**
 	 * Return the value of a property that is stored along with a job.
-	 * 
+	 *
 	 * The name of the job property keys can be looked up in {@link Constants}.
-	 * 
+	 *
 	 * @param jobname
 	 *            the name of the job
 	 * @param key
@@ -747,7 +742,7 @@ public interface ServiceInterface {
 	 * Method to query the status of a job. The String representation of the
 	 * status can be obtained by calling
 	 * {@link JobConstants#translateStatus(int)}
-	 * 
+	 *
 	 * @param jobname
 	 *            the name of the job to query
 	 * @return the status of the job
@@ -761,7 +756,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the jsdl document that was used to create this job.
-	 * 
+	 *
 	 * @param jobname
 	 *            the name of the job
 	 * @return the jsdl document
@@ -777,7 +772,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the mountpoint that is used to acccess this uri.
-	 * 
+	 *
 	 * @param uri
 	 *            the uri
 	 * @return the mountpoint or null if no mountpoint can be found
@@ -789,7 +784,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the name of the site this host belongs to.
-	 * 
+	 *
 	 * @param host
 	 *            the host
 	 * @return the site
@@ -802,7 +797,7 @@ public interface ServiceInterface {
 	/**
 	 * Returns an array of the gridftp servers for the specified submission
 	 * locations.
-	 * 
+	 *
 	 * @param subLoc
 	 *            the submission location
 	 *            (queuename@cluster:contactstring#jobmanager)
@@ -817,11 +812,11 @@ public interface ServiceInterface {
 	/**
 	 * Returns all sites/queues that support this application. If "null" is
 	 * provided, this method returns all available submission queues.
-	 * 
+	 *
 	 * The format of the output a String for each submission location which
 	 * looks like: <queuename>:<submissionHost>[#porttype] (porttype can be
 	 * ommitted if it's pbs.
-	 * 
+	 *
 	 * @param application
 	 *            the application.
 	 * @return all sites that support this application.
@@ -834,11 +829,11 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns all sites/queues that support this version of this application.
-	 * 
+	 *
 	 * The format of the output a String for each submission location which
 	 * looks like: <queuename>:<submissionHost>[#porttype] (porttype can be
 	 * ommitted if it's pbs.
-	 * 
+	 *
 	 * @param application
 	 *            the application.
 	 * @param version
@@ -855,11 +850,11 @@ public interface ServiceInterface {
 	/**
 	 * Returns all sites/queues that support this version of this application if
 	 * the job is submitted with the specified fqan.
-	 * 
+	 *
 	 * The format of the output a String for each submission location which
 	 * looks like: <queuename>:<submissionHost>[#porttype] (porttype can be
 	 * ommitted if it's pbs.
-	 * 
+	 *
 	 * @param application
 	 *            the application.
 	 * @param version
@@ -895,7 +890,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Gets the template Document for this application.
-	 * 
+	 *
 	 * @param application
 	 *            the name of the application
 	 * @return a jsdl template document
@@ -911,7 +906,7 @@ public interface ServiceInterface {
 	/**
 	 * Returns a list of all applications that are currently used for
 	 * (non-batch-)jobs.
-	 * 
+	 *
 	 * @return the list of applications
 	 */
 	@GET
@@ -927,7 +922,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns a list of all applications that are currently used for batchjobs.
-	 * 
+	 *
 	 * @return the list of applications
 	 */
 	@GET
@@ -937,7 +932,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Gets all the properties stored for the current user.
-	 * 
+	 *
 	 * @return all userproperties
 	 */
 	@RolesAllowed("User")
@@ -949,9 +944,9 @@ public interface ServiceInterface {
 	 * Returns an array of strings that are associated with this key. The
 	 * developer can store all kinds of stuff he wants to associate with the
 	 * user. Might be useful for history and such.
-	 * 
+	 *
 	 * Not yet implemented though.
-	 * 
+	 *
 	 * @param key
 	 *            the key
 	 * @return the value
@@ -964,7 +959,7 @@ public interface ServiceInterface {
 	/**
 	 * Returns an array of the versions of the specified application that a
 	 * submissionlocation supports.
-	 * 
+	 *
 	 * @param application
 	 *            the application
 	 * @param site
@@ -979,7 +974,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Checks whether the specified file is a folder or not.
-	 * 
+	 *
 	 * @param url
 	 *            the file
 	 * @return true - if folder; false - if not
@@ -995,15 +990,15 @@ public interface ServiceInterface {
 	/**
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
 	 * from the database.
-	 * 
+	 *
 	 * Also works with batchjobs.
-	 * 
+	 *
 	 * @param jobname
 	 *            the name of the job
 	 * @param clean
 	 *            whether to clean/delete the jobdirectory if possible
 	 * @return the handle to the kill task
-	 * 
+	 *
 	 * @throws NoSuchJobException
 	 *             if no such job exists
 	 * @throws BatchJobException
@@ -1019,12 +1014,12 @@ public interface ServiceInterface {
 	/**
 	 * Deletes the whole jobdirectory (if specified) and if successful, the job
 	 * from the database.
-	 * 
+	 *
 	 * This one doesn't throw an exception if something goes wrong. Contrary to
 	 * {@link #kill(String, boolean)} this method also accepts bash-style globs
 	 * as a jobname and it'll match that against all existing jobs and
 	 * batchjobs.
-	 * 
+	 *
 	 * @param jobnames
 	 *            a list of jobs to kill
 	 * @param clean
@@ -1039,7 +1034,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Returns the date when the file was last modified.
-	 * 
+	 *
 	 * @param remoteFile
 	 *            the file to check
 	 * @return the last modified date
@@ -1056,7 +1051,7 @@ public interface ServiceInterface {
 	 * Lists all applications that are supported by this deployment of a service
 	 * interface. Basically it's a list of all the application where the service
 	 * interface has got a template jsdl.
-	 * 
+	 *
 	 * @return a list of all applications
 	 */
 	@PermitAll
@@ -1068,7 +1063,7 @@ public interface ServiceInterface {
 //	 * Starts a session. For some service interfaces this could be just a dummy
 //	 * method. Ideally a char[] would be used for the password, but jax-ws
 //	 * doesn't support this.
-//	 * 
+//	 *
 //	 * @param username
 //	 *            the username (probably for myproxy credential)
 //	 * @param password
@@ -1085,7 +1080,7 @@ public interface ServiceInterface {
 	/**
 	 * Logout of the service. Performs housekeeping tasks and usually deletes
 	 * the Credential.
-	 * 
+	 *
 	 * @return a logout message
 	 */
 	@POST
@@ -1094,7 +1089,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Lists the content of the specified directory.
-	 * 
+	 *
 	 * @param directory
 	 *            the directory you want to have a listing of. This has to be an
 	 *            absolute path (either something like: /ngdata_vpac/file.txt or
@@ -1122,7 +1117,7 @@ public interface ServiceInterface {
 	/**
 	 * Creates the specified folder (and it's parent folders if they don't
 	 * exist).
-	 * 
+	 *
 	 * @param folder
 	 *            the url of the folder
 	 * @return true - if the folder has been created successfully, false - if
@@ -1139,11 +1134,11 @@ public interface ServiceInterface {
 	/**
 	 * Tries to figure out the best submission locations for all the jobs that
 	 * this batchpartjob consists of.
-	 * 
+	 *
 	 * Call this after you added all jobs to the batchjob and before you
 	 * upload/crosstage any files. It will overwrite possibly specified
 	 * submission locations on jobs.
-	 * 
+	 *
 	 * @param batchjobname
 	 *            the name of the batchjob
 	 * @throws NoSuchJobException
@@ -1159,10 +1154,10 @@ public interface ServiceInterface {
 
 	/**
 	 * Refreshes the status of all jobs that belong to this batchjob.
-	 * 
+	 *
 	 * This returns immediately. You need to watch the action status if you want
 	 * to know when all sub-jobs are refreshed.
-	 * 
+	 *
 	 * @param batchJobname
 	 *            the name of the batchjob
 	 * @return the action status handle for this. Use
@@ -1178,7 +1173,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Removes the specified job from the batchJob.
-	 * 
+	 *
 	 * @param batchJobname
 	 *            the batchJobname
 	 * @param jobname
@@ -1192,10 +1187,10 @@ public interface ServiceInterface {
 
 	/**
 	 * Restarts a batch job.
-	 * 
+	 *
 	 * Depending on the restart policy and the supplied properties, the backend
 	 * will calculate which jobs to restart and how.
-	 * 
+	 *
 	 * @param batchjobname
 	 *            the batchjobname
 	 * @param restartPolicy
@@ -1223,14 +1218,14 @@ public interface ServiceInterface {
 
 	/**
 	 * Resubmit a job. Kills the old one if it's still running.
-	 * 
+	 *
 	 * This uses the same job properties as the old job. If you want some of the
 	 * properties changed, you need to provide an updated jsdl file. Be aware
 	 * that not all properties can be changed (for example you can't change the
 	 * filesystem the job runs on or the fqan). Have a look at the implemenation
 	 * of this method to find out what can't be changed and what not. Anyway,
 	 * use this with caution and prefer to just submit a new job if possible.
-	 * 
+	 *
 	 * @param jobname
 	 *            the name of the job
 	 * @param changedJsdl
@@ -1249,7 +1244,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Sets a batch of user properties.
-	 * 
+	 *
 	 * @param properties
 	 *            the properties
 	 */
@@ -1287,7 +1282,7 @@ public interface ServiceInterface {
 	 * {@link #createJobUsingMap(Map, String, String)} or
 	 * {@link #createJob(String, String, String)} to the specified submission
 	 * location.
-	 * 
+	 *
 	 * @param jobname
 	 *            the jobname
 	 * @return the handle to check the status of the job submission
@@ -1304,7 +1299,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Submit a support request to the default person.
-	 * 
+	 *
 	 * @param subject
 	 *            a short summary of the problem
 	 * @param description
@@ -1314,7 +1309,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Unmounts a filesystem.
-	 * 
+	 *
 	 * @param mountpoint
 	 *            the mountpoint
 	 * @return whether it worked or not
@@ -1326,7 +1321,7 @@ public interface ServiceInterface {
 
 	/**
 	 * Upload a {@link DataSource} to the users' virtual filesystem.
-	 * 
+	 *
 	 * @param file
 	 *            the (local) file you want to upload
 	 * @param filename
@@ -1344,13 +1339,80 @@ public interface ServiceInterface {
 			@PathParam("filename") String filename)
 					throws RemoteFileSystemException;
 
+
+    /**
+     * Enables the user to send a message (incl. attachment) to request support.
+     *
+     * @param title the title of the message
+     * @param message the message
+     * @param file an (optional) attachment
+     * @return an acknowledgement string
+     */
+    @PUT
+	@RolesAllowed("User")
+	@Path("/support/upload")
+	@Produces("text/plain")
+	String requestSupport(String title, String message, @XmlMimeType("application/octet-stream") DataHandler file);
+
+    /**
+     * Returns all messages for this user.
+     *
+     * @return the messages
+     */
+    @GET
+	@Path("/support/messages")
+	@RolesAllowed("User")
+    DtoMessages getMessages();
+
+    /**
+     * Removes the message with the specified title from the users message queue.
+     *
+     * @param title the title
+     */
+    @DELETE
+    @Path("/support/messages/{title}/remove")
+    void removeMessage(@PathParam("title") String title);
+
+    @XmlMimeType("application/octet-stream")
+	@GET
+	@RolesAllowed("User")
+	@Path("/files/shared/{token}")
+	DataHandler downloadSharedFile(@PathParam("token") String token)
+			throws RemoteFileSystemException;
+
+
+    /**
+     * Sends a message to one or multiple users
+     * @param users the users
+     * @param message the message
+     * @return an acknowledgement
+     */
+    @PUT
+	@RolesAllowed("User")
+	@Path("/support/messages/send")
+	@Produces("text/plain")
+    String sendMessage(DtoStringList users, DtoMessage message);
+
+    /**
+     * Uploads a file to be shared later.
+     *
+     * @param file the file
+     * @param allowedUsers who is allowed to view this file
+     * @return a token
+     */
+    @PUT
+	@RolesAllowed("User")
+	@Path("/files/shared/upload")
+	@Produces("text/plain")
+	String uploadSharedFile(@XmlMimeType("application/octet-stream") DataHandler file, DtoStringList allowedUsers);
+
 	/**
 	 * Uploads input file for job or distributes an input file to all the
 	 * filesystems that are used in a batchjob if job is batchjob.
-	 * 
+	 *
 	 * In case of single job: this gets put in the jobdirectory of the job and
 	 * waits until the copying finished
-	 * 
+	 *
 	 * In case of batchjob: You need to reverence to the input file using
 	 * relative paths in the commandline you specify in the jobs that need this
 	 * inputfile. Use this after you created all jobs for this batchjob. In the
@@ -1358,7 +1420,7 @@ public interface ServiceInterface {
 	 * and you have to monitor the progress using the
 	 * {@link #getActionStatus(String)} method if you want to know when the file
 	 * is copied to all targets.
-	 * 
+	 *
 	 * @param jobname
 	 *            the jobname
 	 * @param inputFile

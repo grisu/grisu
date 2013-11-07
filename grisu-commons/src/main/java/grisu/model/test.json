@@ -1,0 +1,12 @@
+{"id": "sftp.storage.example.com", "name": "Example SFTP Storage Host", "status": "UP", "type": "STORAGE", "description": "My example storage system using SFTP to store data for testing", "site": "example.com", "storage": {
+    "host": "texas.rangers.mlb.com",
+    "port": 22,
+    "protocol": "SFTP",
+    "rootDir": "/",
+    "homeDir": "/home/nryan",
+    "auth": {
+        "username": "nryan",
+        "password": "ba$eb@1L",
+        "type": "PASSWORD"
+    }
+}, "default": false }

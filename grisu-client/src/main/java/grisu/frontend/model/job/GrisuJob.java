@@ -529,6 +529,7 @@ public class GrisuJob extends JobDescription implements
             boolean subLocSupportsPrologEpilog = ri.submissionLocationSupportsPrologEpilog(subLoc);
 
             if ( ! subLocSupportsPrologEpilog ) {
+                myLogger.debug("Location {} does not support prolog/epilog, not compressing input/output files.", subLoc);
                 compressInputFiles = false;
                 compressOutputFiles = false;
             } else {
@@ -538,6 +539,7 @@ public class GrisuJob extends JobDescription implements
                 if ( compressOutputFiles == null ) {
                     compressOutputFiles = ClientPropertiesManager.isCompressOutputFiles();
                 }
+                myLogger.debug("Location {} supports prolog/epilog, using client properties to determine whether to compress input/output files: {}, {}", new Object[]{subLoc, compressInputFiles, compressOutputFiles});
             }
 
         }
