@@ -18,8 +18,12 @@ import grisu.jcommons.constants.Constants;
 import grisu.jcommons.constants.JobSubmissionProperty;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
+import grisu.model.UserEnvironmentManager;
 import grisu.model.dto.DtoJob;
 import grisu.model.dto.GridFile;
+import grisu.model.info.ResourceInformation;
+import grisu.model.info.dto.*;
+import grisu.model.info.dto.Queue;
 import grisu.model.job.JobCreatedProperty;
 import grisu.model.job.JobDescription;
 import grisu.model.status.StatusObject;
@@ -171,8 +175,8 @@ public class GrisuJob extends JobDescription implements
 
     private String description = null;
 
-    private boolean compressInputFiles = ClientPropertiesManager.isCompressInputFiles();
-    private boolean compressOutputFiles = ClientPropertiesManager.isCompressOutputFiles();
+    private Boolean compressInputFiles = null;
+    private Boolean compressOutputFiles = null;
 
     public void setCompressInputFiles(boolean compress_input_files) {
         this.compressInputFiles = compress_input_files;
@@ -449,7 +453,7 @@ public class GrisuJob extends JobDescription implements
      * means the backend will not change the jobname you specified -- if there
      * is a job with that jobname already the backend will throw an exception).
      * <p/>
-     * Also, this method uses teh "none" group ({@link Constants.NON_VO_FQAN})
+     * Also, this method uses the "none" group ({@link Constants.NON_VO_FQAN})
      * <p/>
      * Be aware, that once that is done, you can't change any of the basic job
      * parameters anymore. The backend calculates all the (possibly) missing job
@@ -515,7 +519,30 @@ public class GrisuJob extends JobDescription implements
     public final String createJob(final String fqan,
                                   final String jobnameCreationMethod) throws JobPropertiesException {
 
-        // if we use the compress option, we need to add the uncompressing of the input files to the prolog
+        // checking whether to compress in/outputfiles
+        String subLoc = getSubmissionLocation();
+        if ( StringUtils.isBlank(subLoc)) {
+            compressInputFiles = false;
+            compressOutputFiles = false;
+        } else {
+            ResourceInformation ri = GrisuRegistryManager.getDefault(serviceInterface).getResourceInformation();
+            boolean subLocSupportsPrologEpilog = ri.submissionLocationSupportsPrologEpilog(subLoc);
+
+            if ( ! subLocSupportsPrologEpilog ) {
+                compressInputFiles = false;
+                compressOutputFiles = false;
+            } else {
+                if ( compressInputFiles == null ) {
+                    compressInputFiles = ClientPropertiesManager.isCompressInputFiles();
+                }
+                if ( compressOutputFiles == null ) {
+                    compressOutputFiles = ClientPropertiesManager.isCompressOutputFiles();
+                }
+            }
+
+        }
+
+         // if we use the compress option, we need to add the uncompressing of the input files to the prolog
         if (compressInputFiles) {
 
             String existingProlog = getEnvironmentVariables().get("PROLOG");
