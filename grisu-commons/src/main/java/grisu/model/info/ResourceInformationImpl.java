@@ -301,6 +301,9 @@ public class ResourceInformationImpl implements ResourceInformation {
             return false;
         } else {
             Middleware mw = q.getGateway().getMiddleware();
+            if (mw.getOptions() == null ) {
+                return false;
+            }
             Object value = mw.getOptions().get(Middleware.PROLOG_EPILOG_AVAILABLE);
             if (value != null && value instanceof String) {
                 boolean available = Boolean.parseBoolean((String) value);
