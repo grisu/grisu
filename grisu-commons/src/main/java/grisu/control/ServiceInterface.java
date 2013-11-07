@@ -50,7 +50,7 @@ import javax.xml.bind.annotation.XmlMimeType;
 @WebService(targetNamespace = "http://api.grisu", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	public static final int API_VERSION = 16;
+	public static final int API_VERSION = 17;
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
