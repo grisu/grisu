@@ -1,42 +1,21 @@
 package grisu.control;
 
-import grisu.control.exceptions.BatchJobException;
-import grisu.control.exceptions.JobPropertiesException;
-import grisu.control.exceptions.JobSubmissionException;
-import grisu.control.exceptions.NoSuchJobException;
-import grisu.control.exceptions.NoSuchTemplateException;
-import grisu.control.exceptions.NoValidCredentialException;
-import grisu.control.exceptions.RemoteFileSystemException;
+import grisu.control.exceptions.*;
 import grisu.jcommons.constants.Constants;
 import grisu.model.MountPoint;
 import grisu.model.dto.*;
-import grisu.model.info.dto.Application;
-import grisu.model.info.dto.DtoProperties;
-import grisu.model.info.dto.DtoStringList;
-import grisu.model.info.dto.JobQueueMatch;
+import grisu.model.info.dto.*;
 import grisu.model.info.dto.Package;
-import grisu.model.info.dto.Queue;
-import grisu.model.info.dto.Site;
-import grisu.model.info.dto.Version;
-
-import java.util.List;
-import java.util.Map;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.jws.WebService;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.xml.bind.annotation.XmlMimeType;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This is the central interface of grisu. These are the methods the web service
@@ -50,7 +29,7 @@ import javax.xml.bind.annotation.XmlMimeType;
 @WebService(targetNamespace = "http://api.grisu", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	public static final int API_VERSION = 17;
+	public static final int API_VERSION = 18;
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
@@ -380,6 +359,26 @@ public interface ServiceInterface {
 	boolean fileExists(@PathParam("url") String url)
 			throws RemoteFileSystemException;
 
+
+    /**
+     * Returns all directories for a user.
+     *
+     * @return the directories
+     */
+    @GET
+    @Path("/user/directories")
+    @RolesAllowed("User")
+    List<Directory> getAllDirectoriesForUser();
+
+    /**
+     * Returns all directories grid-wide
+     *
+     * @return the directories
+     */
+    @GET
+    @Path("/files/directories")
+    @RolesAllowed("User")
+    public List<Directory> getAllDirectories();
 
 
 	/**

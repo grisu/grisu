@@ -26,7 +26,7 @@ import java.util.Date;
 
 public class LoginManager {
 
-	public static int REQUIRED_BACKEND_API_VERSION = 17;
+	public static int REQUIRED_BACKEND_API_VERSION = 18;
 	public static final String DEFAULT_BACKEND = "bestgrid";
 	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
 

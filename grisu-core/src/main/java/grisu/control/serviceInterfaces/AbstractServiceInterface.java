@@ -821,6 +821,21 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
         return q.toArray(new Queue[]{});
     }
 
+
+    public List<Directory> getAllDirectories() {
+        return informationManager.getDirectories();
+    }
+
+    public List<Directory> getAllDirectoriesForUser() {
+        Set<Directory> dirs = Sets.newTreeSet();
+        for (String fqan : getFqans().asSortedSet()) {
+            List<Directory> temp = informationManager.getDirectoriesForVO(fqan);
+            dirs.addAll(temp);
+        }
+
+        return new ArrayList<Directory>(dirs);
+    }
+
     /*
      * (non-Javadoc)
      *
