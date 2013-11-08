@@ -1,26 +1,19 @@
 package grisu.frontend.view.swing;
 
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
 import grisu.control.ServiceInterface;
 import grisu.model.FqanEvent;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.UserEnvironmentManager;
-
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.RowSpec;
+import javax.swing.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 public class DefaultFqanChangePanel extends JPanel implements
 EventSubscriber<FqanEvent> {
@@ -94,7 +87,7 @@ EventSubscriber<FqanEvent> {
 
 				externalChange = true;
 
-				final String[] allVOs = uem.getAllAvailableFqans(true);
+				final String[] allVOs = uem.getAllAvailableJobFqans();
 
 				voModel.removeAllElements();
 
