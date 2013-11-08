@@ -85,14 +85,6 @@ public interface UserEnvironmentManager {
 	String[] getAllAvailableFqans(boolean excludeFqansWithNoDataQuota);
 
     /**
-     * Get all queues available for this fqan.
-     *
-     * @param fqan the fqan
-     * @return the queues
-     */
-    Set<Queue> getQueues(String fqan);
-
-    /**
      * Get all fqans that have valid queues associated to them.
      *
      * @return the fqanse

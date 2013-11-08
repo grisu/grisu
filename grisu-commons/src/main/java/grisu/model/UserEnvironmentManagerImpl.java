@@ -228,7 +228,7 @@ EventSubscriber<FqanEvent> {
         if ( cachedJobFqans == null ) {
             final List<String> result = new ArrayList<String>();
 				for (final String fqan : getAllAvailableFqans(true)) {
-                    if (getQueues(fqan).size() > 0) {
+                    if (resourceInfo.getAllAvailableSubmissionLocations(fqan).length > 0) {
 						result.add(fqan);
 					}
 				}
@@ -718,33 +718,6 @@ EventSubscriber<FqanEvent> {
 		}
 	}
 
-
-	public final Set<Queue> getQueues(String fqan) {
-
-		if (fqan == null) {
-			fqan = Constants.NON_VO_FQAN;
-		}
-
-		synchronized (fqan) {
-
-			if (alreadyQueriedQueuesPerFqan.get(fqan) == null) {
-
-				final Set<Queue> queues = new HashSet<Queue>();
-				for (final Queue q : getAllAvailableSubmissionLocations()) {
-
-                    for ( Group g : q.getGroups() ) {
-                        if (fqan.equals(g.getFqan())) {
-                            queues.add(q);
-                            break;
-                        }
-                    }
-
-				}
-				alreadyQueriedQueuesPerFqan.put(fqan, queues);
-			}
-			return alreadyQueriedQueuesPerFqan.get(fqan);
-		}
-	}
 
 	public SortedSet<MountPoint> getMountPointsForSite(String site) {
 

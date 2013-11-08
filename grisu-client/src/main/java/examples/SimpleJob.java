@@ -11,17 +11,17 @@ public class SimpleJob {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		ServiceInterface si = LoginManager.loginCommandline("nesi");
-		
+		ServiceInterface si = LoginManager.loginCommandline("dev");
+
 		GrisuJob j = new GrisuJob(si);
 
-		
+
 		j.setCommandline("env");
 		j.createJob("/nz/nesi");
 
 		j.submitJob();
-				
-		
+
+
 
 	}
 

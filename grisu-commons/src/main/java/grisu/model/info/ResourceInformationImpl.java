@@ -173,7 +173,7 @@ public class ResourceInformationImpl implements ResourceInformation {
                 if (temp == null) {
                     temp = new Queue[]{};
                 }
-                myLogger.debug("Sublocs for {}: " + temp.length);
+                myLogger.debug("Sublocs for {}: ", temp.length);
 
                 cachedAllSubmissionLocationsPerFqan.put(fqan, temp);
             }
