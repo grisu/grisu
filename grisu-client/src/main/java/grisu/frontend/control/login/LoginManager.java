@@ -27,7 +27,7 @@ import java.util.Date;
 public class LoginManager {
 
 	public static int REQUIRED_BACKEND_API_VERSION = 18;
-	public static final String DEFAULT_BACKEND = "bestgrid";
+	public static final String DEFAULT_BACKEND = "default";
 	public static final int DEFAULT_PROXY_LIFETIME_IN_HOURS = 240;
 
 	static final Logger myLogger = LoggerFactory.getLogger(LoginManager.class
@@ -89,6 +89,11 @@ public class LoginManager {
 	}
 
 	public static String getLoginUrl(String alias) {
+
+
+        if ( ClientPropertiesManager.DEFAULT_SERVICE_INTERFACE.equalsIgnoreCase(alias) ) {
+            alias = ClientPropertiesManager.getDefaultBackend();
+        }
 
 		String url = SERVICEALIASES.get(alias.toLowerCase());
 		if (StringUtils.isNotBlank(url)) {

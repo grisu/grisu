@@ -33,8 +33,9 @@ public final class ClientPropertiesManager {
 
     private static final int DEFAULT_FILE_DOWNLOAD_RETRIES = 5;
     private static final int DEFAULT_FILE_DOWNLOAD_RETRY_INTERVAL = 15;
+    public static final String DEFAULT_DEPLOYMENT_BACKEND = "NeSI";
 
-	private static int concurrent_upload_thread_dynamic = -1;
+    private static int concurrent_upload_thread_dynamic = -1;
 
 	private static final int DEFAULT_FILE_DOWNLOAD_THREADS = 1;
 
@@ -54,7 +55,7 @@ public final class ClientPropertiesManager {
 
 	public static final int DEFAULT_TIMEOUT = 0;
 
-	public static final String DEFAULT_SERVICE_INTERFACE = "BeSTGRID";
+	public static final String DEFAULT_SERVICE_INTERFACE = "default";
 
 	private static PropertiesConfiguration config = null;
 
@@ -395,11 +396,32 @@ public final class ClientPropertiesManager {
 			myLogger.debug("Problem with config file: " + e.getMessage());
 		}
 
-		if (StringUtils.isBlank(defaultUrl) || "ARCS".equals(defaultUrl)) {
+		if (StringUtils.isBlank(defaultUrl) || "ARCS".equalsIgnoreCase(defaultUrl) || "bestgrid".equalsIgnoreCase(defaultUrl)) {
 			defaultUrl = DEFAULT_SERVICE_INTERFACE;
 		}
+
 		return defaultUrl;
 	}
+
+    public static String getDefaultBackend() {
+        String defaultAlias = null;
+		try {
+
+			defaultAlias = System.getProperty("DEFAULT_BACKEND");
+			if (StringUtils.isBlank(defaultAlias)) {
+				defaultAlias = getClientConfiguration().getString(
+						"defaultBackend");
+			}
+		} catch (final ConfigurationException e) {
+			myLogger.debug("Problem with config file: " + e.getMessage());
+		}
+
+		if (StringUtils.isBlank(defaultAlias) || "ARCS".equalsIgnoreCase(defaultAlias) ) {
+			defaultAlias = DEFAULT_DEPLOYMENT_BACKEND;
+		}
+
+        return defaultAlias;
+    }
 
 	public static long getDownloadFileSizeTresholdInBytes() {
 
