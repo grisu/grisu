@@ -29,7 +29,7 @@ import java.util.Map;
 @WebService(targetNamespace = "http://api.grisu", serviceName = "GrisuService")
 public interface ServiceInterface {
 
-	public static final int API_VERSION = 18;
+	public static final int API_VERSION = 19;
 
 	public static final String VIRTUAL_GRID_PROTOCOL_NAME = "grid";
 	public static String GRISU_JOB_FILE_NAME = ".grisujob";
@@ -1425,5 +1425,50 @@ public interface ServiceInterface {
 			@XmlMimeType("application/octet-stream") DataHandler inputFile,
 			@QueryParam("relativePath") String relativePath)
 					throws RemoteFileSystemException, NoSuchJobException;
+
+    /**
+     * Not implemented yet.
+     *
+     * @param templateName the name of the template
+     * @param inputFile the zip file containing the job template
+     */
+	@POST
+	@RolesAllowed("User")
+	@Path("/job/templates/{templateName}")
+	void uploadJobTemplate(@PathParam("templateName") String templateName,
+			@XmlMimeType("application/octet-stream") DataHandler inputFile) throws TemplateException;
+
+    /**
+     * Not implemented yet.
+     *
+     * @param templateName the name of the template
+     */
+    @DELETE
+    @RolesAllowed("User")
+    @Path("/job/templates/{templateName}")
+    void deleteJobTemplate(@PathParam("templateName") String templateName);
+
+    /**
+     * Not implemented yet.
+     *
+     * @param templateName the name of the template
+     * @return the properties of this template
+     */
+    @GET
+    @RolesAllowed("User")
+    @Path("/job/templates/{templateName}")
+    DtoProperties getJobTemplateProperties(@PathParam("templateName") String templateName);
+
+    /**
+     * Not implemented yet.
+     *
+     * @param templateName the name of the template
+     * @param properties the properties
+     * @return the name of the newly created job
+     */
+    @POST
+    @RolesAllowed("User")
+    @Path("/job/templates/{templateName}/submit")
+    String submitJobTemplate(@PathParam("templateName") String templateName, @QueryParam("properties") DtoProperties properties);
 
 }

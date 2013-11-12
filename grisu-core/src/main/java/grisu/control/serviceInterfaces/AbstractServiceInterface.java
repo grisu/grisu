@@ -45,6 +45,7 @@ import org.w3c.dom.Document;
 
 import javax.activation.DataHandler;
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.*;
 import javax.xml.bind.annotation.XmlMimeType;
 import java.io.File;
 import java.net.InetAddress;
@@ -1644,6 +1645,25 @@ public abstract class AbstractServiceInterface implements ServiceInterface {
 
 
     public String uploadSharedFile(@XmlMimeType("application/octet-stream") DataHandler file, DtoStringList allowedUsers) {
+        return "n/a";
+    }
+
+
+    public void uploadJobTemplate(@PathParam("templateName") String templateName,
+                           @XmlMimeType("application/octet-stream") DataHandler inputFile) throws TemplateException {
+        //
+    }
+
+
+    public void deleteJobTemplate(@PathParam("templateName") String templateName) {
+        //
+    }
+
+    public DtoProperties getJobTemplateProperties(@PathParam("templateName") String templateName) {
+        return null;
+    }
+
+    public String submitJobTemplate(@PathParam("templateName") String templateName, @QueryParam("properties") DtoProperties properties) {
         return "n/a";
     }
 
