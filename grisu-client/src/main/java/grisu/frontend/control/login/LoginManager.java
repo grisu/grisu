@@ -91,11 +91,17 @@ public class LoginManager {
 	public static String getLoginUrl(String alias) {
 
 
-        if ( ClientPropertiesManager.DEFAULT_SERVICE_INTERFACE.equalsIgnoreCase(alias) ) {
+        if ( ClientPropertiesManager.DEFAULT_DEPLOYMENT_BACKEND.equalsIgnoreCase(alias) ) {
             alias = ClientPropertiesManager.getDefaultBackend();
         }
 
-		String url = SERVICEALIASES.get(alias.toLowerCase());
+        String url = null;
+        if ( ClientPropertiesManager.DEFAULT_SERVICE_INTERFACE.equals(alias) ) {
+            url = SERVICEALIASES.get(ClientPropertiesManager.DEFAULT_DEPLOYMENT_BACKEND.toLowerCase());
+        } else {
+            url = SERVICEALIASES.get(alias.toLowerCase());
+        }
+
 		if (StringUtils.isNotBlank(url)) {
 			return url;
 		} else {

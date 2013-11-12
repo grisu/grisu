@@ -1053,7 +1053,10 @@ public final class ClientPropertiesManager {
 	 *            the url of the ServiceInterface
 	 */
 	public static void setDefaultServiceInterfaceUrl(
-			final String serviceInterfaceUrl) {
+			String serviceInterfaceUrl) {
+        if (DEFAULT_DEPLOYMENT_BACKEND.equals(serviceInterfaceUrl)) {
+            serviceInterfaceUrl = DEFAULT_SERVICE_INTERFACE;
+        }
 		try {
 			getClientConfiguration().setProperty("defaultServiceInterfaceUrl",
 					serviceInterfaceUrl);

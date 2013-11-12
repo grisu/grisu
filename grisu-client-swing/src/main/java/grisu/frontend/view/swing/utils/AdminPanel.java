@@ -148,7 +148,9 @@ public class AdminPanel implements ServiceInterfacePanel {
 
         String message = StringUtils.join(msg, "\n");
 
-        MessageDialog d = new MessageDialog();
+        JDialog owner = (JDialog) SwingUtilities.getWindowAncestor(this.getPanel());
+        JFrame parentFrame = (JFrame) owner.getParent();
+        MessageDialog d = new MessageDialog(parentFrame);
         d.setPreferredSize(new Dimension(550, 600));
         d.setPlainText();
         d.setMessage(message);

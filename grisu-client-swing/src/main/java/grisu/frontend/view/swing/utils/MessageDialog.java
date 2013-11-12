@@ -16,7 +16,11 @@ public class MessageDialog extends JDialog {
     private JButton buttonOK;
     private JEditorPane editorPane1;
 
-    public MessageDialog() {
+    public MessageDialog(JFrame owner) {
+        super(owner);
+        if (owner != null ) {
+             setLocationRelativeTo(owner);
+        }
         setContentPane(contentPane);
         setModal(false);
         getRootPane().setDefaultButton(buttonOK);
@@ -26,6 +30,10 @@ public class MessageDialog extends JDialog {
                 onOK();
             }
         });
+
+    }
+    public MessageDialog() {
+        this(null);
     }
 
     private static String generateHtml(Map<String, String> jobProperties) {
