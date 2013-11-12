@@ -30,7 +30,7 @@ EventSubscriber<FqanEvent> {
 	 */
 	public DefaultFqanChangePanel() {
 		setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("147px"),
-				ColumnSpec.decode("218px"), },
+				ColumnSpec.decode("330px"), },
 				new RowSpec[] { RowSpec.decode("40px"), }));
 
 		final JLabel lblGroup = new JLabel("Submit for group:");
@@ -38,7 +38,7 @@ EventSubscriber<FqanEvent> {
 
 		comboBox = new JComboBox(voModel);
 		comboBox.setEditable(false);
-		comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxx");
+		comboBox.setPrototypeDisplayValue("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 
