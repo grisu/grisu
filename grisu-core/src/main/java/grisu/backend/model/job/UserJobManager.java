@@ -2270,12 +2270,21 @@ public class UserJobManager {
 				.getUrl());
 
 		if (parentJob == null) {
-			workingDirectory = "/"
-					+ mountPointToUse.getRootUrl().substring(
-							stagingFileSystem.length())
-							+ "/"
-							+ ServerPropertiesManager.getRunningJobsDirectoryName()
-							+ "/" + job.getJobname();
+            if (mountPointToUse.isShared()) {
+                workingDirectory = "/"
+                        + mountPointToUse.getRootUrl().substring(
+                        stagingFileSystem.length())
+                        + "/" + User.NAME_CALCULATOR.getSubfolderName(getUser().getCredential())
+                        + "/" + ServerPropertiesManager.getRunningJobsDirectoryName()
+                        + "/" + job.getJobname();
+            } else {
+                workingDirectory = "/"
+                        + mountPointToUse.getRootUrl().substring(
+                        stagingFileSystem.length())
+                        + "/"
+                        + ServerPropertiesManager.getRunningJobsDirectoryName()
+                        + "/" + job.getJobname();
+            }
 		} else {
 			workingDirectory = "/"
 					+ mountPointToUse.getRootUrl().substring(

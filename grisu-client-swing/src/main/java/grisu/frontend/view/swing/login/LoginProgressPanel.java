@@ -1,25 +1,18 @@
 package grisu.frontend.view.swing.login;
 
-import grisu.control.ServiceInterface;
-import grisu.control.events.ClientPropertiesEvent;
-import grisu.settings.ClientPropertiesManager;
-
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
-
-import org.bushe.swing.event.EventBus;
-import org.bushe.swing.event.EventSubscriber;
-
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
+import grisu.control.ServiceInterface;
+import grisu.control.events.ClientPropertiesEvent;
+import grisu.settings.ClientPropertiesManager;
+import org.bushe.swing.event.EventBus;
+import org.bushe.swing.event.EventSubscriber;
+
+import javax.swing.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 public class LoginProgressPanel extends JPanel implements EventSubscriber {
 	private JLabel label;
@@ -53,7 +46,7 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 		add(getLabel(), "4, 2, center, default");
 		add(getProgressBar(), "4, 4, fill, fill");
 		add(getMessageLabel(), "4, 6, center, default");
-		add(getChckbxAutologinwheneverPossible(), "2, 8, 6, 1");
+//		add(getChckbxAutologinwheneverPossible(), "2, 8, 6, 1");
 
 	}
 
@@ -125,7 +118,7 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 				getProgressBar().setIndeterminate(true);
 				getLabel()
 						.setText(
-								"Logging in...(if this is your first login, it will take a while. Subsequent logins are faster...)");
+								"Logging in...");
 				getMessageLabel().setText("Using existing local proxy...");
 			}
 		});
@@ -142,11 +135,14 @@ public class LoginProgressPanel extends JPanel implements EventSubscriber {
 
 				getLabel()
 						.setText(
-								"Logging in...(if this is your first login, it will take a while. Subsequent logins are faster...)");
+								"Logging in...");
+                String backend = ClientPropertiesManager
+										.getDefaultServiceInterfaceUrl();
+                if ( ClientPropertiesManager.DEFAULT_SERVICE_INTERFACE.equals(backend) ) {
+                    backend = ClientPropertiesManager.getDefaultBackend();
+                }
 				getMessageLabel().setText(
-						"Connecting to: "
-								+ ClientPropertiesManager
-										.getDefaultServiceInterfaceUrl());
+						"Connecting to: " + backend);
 			}
 
 		});

@@ -2,19 +2,11 @@ package grisu.frontend.view.swing.utils;
 
 import grisu.control.ServiceInterface;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Frame;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
 
 public class SettingsDialog extends JDialog {
 
@@ -44,6 +36,7 @@ public class SettingsDialog extends JDialog {
 	 */
 	public SettingsDialog(Frame parent) {
 		super(parent);
+        setModal(false);
 		setTitle("Settings");
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 701, 522);
@@ -72,6 +65,8 @@ public class SettingsDialog extends JDialog {
 				getRootPane().setDefaultButton(okButton);
 			}
 		}
+        setLocationRelativeTo(parent);
+
 	}
 
 	public void addPanel(String name, JPanel panel) {

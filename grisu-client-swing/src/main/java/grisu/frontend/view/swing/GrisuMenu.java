@@ -157,7 +157,7 @@ public class GrisuMenu extends JMenuBar {
             settingsItem = new JMenuItem("Settings");
             settingsItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent arg0) {
-
+                    dialog.setLocationRelativeTo(parent.getFrame());
                     dialog.setVisible(true);
 
                 }
@@ -184,8 +184,8 @@ public class GrisuMenu extends JMenuBar {
                         public void run() {
 
                             Map<String, String> props = ClientPropertiesHelper.gatherClientProperties(si);
-
-                            MessageDialog dialog = new MessageDialog();
+                            JFrame owner = (JFrame)SwingUtilities.getRoot(GrisuMenu.this);
+                            MessageDialog dialog = new MessageDialog(owner);
                             dialog.setMessage(props);
                             dialog.pack();
                             dialog.setVisible(true);

@@ -1,39 +1,31 @@
 package grisu.frontend.view.swing.files.open;
 
+import com.google.common.collect.Maps;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.RemoteFileSystemException;
 import grisu.frontend.view.swing.files.GridFileSelectionDialog;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
 import grisu.model.dto.GridFile;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.Component;
-import java.awt.Window;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Maps;
-
 public class FileDialogManager {
-	
+
 	public class OpenFileAction extends AbstractAction {
-		
+
 		private final FileDialogManager fdm;
 		private final GridFileHolder gfh;
 		private final String dialogAlias;
-		
+
 	    public OpenFileAction(FileDialogManager fdm, GridFileHolder h, String dialogAlias) {
 	        super();
 	        this.fdm = fdm;
@@ -48,21 +40,21 @@ public class FileDialogManager {
 	        gfh.setFile(file);
 	    }
 	}
-	
+
 	public static Component defaultRootComponent = null;
-	
+
 	public static final String FILE_DIALOG_KEY = "file_dialog";
 
-	
+
 	static final Logger myLogger = LoggerFactory
 			.getLogger(FileDialogManager.class.getName());
-	
+
 	private static Map<ServiceInterface, FileDialogManager> cachedRegistries = new HashMap<ServiceInterface, FileDialogManager>();
-	
+
 	public static FileDialogManager getDefault(final ServiceInterface si) {
 		return getDefault(si, null);
 	}
-	
+
 	private synchronized static void createSingletonFileDialog(Window owner,
 			ServiceInterface si, String dialogAlias) {
 
@@ -112,13 +104,13 @@ public class FileDialogManager {
 
 		return cachedRegistries.get(si);
 	}
-	
+
 	private final ServiceInterface si;
 	private static Map<String, GridFileSelectionDialog> dialogs = Maps
 			.newConcurrentMap();
 
 	private final Window rootComponent;
-	
+
 	public FileDialogManager(ServiceInterface si, Component comp) {
 		this.si = si;
 		if ( comp == null ) {
@@ -126,7 +118,7 @@ public class FileDialogManager {
 		}
 		this.rootComponent = SwingUtilities.getWindowAncestor(comp);
 	}
-	
+
 	public GridFileSelectionDialog getFileDialog(String dialogName) {
 
 		if (dialogs.get(dialogName) == null) {
@@ -139,18 +131,19 @@ public class FileDialogManager {
 		}
 		return dialogs.get(dialogName);
 	}
-	
+
 	public GridFile popupFileDialogAndAskForFile(String alias) {
 
 		getFileDialog(alias).setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		getFileDialog(alias).centerOnOwner();
+
+        getFileDialog(alias).setLocationRelativeTo(rootComponent);
 		getFileDialog(alias).setVisible(true);
 
 		final GridFile file = getFileDialog(alias).getSelectedFile();
 
 		return file;
 	}
-	
+
 	public OpenFileAction createOpenAction(GridFileHolder gfh, String dialogAlias) {
 		OpenFileAction oa = new OpenFileAction(this, gfh, dialogAlias);
 		return oa;

@@ -1,5 +1,6 @@
 package grisu.model;
 
+import com.google.common.base.Strings;
 import grisu.control.ServiceInterface;
 import grisu.control.exceptions.NoSuchJobException;
 import grisu.control.exceptions.RemoteFileSystemException;
@@ -12,50 +13,32 @@ import grisu.model.dto.GridFile;
 import grisu.model.files.FileSystemItem;
 import grisu.model.info.ApplicationInformation;
 import grisu.model.info.ResourceInformation;
-import grisu.model.info.dto.Application;
-import grisu.model.info.dto.DtoProperties;
-import grisu.model.info.dto.DtoStringList;
+import grisu.model.info.dto.*;
 import grisu.model.info.dto.Queue;
 import grisu.model.status.StatusObject;
 import grisu.settings.ClientPropertiesManager;
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
-import javax.swing.tree.TreeModel;
-
 import net.sf.ehcache.util.NamedThreadFactory;
-
 import org.apache.commons.lang.StringUtils;
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.EventSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
+import javax.swing.tree.TreeModel;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The implemenation of {@link UserEnvironmentManager}.
- * 
+ *
  * @author markus
- * 
+ *
  */
 public class UserEnvironmentManagerImpl implements UserEnvironmentManager,
 EventSubscriber<FqanEvent> {
@@ -68,7 +51,8 @@ EventSubscriber<FqanEvent> {
 	private final ResourceInformation resourceInfo;
 	private FileManager fm;
 
-	private String[] cachedFqans = null;
+    private String[] cachedFqans = null;
+    private String[] cachedJobFqans = null;
 	private Application[] cachedApplications = null;
 	private String[] cachedFqansUsable = null;
 	private String[] cachedUniqueGroupnames = null;
@@ -77,7 +61,8 @@ EventSubscriber<FqanEvent> {
 	private Set<Queue> cachedAllSubmissionLocations = null;
 	private SortedSet<String> cachedAllSites = null;
 	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerSubmissionLocation = new TreeMap<String, Set<MountPoint>>();
-	private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
+    private final Map<String, Set<MountPoint>> alreadyQueriedMountPointsPerFqan = new TreeMap<String, Set<MountPoint>>();
+    private final Map<String, Set<Queue>> alreadyQueriedQueuesPerFqan = new TreeMap<String, Set<Queue>>();
 	private MountPoint[] cachedMountPoints = null;
 	private final Map<String, SortedSet<MountPoint>> alreadyQueriedMountPointsPerSite = new TreeMap<String, SortedSet<MountPoint>>();
 
@@ -228,7 +213,7 @@ EventSubscriber<FqanEvent> {
 		} else {
 			if (cachedFqansUsable == null) {
 				final List<String> result = new ArrayList<String>();
-				for (final String fqan : getAllAvailableFqans()) {
+				for (final String fqan : getAllAvailableFqans(false)) {
 					if (getMountPoints(fqan).size() > 0) {
 						result.add(fqan);
 					}
@@ -238,6 +223,19 @@ EventSubscriber<FqanEvent> {
 			return cachedFqansUsable;
 		}
 	}
+
+    public synchronized final String[] getAllAvailableJobFqans() {
+        if ( cachedJobFqans == null ) {
+            final List<String> result = new ArrayList<String>();
+				for (final String fqan : getAllAvailableFqans(true)) {
+                    if (resourceInfo.getAllAvailableSubmissionLocations(fqan).length > 0) {
+						result.add(fqan);
+					}
+				}
+				cachedJobFqans = result.toArray(new String[result.size()]);
+        }
+        return cachedJobFqans;
+    }
 
 	public synchronized Set<String> getAllAvailableFqansForApplication(
 			String application) {
@@ -668,7 +666,7 @@ EventSubscriber<FqanEvent> {
 
 	/**
 	 * Get all the users' mountpoints.
-	 * 
+	 *
 	 * @return all mountpoints
 	 */
 	public final synchronized MountPoint[] getMountPoints() {
@@ -681,7 +679,7 @@ EventSubscriber<FqanEvent> {
 
 	/**
 	 * Gets all the mountpoints for this particular VO.
-	 * 
+	 *
 	 * @param fqan
 	 *            the fqan
 	 * @return the mountpoints
@@ -719,6 +717,7 @@ EventSubscriber<FqanEvent> {
 			return alreadyQueriedMountPointsPerFqan.get(fqan);
 		}
 	}
+
 
 	public SortedSet<MountPoint> getMountPointsForSite(String site) {
 

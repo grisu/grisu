@@ -2,22 +2,22 @@ package grisu.backend.hibernate;
 
 import grisu.backend.model.User;
 import grisu.jcommons.constants.Constants;
-
-import java.math.BigInteger;
-import java.util.List;
-
 import org.hibernate.Query;
 import org.hibernate.QueryException;
 import org.hibernate.SQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * This class takes care of storing users and their properties into the a
  * database using hibernate.
- * 
+ *
  * @author Markus Binsteiner
- * 
+ *
  */
 public class UserDAO extends BaseHibernateDAO {
 
@@ -58,7 +58,7 @@ public class UserDAO extends BaseHibernateDAO {
 	/**
 	 * Looks up the database whether a user with the specified dn is already
 	 * persisted.
-	 * 
+	 *
 	 *            the dn of the user
 	 * @return the {@link User} or null if not found
 	 */
@@ -72,7 +72,7 @@ public class UserDAO extends BaseHibernateDAO {
 
 			final Query queryObject = getCurrentSession().createQuery(
 					queryString);
-			
+
 //			final Query queryObject = getCurrentSession().createSQLQuery(queryString);
 
 			try {
@@ -103,7 +103,7 @@ public class UserDAO extends BaseHibernateDAO {
 	/**
 	 * Looks up the database whether a user with the specified dn is already
 	 * persisted.
-	 * 
+	 *
 	 * @param dn
 	 *            the dn of the user
 	 * @return the {@link User} or null if not found
@@ -142,11 +142,11 @@ public class UserDAO extends BaseHibernateDAO {
 		}
 
 	}
-	
+
 	/**
 	 * Looks up the database whether a user with the specified dn is already
 	 * persisted.
-	 * 
+	 *
 	 * @param dn
 	 *            the dn of the user
 	 * @return the {@link User} or null if not found
@@ -211,8 +211,8 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().close();
 		}
 	}
-	
-	
+
+
 	public List<String> findAllUserDNs(){
 		final String queryString = "select dn from users";
 		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
@@ -266,7 +266,7 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().close();
 		}
 	}
-	
+
 	public List<String> findUserDNsFromJobStat(){
 		final String queryString = "select distinct dn from JobStat";
 		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
@@ -292,7 +292,7 @@ public class UserDAO extends BaseHibernateDAO {
 		} finally {
 			getCurrentSession().close();
 		}
-	}	
+	}
 
 	public List<String> findDNSortedOnId(){
 		//final String queryString = "select dn, max(id) from JobStat group by dn order by id";
@@ -320,9 +320,9 @@ public class UserDAO extends BaseHibernateDAO {
 		} finally {
 			getCurrentSession().close();
 		}
-	}	
+	}
 
-	
+
 	public Integer findDNCountfromJobStat(){
 		//final String queryString = "select dn, max(id) from JobStat group by dn order by id";
 		//final String queryString = "select u.dn from users u where exists(select 1 from JobStat j where u.dn=j.dn)";
@@ -337,7 +337,7 @@ public class UserDAO extends BaseHibernateDAO {
 			getCurrentSession().close();
 		}
 		return res;
-	}	
+	}
 
 	public static void main(String[] args){
 		UserDAO u = new UserDAO();
@@ -347,5 +347,5 @@ public class UserDAO extends BaseHibernateDAO {
 		//u.findAllUsers();
 		System.out.println("end:" + (System.currentTimeMillis()-start));
 	}
-	
+
 }

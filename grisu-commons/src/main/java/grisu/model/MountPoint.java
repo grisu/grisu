@@ -79,6 +79,8 @@ public class MountPoint implements Comparable<MountPoint> {
 
 	private boolean isHomeDir = false;
 
+    private boolean shared = false;
+
 	private boolean isVolatileFileSystem = false;
 
 	// for hibernate
@@ -335,6 +337,12 @@ public class MountPoint implements Comparable<MountPoint> {
 		}
 	}
 
+    @Column(nullable = true)
+    @XmlElement(name = "sharedFileSystem")
+    public boolean isShared() {
+        return shared;
+    }
+
 	@Column(nullable = true)
 	@XmlElement(name = "volatileFileSystem")
 	public boolean isVolatileFileSystem() {
@@ -413,6 +421,10 @@ public class MountPoint implements Comparable<MountPoint> {
 	public void setSite(final String site) {
 		this.site = site;
 	}
+
+    public void setShared(final boolean shared) {
+        this.shared = shared;
+    }
 
 	public void setUrl(final String url) {
 		this.rootUrl = FileManager.ensureTrailingSlash(url);

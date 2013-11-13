@@ -10,16 +10,16 @@ import java.util.Set;
 /**
  * Classes that implement this interface provide general information about the
  * grid.
- * 
+ *
  * @author markus
- * 
+ *
  */
 public interface ResourceInformation {
 
 	/**
 	 * Convenience method to get a list of sites out of a set of
 	 * submissionlocations.
-	 * 
+	 *
 	 * @param submissionLocations
 	 *            the submissionLocations
 	 * @return the sites
@@ -30,7 +30,7 @@ public interface ResourceInformation {
 	/**
 	 * Convenience method to filter all submissionlocations out of a list of
 	 * submissionlocations that are located at the specified site.
-	 * 
+	 *
 	 * @param site
 	 *            the site
 	 * @param submissionlocations
@@ -42,14 +42,14 @@ public interface ResourceInformation {
 
 	/**
 	 * A list of all applications that are available grid-wide.
-	 * 
+	 *
 	 * @return all application packages
 	 */
 	Application[] getAllApplications();
 
 	/**
 	 * A list of all applications that are available for a particular vo.
-	 * 
+	 *
 	 * @param fqan
 	 *            the vo
 	 * @return the applications
@@ -59,7 +59,7 @@ public interface ResourceInformation {
 	/**
 	 * Returns a list of all sites a user that is member of the specified fqan
 	 * can access.
-	 * 
+	 *
 	 * @param fqan
 	 *            the fqan
 	 * @return the list of sites
@@ -68,7 +68,7 @@ public interface ResourceInformation {
 
 	/**
 	 * All the submissionLocations the user has got access to with this fqan.
-	 * 
+	 *
 	 * @param fqan
 	 *            the fqan
 	 * @return all submissionLocations
@@ -77,15 +77,22 @@ public interface ResourceInformation {
 
 	/**
 	 * Returns a list of all available submission locations, regardless of VO.
-	 * 
+	 *
 	 * @return all submission locations
 	 */
 	Queue[] getAllSubmissionLocations();
 
+    /**
+     * Returns the {@link Queue} object for the specified submissionlocation string.
+     *
+     * @param subLoc the submission location string
+     * @return the Queue object
+     */
+    Queue getSubmissionLocation(String subLoc);
 
 	/**
 	 * Calculates the best staging filesystem for this submissionLocation.
-	 * 
+	 *
 	 * @param subLoc
 	 *            the submissionLocation
 	 * @return the staging filesystem
@@ -95,7 +102,7 @@ public interface ResourceInformation {
 	/**
 	 * Returns the name of the site the specified submission location or ulr
 	 * belongs to.
-	 * 
+	 *
 	 * @param urlOrSubmissionLocation
 	 *            the submission location or url
 	 * @return the name of the site
@@ -105,11 +112,19 @@ public interface ResourceInformation {
 	/**
 	 * A list of all available staging filesystems for this submissionlocation.
 	 * In order of relevance.
-	 * 
+	 *
 	 * @param subLoc
 	 *            the submissionLocation
 	 * @return the staging filesystems
 	 */
 	List<String> getStagingFilesystemsForSubmissionLocation(String subLoc);
+
+    /**
+     * Returns whether the specified submission location has the middleware configured in a way that a job can extract input/output files.
+     *
+     * @param subLoc
+     * @return
+     */
+    boolean submissionLocationSupportsPrologEpilog(String subLoc);
 
 }
