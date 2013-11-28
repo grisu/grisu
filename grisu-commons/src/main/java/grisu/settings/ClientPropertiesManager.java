@@ -186,8 +186,12 @@ public final class ClientPropertiesManager {
 
 		boolean compress = false;
 		try {
-			compress = Boolean.parseBoolean(getClientConfiguration().getString(
-					COMPRESS_INPUT_FILES_KEY));
+            String temp = getClientConfiguration().getString(COMPRESS_INPUT_FILES_KEY);
+            if ( temp == null ) {
+                compress = true;
+            } else {
+			compress = Boolean.parseBoolean(temp);
+            }
 
 		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());
@@ -202,8 +206,12 @@ public final class ClientPropertiesManager {
 
 		boolean compress = false;
 		try {
-			compress = Boolean.parseBoolean(getClientConfiguration().getString(
-					COMPRESS_OUTPUT_FILES_KEY));
+            String temp = getClientConfiguration().getString(COMPRESS_OUTPUT_FILES_KEY);
+            if ( temp == null ) {
+                compress = true;
+            } else {
+                compress = Boolean.parseBoolean(temp);
+            }
 
 		} catch (final Exception e) {
 			// myLogger.debug("Problem with config file: " + e.getMessage());

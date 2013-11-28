@@ -1,5 +1,8 @@
 package grisu.frontend.view.swing;
 
+import com.google.common.collect.ImmutableList;
+import com.jgoodies.common.base.SystemUtils;
+import com.jgoodies.looks.Options;
 import grisu.X;
 import grisu.control.ServiceInterface;
 import grisu.frontend.control.login.LoginManager;
@@ -17,37 +20,24 @@ import grith.gridsession.GridClient;
 import grith.gridsession.GridSessionCred;
 import grith.jgrith.Environment;
 import grith.jgrith.cred.GridLoginParameters;
-
-import java.awt.AWTEvent;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.util.*;
-
-import javax.swing.InputMap;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.KeyStroke;
-import javax.swing.UIManager;
-
 import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-import com.jgoodies.common.base.SystemUtils;
-import com.jgoodies.looks.Options;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.*;
+import java.util.List;
 
 public abstract class GrisuApplicationWindow extends GridClient implements
 WindowListener, ServiceInterfaceHolder {
 
 	static final Logger myLogger = LoggerFactory
 			.getLogger(GrisuApplicationWindow.class.getName());
-	
+
 	public static String PANEL_TO_PRELOAD = null;
 
 	private ServiceInterface si;
@@ -65,9 +55,9 @@ WindowListener, ServiceInterfaceHolder {
 
 	public GrisuApplicationWindow() throws Exception {
 		this((ServiceInterfacePanel) null);
-		
+
 	}
-	
+
 	public GrisuApplicationWindow(ServiceInterfacePanel panel) throws Exception {
 		super(new GridLoginParameters());
 		initialize();
@@ -93,13 +83,13 @@ WindowListener, ServiceInterfaceHolder {
 			}
 		}
 		addSettingsPanel("Http proxy settings", httpProxyPanel);
-		
+
 		FileDialogManager.defaultRootComponent = getFrame();
 	}
 
 	/**
 	 * Launch the application.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public GrisuApplicationWindow(Set<ServiceInterfacePanel> configpanels)
@@ -122,7 +112,7 @@ WindowListener, ServiceInterfaceHolder {
 			}
 		}
 		addSettingsPanel("Http proxy settings", httpProxyPanel);
-					
+
 		FileDialogManager.defaultRootComponent = getFrame();
 	}
 
@@ -135,30 +125,30 @@ WindowListener, ServiceInterfaceHolder {
 	}
 
 	abstract public boolean displayAppSpecificMonitoringItems();
-	
+
 	abstract public boolean displayBatchJobsCreationPane();
 
 	abstract public boolean displaySingleJobsCreationPane();
-	
+
 	abstract public boolean displayAllJobsMonitoringItem();
 
 	public void exit(boolean deleteSession) {
-		
+
 		if ( deleteSession ) {
-			
+
 			try {
 				GridSessionCred cred = new GridSessionCred(this);
 				cred.destroy();
 			} catch (Exception e) {
 				myLogger.error("Could not destroy session.", e);
 			}
-			
-			
+
+
 		}
-		
+
 		exit();
 	}
-	
+
 	public void exit() {
 		try {
 
@@ -254,7 +244,7 @@ WindowListener, ServiceInterfaceHolder {
 		final boolean displayAppSpecificMonitoringItems = displayAppSpecificMonitoringItems();
 		final boolean displayAllJobsMontorintItems = displayAllJobsMonitoringItem();
 
-			mainPanel = new GrisuMainPanel(singleJobs, displayAllJobsMontorintItems, displayAppSpecificMonitoringItems,
+        mainPanel = new GrisuMainPanel(singleJobs, displayAllJobsMontorintItems, displayAppSpecificMonitoringItems,
 					getApplicationsToMonitor(), batchJobs, displayAllJobsMontorintItems, displayAppSpecificMonitoringItems,
 					getApplicationsToMonitor());
 
@@ -265,7 +255,7 @@ WindowListener, ServiceInterfaceHolder {
 		final LoginPanel lp = new LoginPanel(mainPanel, siHolders);
 		lp.setSessionClient(this);
 		frame.getContentPane().add(lp, BorderLayout.CENTER);
-		
+
 //		  int condition = JComponent.WHEN_FOCUSED;
 ////		  InputMap iMap = getFrame().getRootPane().getInputMap(condition);
 //		  InputMap iMap = (InputMap)UIManager.get("Button.focusInputMap");
@@ -275,10 +265,10 @@ WindowListener, ServiceInterfaceHolder {
 //
 //		  String enter = "enter";
 //		  iMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), enter);
-//		  aMap.put(enter, lp.getLoginPanel().getAction());		
-		  
+//		  aMap.put(enter, lp.getLoginPanel().getAction());
+
 		  getFrame().getRootPane().setDefaultButton(lp.getLoginPanel().getLoginButton());
-		  
+
 		  JButton button = lp.getLoginPanel().getLoginButton();
 		  InputMap im = button.getInputMap();
 		  im.put( KeyStroke.getKeyStroke( "ENTER" ), "pressed" );
@@ -308,17 +298,17 @@ WindowListener, ServiceInterfaceHolder {
 		for (final ServiceInterfacePanel panel : configPanels) {
 			panel.setServiceInterface(si);
 		}
-		
+
 		String lastPanel = PANEL_TO_PRELOAD;
 
 		if ( StringUtils.isBlank(lastPanel)) {
-			lastPanel = ClientPropertiesManager.getProperty("lastCreatePanel"); 
+			lastPanel = ClientPropertiesManager.getProperty("lastCreatePanel");
 		}
 		if ( StringUtils.isNotBlank(lastPanel)) {
 			String[] command = lastPanel.split(",");
 			this.mainPanel.getGrisuNavigationPanel().setNavigationCommand(command);
 		}
-		
+
 		getFrame().getRootPane().setDefaultButton(null);
 
 	}
@@ -334,7 +324,7 @@ WindowListener, ServiceInterfaceHolder {
 		}
 		// this.si = si;
 		lp.setServiceInterface(si);
-		
+
 		getFrame().getRootPane().setDefaultButton(null);
 
 	}

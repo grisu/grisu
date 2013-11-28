@@ -7,17 +7,16 @@ import grisu.frontend.view.swing.jobmonitoring.single.JobDetailPanel;
 import grisu.jcommons.constants.Constants;
 import grisu.model.FileManager;
 import grisu.model.GrisuRegistryManager;
+import org.apache.commons.lang3.text.WordUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Constructor;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.swing.JPanel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AppSpecificViewerPanel extends JPanel implements
 JobDetailPanel, PropertyChangeListener {
@@ -46,11 +45,19 @@ JobDetailPanel, PropertyChangeListener {
 			appName = job.getJobProperty(
 					Constants.APPLICATIONNAME_KEY, false);
 
-			final String className = "grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
+			String className = "grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
 					+ appName;
-			final Class classO = Class.forName(className);
 
-			final Constructor<AppSpecificViewerPanel> constO = classO
+            Class class0 = null;
+            try {
+                class0 = Class.forName(className);
+            } catch (Exception e) {
+                className = "grisu.frontend.view.swing.jobmonitoring.single.appSpecific."
+					+ WordUtils.capitalize(appName);
+                class0 = Class.forName(className);
+            }
+
+			final Constructor<AppSpecificViewerPanel> constO = class0
 					.getConstructor(ServiceInterface.class);
 
 			final AppSpecificViewerPanel asvp = constO.newInstance(si);
