@@ -2175,10 +2175,10 @@ public class UserJobManager {
 
 		// check whether version is specified or not. if not, try to find latest
 		// one...
-		if (Version.ANY_VERSION.equals(version)) {
-			// TODO
-			myLogger.debug("Not implemented yet, but usually this would find the latest version on the grid since the user didn't specify it.");
-		}
+        if (Version.ANY_VERSION.equals(version)) {
+            // TODO
+            myLogger.debug("Not implemented yet, but usually this would find the latest version on the grid since the user didn't specify it.");
+        }
 
 		Collection<Queue> availableQueues = AbstractServiceInterface.informationManager
 				.findQueues(jobSubmissionObject.getJobSubmissionPropertyMap(),
@@ -2210,7 +2210,18 @@ public class UserJobManager {
 			}
 		}
 
-		JsdlHelpers.setCandidateHosts(jsdl, new String[] { queue.toString() });
+        // can be removed once 'find latest version' (above) is implemented
+        if (Version.ANY_VERSION.equals(version)) {
+            List<Version> versions_temp = AbstractServiceInterface.informationManager.getVersionsOfApplicationOnSubmissionLocation(applicationName, queue.calculateSubmissionLocation());
+            if ( versions_temp.size() > 0 ) {
+                applicationVersion = versions_temp.get(0).toString();
+            } else {
+                myLogger.error("There doesn't seem to be a version of application {} installed for {}. Leaving 'any' in place...",applicationName, queue.calculateSubmissionLocation());
+            }
+        }
+
+
+        JsdlHelpers.setCandidateHosts(jsdl, new String[] { queue.toString() });
 
 		// figuring out which filesystem to use
 		Set<Directory> stagingFileSystems = queue
